@@ -1,0 +1,1486 @@
+=== PAGE 1 ===
+FOR INTERNAL USE
+
+=== PAGE 2 ===
+FOR INTERNAL USE
+Proposal Glossary
+DHL Supply Chain Proposal | L'Occitane | December 2022 2
+1 DHL Proposal Approach
+2 Engineered Design
+3 Concept of Operations
+4 Operating Budgets
+5 Data and Assumptions
+6 Labor Strategy
+7 Systems Solution
+8 Systems Implementation
+9 DHL Resilience & Risk Mitigation
+10 #TOGETHERUNSTOPABLE
+
+=== PAGE 3 ===
+FOR INTERNAL USE
+DHL’S APPROACH TO 
+L'OCCITANE GROUP’S 
+DESIRED OUTCOMES
+DHL Supply Chain Proposal | L'Occitane | December 2022 3
+
+=== PAGE 4 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 4
+Improve gross margins, provide relief to a capacity constrained existing network, deliver 
+distribution support for significant growth, and enhance individual brand identity   
+Expected Outcomes - cooperatively addressed
+A successful partnership with DHL will enable this outcome for L'Occitane through:
+• Consolidation of the NA brands within a single network
+• Executing the most effective transformation strategy with attention to:
+− Real Estate availability & cost (pegged @ 400k sqft for Phase I)
+− Labor availability & cost
+− Timeline to deliver the capacity (no later than June of 2024)
+− Return on capital investment
+• Effectively scale the solution to support brand specific growth and solve for delivering 
+upwards of 127 million units of throughput capacity by 2027
+• Prioritize flexibility to respond to changes in business priorities over time
+
+=== PAGE 5 ===
+FOR INTERNAL USE
+DHL Approach – transformation in two phases
+DHL Supply Chain Proposal | L'Occitane | December 2022
+• 400K sqft in Columbus, OH
+• Transformational solution consolidating the 3 existing 
+operations to 1 custom engineered multi-brand + 
+mulit-channel facility
+• Profile adaptability and the ability to scale rapidly is 
+prioritized leveraging Locus AMR as the core 
+technology.
+• Labor strategy is supported by regional recruiting 
+center and existing campus resources
+Phase I – facility outfitted for March 2024 OB go-live
+• Updated network analysis to be performed in order to 
+identify the optimal:
+− Inventory strategy
+− Order management capability
+− Operating geography
+− Operating solution (transport & fulfillment)
+• Priority will be placed on achieving a reduction in 
+carbon footprint and increase in speed to delivery 
+while mitigating the additional inventory carrying 
+costs
+• Labor strategy will remain supported by regional 
+recruiting center and existing campus resources
+Phase II – network expansion supporting continued growth 
+(FY 2026 or 2027)
+5
+=== PAGE 6 ===
+FOR INTERNAL USE
+Key Criteria
+6DHL Supply Chain Proposal | L'Occitane | December 2022
+Inventory
+(Yr 2025)
+• 3,700 SKUs 
+• Max pallets on hand= 17,000
+• Equivalent cases on hand = 
+1,700,000 cases
+• Inventory turns = 2.3
+• Average cases/pallet = 100
+• Average units/case = 25
+• % Unit Pick = 44%
+• % Case Pick units = 46%
+• % Pallet pick unit = 10%
+• Average B2C lines/order: 2.7
+• Average B2C units/line: 1.3
+Order
+Profile
+Annual Volume 
+(FY 2025)
+Outbound
+SLA
+• B2B- 48 hrs pick and pack
+• B2C- 24 hrs pick and pack 
+• (Sat/Sun orders ship on Mon)
+• Except LimeLife: ship 
+same day if order drops 
+before 1pm
+• % Pallet unload = 98%
+− 60% homogenous 
+− 40% mixed
+• SKUs/mixed pallet = 6
+Inbound Profile
+• %B2B = 80% unit
+• %B2C = 20% unit
+• Brand Profile B2C
+− %L’Occi & Elemis = 33%
+− %SDJ = 20%
+− %Lime Life = 47%
+Brand Profile
+B2B:
+Units 52,332,693
+Cartons 12,814,119
+Pallets 6,181
+B2C:
+Orders 4,395,243
+Units 13,117,585
+L'Occitane Elemis 4,328,803
+SDJ 2,623,517
+LimeLife 6,165,265
+DHL has identified key profile assumptions and 
+metrics which are listed below
+• Volumes represent FY 2025
+Seasonality
+• Monthly Peak to average ratio 1.93
+– Design capacity is based on 1.93 peak 
+factor as an assumption
+– Will require daily volume by brand to 
+determine actual peak capacity 
+requirement
+Order Profile
+• Order pick analysis shows an average 44% 
+unit pick, 46% case pick and 10% pallet 
+pick, varies by brand
+Packaging
+• 12,592,944 units per year
+Returns Processing
+• 9,303 orders per year
+=== PAGE 7 ===
+FOR INTERNAL USE
+Comprehensive Evaluation
+7DHL Supply Chain Proposal | L'Occitane | December 2022
+• We evaluated 5 unit pick technologies, for the FY2025 volumes
+• We focused on balancing space, throughput, labor costs and capital investment
+• Key selection criteria prioritized the following:
+i. Flexible to profile changes and volume by brand
+ii. Scalable to support steady state and peak volume
+iii. Low capital investment
+iv. Go-Live by mid 2024
+• Assisted Picking Robots (Locus) best fit these requirements:
+• Shorter implementation timeline
+• Scalable and flexible to volume changes
+• Low capital and quick ROI
+• Reduce training time for new employees, especially during peak season
+• Long term solution to be further evaluated based on network strategy
+• Understanding the purpose and timeline for the West DC
+
+=== PAGE 8 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 8
+Proposed Commercial Tenants
+• 5 Years
+Open Book with fee of 10% margin of which 2 points are @ 
+risk and seeking 1 point as upside for performance. This 
+is not your traditional cost plus.
+“Open Book” is a cost reimbursement + performance adjusted 
+fee arrangement that:
+• Incentivizes performance
+• Drives continual improvement
+• Supports responsiveness to changes in the business 
+without the need for re-commercialization
+• Promotes the right decision-making behaviors
+• Provides price certainty
+*At such time that both parties view the business would benefit from a Fixed/ 
+Variable style structure DHL is open to that discussion.
+• Costs demonstrated in the commercial workbook will be 
+billed as incurred
+Operating Term
+DHL will hold the lease. Currently estimated @ ~$19M in 
+investment.  The final facility selection will be collaboratively 
+determined based on final design, detailed investment strategy, 
+forecast & market factors.  DHL is proposing to manage all 
+facility related design and buildout elements.
+DHL is proposing to finance 100% of the capital for the solution 
+currently estimated @ ~$12.5 million in capital alone. DHL 
+financing costs to be applied to the purchase.  Capital includes 
+both redeployable and non-redeployable assets.  
+This proposal is contingent on the following:
+• L’Occitane establishes a letter of credit (LOC) for the project to cover 
+the amount of non-redeployable capital currently estimated @ ~$8M.  
+The amount will be open to draw down annually based on the 
+depreciated value of the non-recoverable assets.
+• A parent guarantee is provided from L’Occitane International S.A.
+• Net 30 days with cash neutrality achieved via pre-bill
+• This is the lowest total cost option as it avoids interest on 
+working capital which accounts for roughly 3-4% of the total 
+cost
+Facilities
+Commercial Structure
+Capital
+A/R & Invoicing
+Startup & Ramp up
+
+=== PAGE 9 ===
+FOR INTERNAL USE
+ENGINEERED DESIGN
+DHL Supply Chain Proposal | L'Occitane | December 2022 9
+
+=== PAGE 10 ===
+FOR INTERNAL USE
+Solution Philosophy – custom engineering
+DHL Supply Chain Proposal | L'Occitane | December 2022 10
+DHL has proposed a turnkey solution designed to effectively support consolidation of various L'Occitane brands.
+Innovation
+Design
+Recommended applicable technology based on 
+our understanding of the profile and 
+requirements for L’Occitane’s transformational 
+roadmap
+Analyzed volume and activity flow to determine 
+sizing, staffing, capital and system requirements
+Leveraged extensive operational experience and 
+insights to confirm assumptions and strategies
+Evaluated data and information provided to 
+formulate inbound, outbound, inventory, and 
+order fulfillment profile
+Operation
+• Warehouse and support robotics
+• Systems and analytics for workflow planning and 
+balancing
+• Facility SQ FT 400k sq ft 
+• Total Direct FTEs           397 FTEs (FY25)
+• WMS Solution Manhattan
+• Annual units 90M (FY25)
+• Unit/Case/Pallet Pick     44%/46%/10%
+=== PAGE 11 ===
+FOR INTERNAL USE
+Sizing Analysis
+DHL Supply Chain Proposal | L'Occitane | December 2022 11
+• The facility has been sized for FY 2025 storage and 
+operational requirements
+• Based on the storage parameters provided estimated sizing 
+is 400K sq ft
+• Storage capacity to be confirmed after building selection
+• Current storage capacity will be exceeded by FY2026
+• In lieu of detailed inventory snapshots, DHL has applied 
+the pareto distribution from outbound velocity to the 
+inventory profile:
+− A SKUs = 20% of SKUs, 50% of volume
+− B SKUs = 30% of SKUs, 30% of volume
+− C SKUs = 50% of SKUs, 20% of volume
+
+=== PAGE 12 ===
+FOR INTERNAL USE
+SLA and Throughput Capacity
+12DHL Supply Chain Proposal | L'Occitane | December 2022
+• SLA
+• B2B- 48-hour pick and pack
+• B2C- 24-hour pick and pack (Sat/Sun orders ship on Mon)
+• Except LimeLife: ship same day if order drops before 1pm
+• Throughput capacity
+• Designed to peak day based on FY2025 volume using an assumption of 1.93 peak factor
+• Will need daily volume, for all brands, during peak to calculate accurate peak requirement
+• For B2C, pick & pack capacity of 124k units/day during peak in FY2025
+
+=== PAGE 13 ===
+FOR INTERNAL USE
+Automation Comparison for Each Picking
+13
+Based upon the balance of active SKUs, SKU velocities, space constraints, product packaging, daily volatility, and high maximum 
+throughput requirements DHL recommends a Pick Assisted Robot solution
+Metric Pick Assisted Robot Mechanized Assembly Pick Tower/Conveyor Goods to Person Robots
+Technology
+Throughput Medium High High Medium
+SKU Count High Low Medium High
+Space Efficiency Low High Medium Medium
+Capital Investment Less Capital – Set up in 
+RaaS Model (Robotics as a 
+Service)
+Medium Capital High Capital Medium Capital
+Flexibility/Scalability High – Easy to 
+move/reconfigure
+Low flexibility, High volume –
+Needs low SKU count & 
+profile
+Medium Medium
+Ease to Implement Fast Medium Slow Medium
+IT Integration with WMS Yes Yes Yes Yes
+Additional Comments AA movers require multiple 
+locations to avoid 
+congestion
+SKU profile requires high 
+concentration of limited active 
+SKU count
+Large investment in fixed 
+infrastructure
+Does not fit large B2B 
+order profile as well as 
+APR (Locus)
+DHL Supply Chain Proposal | L'Occitane | December 2022
+=== PAGE 14 ===
+FOR INTERNAL USE
+Assisted Picking Robot - Locus
+14DHL Supply Chain Proposal | L'Occitane | December 2022
+• Improvement in picking productivity of 50%-150%
+• Easy to scale during peak periods
+• Reduced training and ramp up time
+• Low capital solution allowing for flexibility
+• Fast implementation timeline
+• High number of lines in B2B orders make a more automated solution 
+less efficient
+
+=== PAGE 15 ===
+FOR INTERNAL USE
+Pick and Pass: Fast Pick with Locus
+15DHL Supply Chain Proposal | L'Occitane | December 2022
+• Putting fast moving SKUs into a regular aisle leads to:
+• Congestion of robots (robots are waiting and can't pass to get to 
+another location
+• A larger number of replenishments into small pick locations
+• 28' Wide aisles reduces congestion, allowing robots to pass robots 
+that are queued for picking
+• 300 pallet flow locations will have 30 of top moving SKUs for all 4 
+brands (120 total SKUs)
+• Multiple locations will reduce crowding of robots at one location
+• This will account for approximately 37% of overall unit volume
+ 1. Picking Aisle
+2. Queue for orders lane
+3. Passing lane
+4. Empty pallet/dunnage drop
+4
+3
+2
+1
+=== PAGE 16 ===
+FOR INTERNAL USE
+Packaging
+16DHL Supply Chain Proposal | L'Occitane | December 2022
+• Packaging Productivity
+• DHL was able to estimate number of associates for packaging
+• Team will need annual volume and more specs to refine estimation
+• Key assumptions:
+• Assumed 25% Relabeling, 37.5% Simple (2 items), 30% medium (4 items), 7.5% Hard (12 items)
+• Seasonality from a similar business used, with peak in July and August
+• Assumed quantity of finished VAS in a case, quantity of cases on pallets
+• Assumed 12 items for a hard build (assumed some smaller than advent calendars)
+• High level estimate of 84 units/hour
+
+=== PAGE 17 ===
+FOR INTERNAL USE
+Innovation Roadmap for L'Occitane
+17
+Through DHL’s Accelerated Digitalization agenda, we create and maintain 
+visibility of all the great ideas out there, whether they come from 
+innovation efforts within DPDHL or from our partners and external 
+vendors.
+For this project, we assessed different technologies and classified them by 
+maturity level. We will share this list regularly with L'Occitane as new 
+options are identified
+Technologies in Pilot phase with expected 
+deployment in < 18 months
+Productized technologies that are 
+applicable to current profile
+Technologies To Be Evaluated in > 18
+months
+Go-Live 
+Cleaning Robots
+Unloading 
+technology/ 
+Palletized (AGVs)
+Indoor Robotic 
+Transport/ Reach Truck 
+AGVs
+Towards an 
+innovative
+supply 
+chain
+Indoor Robotic Transport/ 
+Bin and Pallet Focus
+MOVING THROUGH THE INNOVATION FUNNEL
+INNOVATE LOCALLY ENHANCE SOLUTIONS SCALE
+IDEAS
+RESEARCH
+PROOF OF CONCEPT
+(PoC) PILOT INDUSTRIALIZATIONPRODUCT
+• Regional Boards select and approve PoCs where 
+applicable
+• Regions/sites implement local use cases
+• Digital Sponsors select PoC/pilots to be scaled cross-
+regionally
+• Cost effective customer 
+solutions 
+DHL Supply Chain Proposal | L'Occitane | December 2022
+Opportunity 
+Charging for MHE
+Ranger MoveSmart
+from Grey Orange
+Robotic case unload
+(Stretch Robots, Boston 
+Dynamics)
+Locus Robotics 
+Locus Vector bots 
+for case/unit pick 
+and Locus putaway
+=== PAGE 18 ===
+FOR INTERNAL USE
+CONCEPT OF 
+OPERATIONS
+DHL Supply Chain Proposal | L'Occitane | December 2022 18
+
+=== PAGE 19 ===
+FOR INTERNAL USE
+New Jersey vs Columbus, OH
+19DHL Supply Chain Proposal | L'Occitane | December 2022
+• Columbus is DHL's preferred location
+• Rent is more cost effective in Columbus
+• FY2023 NNN Columbus $5.50/sqft
+• FY2023 NNN New Jersey $19.00/Sqft
+• Wages for salaried and hourly is more reasonable in Columbus
+• FY2023 Forklift Wage Columbus $18.00/hr
+• FY2023 Forklift Wage New Jersey $18.50/hr
+• Columbus is in central area which allows for better shipping rates and service levels
+• DHL has a campus in Columbus, which will lead to more labor sharing opportunities and operational support
+
+=== PAGE 20 ===
+FOR INTERNAL USE
+Conceptual Layout
+20DHL Supply Chain Proposal | L'Occitane | December 2022
+The following conceptual facility plan captures the functional areas identified for this operation. This layout will be validated 
+and finalized after detailed data analysis and mechanization design, and site selection.
+1. Inbound Dock
+2. Shipping Dock
+3. Reserve storage
+4. Pick and Pass- Fast Pick
+5. Carton Flow Pick
+6. VAS/Packaging Area
+7. Ship/Receive Office
+8. MHE Charging
+9. Packing Area
+10. Outbound Mechanized Sorter
+Legend
+12
+3
+4
+5
+6
+7
+8
+9
+10
+=== PAGE 21 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 21
+
+=== PAGE 22 ===
+FOR INTERNAL USE
+Staffing Summary – Organizational Chart
+22DHL Supply Chain Proposal | L'Occitane | December 2022
+• The following summarizes the required headcount and management structure to support the operation in 2023 and 2024
+Direct Hourly FY25
+Total Inbound 46.0              
+Total Order Processing 141.0            
+Total Packing 104.6            
+Total VAS 88.7              
+Total Miscellaneous 16.7              
+Total Operation Direct 397.0            
+Operation Indirect FY25
+Admin Ass't 2.0                
+Cust Service 1.0                
+Ship/ Receive 8.0                
+Inventory 8.0                
+RF Tasking 10.0              
+Total Operation Indirect 29.0              
+Management FY25
+General Manager 1 1.0                
+Operations Manager 1 2.0                
+Operations Manager 2 2.0                
+HR Manager 1.0                
+Industrial Engineering Mgr 1.0                
+Operational Business Manager 1.0                
+Operations Systems Mgr 1.0                
+Transportation Manager 1 0.5                
+Inventory Manager 1 1.0                
+Operations Supervisor 23.0              
+Field Sr QA Specialist 1.0                
+Inventory Supervisor 1 1.0                
+Operational Business Analyst 1.0                
+Industrial Engineer 1.0                
+Sr Business Data Analyst I 1.0                
+HR Rep 1.0                
+Seasonal Support Bonus 1.0                
+Total Management 40.5              
+=== PAGE 23 ===
+FOR INTERNAL USE
+Shift and Schedule Pattern
+23DHL Supply Chain Proposal | L'Occitane | December 2022
+• 2 + 1 Shift operation 
+• Two 10-hour shifts Monday through Friday 
+• One 12-hour weekend shift Saturday to Sunday
+• DHL Associates will be cross trained across several shifts
+• DHL will work with L’Occitane on forecasting for Volumes daily & weekly. Labor 
+management from VTO and MTO
+Shift Time Monday Tuesday Wednesday Thursday Friday Saturday Sunday
+Day 6a-4p x x x x x
+Afternoon 4p-2a x x x x x
+Weekend 6a-6p x x
+Operation Shift Structure
+
+=== PAGE 24 ===
+FOR INTERNAL USE
+Process Flow: Inbound
+DHL Supply Chain Proposal | L'Occitane | December 2022
+Receiving
+Inbound
+Multi 
+SKU 
+Pallet?
+Stretch-wrap 
+pallet
+Sort to single 
+SKU pallet
+Put-away to 
+system driven 
+Pallet location
+Returns?
+Yes
+No
+Unload to returns 
+area Destroy?Inspect all 
+units
+Putaway to pick 
+locations
+Palletize Place in obsolete 
+storage
+Yes
+Yes
+Unload 
+pallets
+New 
+SKU?
+No
+Cubiscan
+item
+Receive 
+(inspect as 
+required)
+Palletized 
+Load?
+Yes
+Yes
+No
+Unload & 
+Palletize 
+Cases
+No
+Enough 
+Product 
+for 
+Pallet?
+No
+Yes
+Sort to mixed 
+pallet
+Put-away to 
+system driven VNA 
+location
+No
+24
+=== PAGE 25 ===
+FOR INTERNAL USE
+Process Flow: Replenishment
+DHL Supply Chain Proposal | L'Occitane | December 2022
+Replenishment
+Drop pallet to active 
+pick location
+Retrieve pallet from 
+reserve inventory
+Place in Carton 
+Flow locations
+Replen
+Type
+Full Pallet
+Replen cases 
+from reserve 
+Cases
+Replenishment
+25
+=== PAGE 26 ===
+FOR INTERNAL USE
+Process Flow: All Picking for B&M
+Picking & Outbound
+Load to OB 
+trailer
+Stage to OB 
+shipping lane
+Case 
+pick line
+Pick case from 
+active location
+(Respecting FEFO/Shelf Life)
+Cycle Count
+Palletize and 
+stretch wrap
+Conduct case 
+countback
+Count 
+back 
+Pass?
+No
+Yes
+Print and 
+apply 
+shipping label
+• Random audit % based upon agreement between DHL
+Tote 
+induction 
+to bot
+Bot travels 
+pick route; 
+meets 
+pickers
+Pick to Assisted Picking Robot (APR)
+100% Unit Scan
+Bot 
+deposit to 
+drop 
+point/pack 
+station
+Picker 
+pick to 
+bot
+Packout & 
+Label 
+Carton
+Each 
+pick line
+Audit 
+OrdersAudit?
+Complete 
+Haz/Retail 
+Specific Req.
+100% Count Audit
+Yes
+No
+ConsolidatePallet 
+pick 
+Pick pallet from 
+reserve location
+DHL Supply Chain Proposal | L'Occitane | December 2022 26
+=== PAGE 27 ===
+FOR INTERNAL USE
+Process Flow: Each Picking for Ecom
+DHL Supply Chain Proposal | L'Occitane | December 2022Picking & Outbound
+Unit 
+Pick 
+Orders
+Load to OB 
+trailer
+Stage to OB 
+shipping lane
+Resolve
+Issue?
+Audit/Hospital
+No
+No
+Yes Sort cartons 
+and palletize
+Bot 
+travels to 
+packout
+Tote travels 
+thru fast pick 
+lane
+Tote 
+induction 
+to Bot
+Bot travels 
+pick route; 
+meets 
+pickers
+Picker 
+pick to 
+Bot
+Cluster Pick to Assisted picking robot
+Bot 
+travels 
+out of 
+slow pick
+Packout:
+Ship Prep
+Fast 
+Pick 
+SKU?
+NoYesFast moving Skus
+Yes
+Print & 
+Apply 
+Ship 
+Label
+Picks 
+Left?
+Tote 
+induction 
+to bot
+Picker 
+picks to 
+bot
+Bot 
+travels 
+out of 
+fast pick
+Slower moving Skus
+Split of Haz/Intl/Dom
+Audit
+Audit? No
+Yes
+27
+=== PAGE 28 ===
+FOR INTERNAL USE
+Equipment
+DHL Supply Chain Proposal | L'Occitane | December 2022 28
+Equipment Quantity
+Stand Up CB 3                      
+Double Pallet Center Rider 17                    
+Stockpicker 23                    
+MonoMast (S Class) 9                      
+Assisted Picking Robots (Unit) - Locus 146                 
+Electric Sweeper / Scrub 1                      
+Semi-automated Stretchwrapper 2                      
+Manual Pallet Jack 12                    
+Picking Carts 10                    
+Baler 1                      
+CubiScan 1                      
+=== PAGE 29 ===
+FOR INTERNAL USE
+OPERATING BUDGETS
+DHL Supply Chain Proposal | L'Occitane | December 2022 29
+
+=== PAGE 30 ===
+FOR INTERNAL USE
+Budget Overview
+30DHL Supply Chain Proposal | L'Occitane | December 2022
+Key Pricing Assumptions
+• Based on 5-year contract
+• Inflation of wages, salaries, and benefits have been included
+• Real estate rates represent current market rates and are 
+subject to volatility
+• A/R terms assumed to cash neutral
+• Packaging supplies (pallets, corrugate, void fill, etc.) 
+considered as pass-through cost and not considered in 
+budget
+• DHL is not responsible for end-of-life product storage or 
+destruction
+• Start-up/Ramp-up is excluded from operational budget
+• Management fee of 10%
+
+=== PAGE 31 ===
+FOR INTERNAL USE
+Capital Summary
+31DHL Supply Chain Proposal | L'Occitane | December 2022
+Key Capital Pricing Assumptions
+• Capital depreciated over useful life
+• Racking has been priced based on recent 
+quotation.
+– Cost of steel for use in racking, automation 
+systems etc. – prices are volatile
+– Prices from suppliers are valid for periods 
+between 5-30 days.
+• Equipment costs are estimate, will require 
+vendor quotes to finalize costs
+• Hazardous materials room not taken into 
+consideration, will need to review SDS sheets 
+to verify requirements
+• The following table summarizes the capital factored in the pricing including all equipment, racking, and IT systems costs
+
+=== PAGE 32 ===
+FOR INTERNAL USE
+Start Up and Ramp Up Summary
+32DHL Supply Chain Proposal | L'Occitane | December 2022
+Key Start Up and Ramp Up Assumptions
+• Start-up and ramp up costs to be billed as incurred
+• Offsite start-up support provided
+• 3 Managers and 2 Supervisors – 8 weeks
+• Permanent Staff
+– Salaried roles to be hired ahead of go live. Time 
+varies depending on role and 
+responsibility. These individuals will be 
+responsible for the set up of the operation
+– Direct and Clerical will receive 2 weeks for DHL 
+onboarding and training
+• Direct labor ramp-up
+– Direct Inbound – minimal ramp up as we expect 
+staff to be fully productive after inventory build 
+up
+– Direct Outbound – period of 5 months
+– No ramp-up for clerical labor as these positions 
+will be filled with existing experienced campus 
+labor
+• Start-up costs are defined as expenses incurred prior to first receipt in setting up facility and hiring/training staff; ramp -up costs are defined as direct 
+labor inefficiencies required to bring staff to steady state productivity
+
+=== PAGE 33 ===
+FOR INTERNAL USE
+DATA AND
+ASSUMPTIONS
+DHL Supply Chain Proposal | L'Occitane | December 2022 33
+
+=== PAGE 34 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 34
+• Monthly Inventory Snapshot
+• Item Master
+• Order data, broken down by line level by brand for 12 
+months
+• Shipment data by brand for 12 months
+• Customer list for B2B
+• DC Bin Types
+• Returns shipment list
+• SDS Sheets
+Request for Data
+=== PAGE 35 ===
+FOR INTERNAL USE
+Assumptions
+DHL Supply Chain Proposal | L'Occitane | December 2022 35
+• 25 units/case
+• 100 cases/pallet
+• All mixed pallets to be sorted and scanned
+• SKU Growth of 1.5%
+• All homogeneous pallets are 1 lot code and no separation required
+• 6 SKUs/mixed pallet
+• 2% of loads come in floorloaded with enough product for homogenous pallets
+• All cartons are 0.5 ft3
+• For carton pick, 39 cases/pallet for non-hotel and 3 cases/pallet for hotel
+• Outbound full pallet picked SKUs do not need to be wrapped
+• All non-sellable units are in storage locations, picked to order and cannot be stored at a pack station
+• 3% of orders need to be audited
+• 95% of unit packed SKUs can be sorted through the outbound sorter into a gaylord
+• 250 parcels/outbound pallet
+• Peak to average ratio is 1.93
+=== PAGE 36 ===
+FOR INTERNAL USE
+Assumptions
+DHL Supply Chain Proposal | L'Occitane | December 2022 36
+•Facility
+•The following costs were not taken into consideration and will need to be reviewedfor the next proposal
+•–FDA grade improvements per code/cGMP/ISO requirements
+•–Permits, licenses
+•–Temperature Mapping assumed not in scope
+•–Hazmat shipping and storage requirements will need to be reviewed
+••DHL has included the following facility related costs for all sites. Costs assumed to be included in DHL scope include:
+•–Lease, CAM, taxes, insurance, and other Building OpEx
+•–Trash removal
+•–Utilities cost which is estimated
+•–DHL office space and shared break room
+•–Full dock packages at all doors on both sides including seals, leveler (min: 40k lb), trailer restraint, air drop, 110V quad outlet, trailer light
+•–Site security infrastructure
+•–Security monitoring is 3PL responsibility
+•–Lithium Battery area installation to code; including electrical service and disconnects, ventilation, floor painting, drains,eye wash, permits
+•–Sanitation infrastructure: sweeper/scrubber dump station and charging areas, sanitation closets, etc
+•–Guard rails and other fixed facility assets related to safety
+•–Rental equipment to support ramp-up or peak months if needed
+•–DHL will handle pest control and office cleaning
+•–Facility prep items to reflect DHL culture and best practices
+=== PAGE 37 ===
+FOR INTERNAL USE
+Assumptions
+DHL Supply Chain Proposal | L'Occitane | December 2022 37
+Labor
+• The hourly productivity rates and detail assumptions by activity included in the Concept of Operations are included in the budgets provided. They are benchmarked from similar operations
+•Lost productivity due to profile change, plus any extra MHE needed will be billed as agreed. Budget provided does not accountfor any profile variance including:
+•Exceeding yard capacity
+•Storage capacity beyond 85%
+•Overflow site handling
+•SKU growth over 1.5%/year
+•Excess obsolete inventory including holds
+•Inventory policy changes
+•Labor cost, supervision, indirect support for the following activities have not been included in the budgets:
+•Pallet Transfer – no pallets cost have been included
+•Re-stocking (de picks)
+=== PAGE 38 ===
+FOR INTERNAL USE
+Assumptions
+DHL Supply Chain Proposal | L'Occitane | December 2022 38
+Labor (cont)
+• Labor cost, supervision, indirect support, MHE and other capital for the following value-added (VAS) activities have NOT been included in the budgets provided:
+• Recoup and damage handling; this includes inventory of less than full case quantities
+• Loss allowance for damaged/missing product
+• Trailer/Container detention due to loading issues, overweight rework, scheduling constraints
+• Cancelled order restocking
+• Inbound labeling (LPN, etc)
+• Customer specific and regulatory shipping requirements; case labeling, pallet labeling, etc
+• Shipping supplies: shipping pallets (CHEP or other), storage pallets wrap, labels, etc (to be provided at cost plus 5% margin and are not included in budget)
+• All homogeneous pallets come in wrapped on acceptable pallets
+• Nonstandard activities (different than accessorial shared in RFP) are not included in pricing, pending advance notice
+• Hourly labor has been provided: minimum hourly billing will be in effect for emergency and holiday coverage outside of normaloperations to cover supervision
+=== PAGE 39 ===
+FOR INTERNAL USE
+Assumptions
+DHL Supply Chain Proposal | L'Occitane | December 2022 39
+Labor Ramp-up included in Start-up Budget:
+• All Labor Costs incurred prior to start-up are included in start-up budget
+• Variable labor costs due to inefficiency over the first 5 months of operating is included in the ramp-up budget
+• Transition Support Team travel and hours
+• New Salary Associates on-boarding prior to go-live
+• DHL training of new associates prior to go-live
+• DHL includes cost to relocate 2 management associates (if required) for New Jersey, none for Columbus
+=== PAGE 40 ===
+FOR INTERNAL USE
+LABOR STRATEGY
+DHL Supply Chain Proposal | L'Occitane | December 2022 40
+
+=== PAGE 41 ===
+FOR INTERNAL USE
+Labor Strategy
+DHL Supply Chain Proposal | L'Occitane | December 2022 41
+In the field of contract logistics, a motivated and well-trained workforce is critical to offering L'Occitane an optimal solution. 
+Therefore, we take a proactive and multi-layered approach to both attracting and retaining DHL employee's vs relying on temp 
+labor. The shift from temp labor to full-time employees is proving successful, as shown by this renewed certification from the 
+Top Employers Institute. 
+Specifically in the US, our top-performing areas include workforce planning, performance management, Certified Supply Chain 
+Specialist (CSCS) program, online learning and development offerings, succession planning, and college recruiting 
+processes. These all add up to outstanding opportunities for every member of our organization and ensure our continued success and 
+market leadership.
+Location Labor Market Conditions: DHL’sColumbus campus contains a strong pipeline of tenured leadership and hourly 
+workforce. Internal operations and functional leadership candidates are available in the Columbus campus that includes 20+ sitesthat 
+are largely complex multi-channel operations. 
+Competitive Compensation: DHL’s wage progression is designed to be competitive in the marketplace by being positioned between the 
+50th and 75th %tile of the starting wage rate.
+=== PAGE 42 ===
+FOR INTERNAL USE
+Hourly Columbus Campus Labor
+DHL Supply Chain Proposal | L'Occitane | December 2022 42
+$1.00    2ne & 3rd Shift
+$1.50    Weekend Day
+Surge Premiums and Peak Incentives
+401(k) Retirement Savings Plan
+Life and AD&D Insurance
+Short Term Disability Insurance
+Employee Assistance Programs
+Education Reimbursement
+Paid Holidays
+Paid Vacation
+Health & Welfare Insurance (Medical, Dental, and 
+Vision)
+Shift Premiums
+Incentives
+Benefits
+*Bi-annual wage reviews/assessments and market evaluations
+*Monthly discussions with L’Occitane to review labor market
+=== PAGE 43 ===
+FOR INTERNAL USE
+High Level Planning Strategy (FY 2025)
+DHL Supply Chain Proposal | L'Occitane | December 2022 43
+➢ In steady state, 90%+ of the total workforce will be Full-Time
+➢ Agency employees will be used to supplement demand during peak 
+volumes
+➢ Campus partner accounts have labor can provide labor share during non -
+peak times both in terms of hourly associates and leadership
+➢ Can use campus resources in Recruiting Center (pictured to the right) to hire 
+for peak times
+
+=== PAGE 44 ===
+FOR INTERNAL USE
+Benefits of Our Centralized Hourly Recruiting Approach
+• Improved candidate experience
+• Onsite drug and background resources
+• Proprietary attendance and turnover tracking tools
+• Well versed in partnering with Columbus operations that experience 
+dramatic spikes in volume
+• Ability to stay connected to “ready” candidate pool for future and 
+seasonal needs
+• Ability to handle start-up recruiting using a standard, consistent, and 
+modern process
+2021 Columbus Campus Results
+• We processed 9,400 applicants
+• We hired 2,100 employees
+DHL Supply Chain Proposal | L'Occitane | December 2022 44
+DHL Supply Chain has established centralized recruiting centers to create recruiting support for sites across the United 
+States and Canada. 
+There are seven centers across North America to manage hourly recruiting, each of which uses the same systems, 
+processes and tools and operates under the same governance procedures.
+Regional Recruiting Center
+Regional Recruiting Center
+
+=== PAGE 45 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 45
+Peak Approach
+=== PAGE 46 ===
+FOR INTERNAL USE
+DHL Supply Chain Proposal | L'Occitane | December 2022 46
+DHL’s understanding of the local labor market, depth of existing capability, extensive 
+resources will deliver reliable support to L'Occitane
+DHL Campus – Columbus, OH
+DHL Columbus, OH Campus
+
+=== PAGE 47 ===
+FOR INTERNAL USE
+SYSTEMS SOLUTION
+DHL Supply Chain Proposal | L'Occitane | December 2022 47
+
+=== PAGE 48 ===
+FOR INTERNAL USE
+Comprehensive, integrated IT solution
+DHL Supply Chain Proposal | L'Occitane | December 2022 48
+Core 
+applications
+Ancillary/micro-service 
+– planned scope
+Ancillary/micro-service 
+– growth option
+Visuality layer 
+Serves as the backbone of the operation, enabling a 
+responsive, reliable, and highly visible supply chain
+=== PAGE 49 ===
+FOR INTERNAL USE
+Expertise with Manhattan Implementations
+49
+Scalable, flexible application that aligns with eCommerce business needs (growth, volume, 
+automation).
+Standard eCommerce operating template facilitates  ~70% reduction in configuration effort 
+over the traditional end to end configuration approach. Allowing focus in the quality of 
+solution delivery.  
+DHL Supply Chain leverages its vast product knowledge. Our projects consist of 85% internal 
+labor and 15% Manhattan labor to support.   
+DHL Supply Chain Proposal | L'Occitane | December 2022
+Extensions to support like operating models will be leveraged within this solution. 
+DHL Supply Chain knows how to operationalize Manhattan’s Warehouse Management System. To-date DHL Supply Chain has 
+implemented Manhattan at over 435 customer sites worldwide with over 5,150 concurrent users worldwide.
+=== PAGE 50 ===
+FOR INTERNAL USE
+DHL LINK is the conduit that connects your systems
+DHL Supply Chain Proposal | L'Occitane | December 2022 50
+EDI Services API Services
+Leverage our services and 
+solutions using your own web, 
+mobile or enterprise applications
+Integrate seamlessly with 
+guaranteed, reliable and agile 
+business data delivery
+Our global strategic 
+integration platform
+DHL LINK
+FLEXIBLE
+Standard building blocks satisfy individual 
+customer integration
+RESILIENT
+Reduces risk through consistent processes and 
+deep industry expertise 
+SCALABLE
+Flexibility and scalability to support evolving 
+business needs including new market entry
+Trading partners 
+operating in 
+50
+countries
+Trading Partners 
+connected globally
+Circa 2,478
+ 4.4 billion 
+Messages annually flow
+through DHL LINK 
+296
+Customer 
+implementations
+
+=== PAGE 51 ===
+FOR INTERNAL USE
+IT integration solution concept is simple yet comprehensive. 
+51DHL Supply Chain Proposal | L'Occitane | December 2022
+
+=== PAGE 52 ===
+FOR INTERNAL USE
+MySupplyChain provides a single point of access for integrated supply chain functions so you can gain insights more effectively
+MySupplyChain – globally standardized, secure customer platform 
+DHL Supply Chain Proposal | L'Occitane | December 2022 52
+
+=== PAGE 53 ===
+FOR INTERNAL USE
+SmartOperations
+SmartOps surfaces key OMS data in an easily consumable format, providing better control of warehouse 
+operations and improving decision-making.  The program encompasses a suite of digital applications that can 
+be accessed via approved mobile wearable devices, such as Android 6 (or newer) RF’s and Zebra tablets:
+Benefits of leveraging SmartOperations:
+✓ Digitalization of paper processes, such as near miss / hazard and incident reporting
+✓ Increased time spent on the floor by Ops leadership
+✓ Centralization of DSC applications
+✓ Easy navigation, with same look & feel across core apps
+DHL Supply Chain Proposal | L'Occitane | December 2022 53
+=== PAGE 54 ===
+FOR INTERNAL USE
+SmartScreens – goodbye RF “green screen” !
+SmartScreens provide a user interface that is easy to understand and minimizes the learning curve for a new 
+user. They support soft Hotkeys / Menu Buttons for quick access and easy usage, as well as context-based 
+Keyboards.
+DHL Supply Chain Proposal | L'Occitane | December 2022 54
+RF “Green Screen” SmartScreen
+=== PAGE 55 ===
+FOR INTERNAL USE
+SYSTEMS 
+IMPLEMENTATION 
+APPROACH
+DHL Supply Chain Proposal | L'Occitane | December 2022 55
+
+=== PAGE 56 ===
+FOR INTERNAL USE
+DePICT® project management methodology
+DHL Supply Chain Proposal | L'Occitane | December 2022 56
+Determine objectives, 
+budget, time 
+constraints, resources, 
+risks, assumptions and 
+other variables in 
+order to clearly define 
+the project and what it 
+aims to achieve
+Create a detailed plan 
+with clear timelines 
+and responsibilities 
+that take the project 
+from start-up to 
+steady state
+Manage risks, resolve 
+issues, document 
+scope changes, and 
+generate status 
+reports
+Hand off to 
+operations and 
+complete post-
+project review
+Deliver the scope of
+the project, including
+the IT implementation
+Define Plan Implement Control Transition
+Facilitates consistent, world-class project delivery for our customers
+=== PAGE 57 ===
+FOR INTERNAL USE
+Systems Testing
+DHL Supply Chain Proposal | L'Occitane | December 2022 57
+Unit
+Testing
+QA and 
+System 
+Integration 
+testing 
+(SIT)
+Conference 
+Room Pilot 
+(CRP)
+User 
+Acceptance 
+Testing 
+(UAT)
+Day in the 
+Life Of 
+(DILO)
+Cutover 
+and Go-
+Live
+Development team 
+tests the solution in 
+a vacuum to ensure 
+it is working as 
+expected
+Involves full end-to-
+end testing of all 
+processes and system 
+interfaces using 
+production-like test 
+data from the customer
+Project team walks 
+through the system 
+to carry out typical 
+or key business 
+processes, 
+validating that the 
+solution supports 
+the required 
+business processes Actual users test the 
+systems to validate 
+ability to carry out 
+required tasks and to 
+validate that all 
+original requirements 
+are captured
+Operations leads a 
+final walkthrough 
+that proves that 
+they are trained and 
+capable of running 
+the business and 
+that the system 
+supports the 
+business 
+requirements Structured process 
+of ensuring that 
+system is 
+implemented 
+correctly and is 
+ready to be used in 
+production
+Project phases
+Project events
+DHL Supply Chain utilizes a robust testing approach that ensures the IT solution is working as expected and is 
+meeting the needs of the end users
+=== PAGE 58 ===
+Example Timeline
+Project Kickoff 
+DePICT Review
+Define & Plan
+SIPOC
+Implement & Control
+Business 
+Requirements 
+Document 
+(BRD)
+EDI Mapping 
+Session
+Reporting 
+Requirements 
+Session
+Infrastructure Delivery
+WMS Setup
+Quality 
+Assurance 
+Testing (QA 
+Testing)
+User 
+Acceptance 
+Testing (UAT)
+Transition
+Training
+GO LIVE
+Solution Mod 
+Construction
+EDI 
+Construction
+Labels and 
+Report 
+Construction  
+Conference 
+Room Pilot 
+(CRP)
+Test Day in the 
+Life (Test DILO)
+Prod Day in the 
+Life (Prod DILO)
+Hypercare / 
+Transition to 
+Support
+Ancillary 
+System Setup
+58DHL Supply Chain Proposal | L'Occitane | December 2022
+15 Days 160 Days 40 Days
+DHL Supply 
+Chain Only Task
+DHL Supply 
+Chain and 
+L'Occitane 
+End to End 
+Testing (E2E)
+Design & Configuration Testing Testing
+Area / Week WK1 WK2 WK3 WK4 WK5 WK6 WK7 WK8 WK9 WK10 WK11 WK12 WK13 WK14 WK15 WK16 WK17 WK18 WK19 WK20 WK21 WK22 WK23 WK24 WK25 WK26 WK27 WK28 WK29 WK30 WK31 WK32 WK33 WK34 WK35 WK36 WK37 WK38 WK39 WK40 WK41 WK42 WK43
+Define & Plan
+Infrastructure Delivery
+Design & Configuration 
+System Testing
+Cutover
+Go Live
+Hypercare
+=== PAGE 59 ===
+FOR INTERNAL USE
+RESILIENCE AND RISK 
+MITIGATION
+DHL Supply Chain Proposal | L'Occitane | December 2022 59
+=== PAGE 60 ===
+FOR INTERNAL USE
+Risk Mitigation
+DHL Supply Chain Proposal | L'Occitane | December 2022 60
+The DHL approach to risk mitigation provides the backbone for our capability to reliably exceed customer expectations. The
+key tenants of the DHL risk management program are categorized as follows:
+• Core Operations Management 
+− Continuous Improvement
+− Labor Management
+− Peak Execution
+• Systems Strategy
+• Business Continuity
+
+=== PAGE 61 ===
+FOR INTERNAL USE
+Core Operations Management – People Focused, Execution Edge 
+DHL Supply Chain Proposal | L'Occitane | December 2022 61
+Certified Supply Chain Specialist 
+• Developmental & problem-solving framework 
+that begins on Day 1
+• Mindset to deliver quality leadership and 
+service excellence for L'Occitane
+• Supports our Supply Chain Essentials:  Right 
+First Time, Can Do, & Passion
+Operations Management System
+• Creates a culture of continuous improvement 
+using objective alignment, performance 
+measurement, and active leadership 
+Continuous Improvement
+• First Choice methodology
+• Performance Dialog
+• The Voice of the Customer 
+Continuous Improvement Labor Management Peak Planning
+Labor Planning
+• Forecasting labor demand
+• Analyzing labor performance 
+• Balancing projected labor demand and supply 
+utilizing internal and market insight and optics
+Team Based Labor Strategy
+• Collaborative approach & cross training 
+emphasis to manage business volatility
+• “High Touch” environment for the wholesale 
+Specialist
+Labor Management Program
+• Engineered standards post Go Live
+• Drives a coaching mentality while promoting 
+associate recognition, incentive, and process 
+improvement
+Comprehensive and collaborative approach 
+towards peak season execution …
+Q1
+• Lessons Learned, Infrastructure, formal CI 
+commencement
+Q2
+• Detailed peak plan takes shape that considers  
+expected volume, headcount requirements, 
+marketing strategy, engagement & customer 
+alignment
+Q3
+• Recruitment and training commences
+• Stress test rates of flow and systems bandwidth
+• Inventory and equipment prep
+Q4
+• Win the Weekend
+=== PAGE 62 ===
+FOR INTERNAL USE
+Adaptive, integrated, intelligence-driven Cyber Defense Center 
+Secure by Design
+Using automated code analysis and 
+internationally recognized best-practices 
+we reduce risks right at the beginning
+Skilled Information Security 
+Organization
+About 300 dedicated experts (24/7 
+Cyber Defense Center) supported by 
+more than 10,000 IT professionals 
+around the world
+Responsible Data Handling
+We only collect the data we need to provide the 
+services 
+we offer. And we delete it when no longer required
+Legal Compliance
+Our legal experts monitor the 
+development of existing and emerging 
+data protection and cyber-security 
+legislation world-wide and ensure 
+compliance
+Information Security Code of Practice for 
+Suppliers 
+To ensure that our suppliers meet 
+essential security standards, we include 
+our requirements in contracts for both IT 
+and non-IT suppliers
+Sustainable
+Security
+DHL Supply Chain Proposal | L'Occitane | December 2022 62
+=== PAGE 63 ===
+FOR INTERNAL USE
+Best-in-class infrastructure solution to support your business  
+Physical Servers replicated 
+via clustering or replication 
+technologies
+Virtual Servers replicated 
+via VMware Site Recovery 
+Manager (SRM)
+Oracle Database servers 
+replicated via Oracle Data 
+Guard
+DHL Supply Chain Proposal | L'Occitane | December 2022 63
+Production Services hosted 
+in the DHL Ashburn and 
+Mechanicsburg Data 
+Centers
+High-capacity and highly 
+redundant wide area 
+network (WAN) between 
+the Data Centers
+Leverages active 
+replications where possible
+All network equipment and 
+peripherals are purchased 
+or leased by DHL
+=== PAGE 64 ===
+FOR INTERNAL USE
+IT service management
+DHL Supply Chain Proposal | L'Occitane | December 2022 64
+IT Service 
+Management
+Ease of 
+Implementation
+Reduced IT 
+Risk
+Maximum 
+Service 
+Availability
+Responsive to 
+Business Needs
+Standard Global Service 
+Management Toolset 
+provides timely resolution 
+of issues and 24x7 support 
+for critical IT services
+We leverage globally aligned 
+asset management and change 
+management practices and 
+procedures, and we minimize  
+financial and compliance risks 
+stemming from unlicensed 
+software
+IT solutions are readily 
+available to the business 
+and must be performing 
+according to 
+requirements and SLAs
+Mature quality assurance 
+processes improved start 
+up speed and reduced 
+deployment risk
+Provides the infrastructure, operations, processes, people and competencies to deliver fit -for-use IT services
+=== PAGE 65 ===
+FOR INTERNAL USE
+Disaster Recovery Solution  
+Deployed manually in the case of an adverse event, DSC’s disaster recovery solution leverages virtual technology, providing
+production application and database switchover between the Ashburn and Mechanicsburg datacenters. This enables DHL to
+provide greatly improved SLAs for disaster recovery:
+✓ In the event that an adverse event occurs, DHL Supply Chain will replicate all tiers of Application data between Ashburn
+and Mechanicsburg, enabling a “warm” standby
+✓ According to the RPO, these replications cannot fall more than 30 minutes behind—in reality, ~one minute is the longest
+duration in between replications
+4 Hour Recovery Time Objective (RTO)
+The targeted duration of time within which normal 
+operations must be restored after a disaster or 
+failure
+30 Minutes of Recovery Point Objective (RPO)
+The maximum targeted length of time in which 
+data can be lost due to a failure or disaster
+DHL Supply Chain Proposal | L'Occitane | December 2022 65
+=== PAGE 66 ===
+FOR INTERNAL USE
+Business Continuity 
+DHL Supply Chain Proposal | L'Occitane | December 2022 66
+DHL Supply Chain has developed a comprehensive Business Continuity Management Strategy that all sites utilize for each of their 
+respective customers: organized, supported and driven by the BCM 10 Step Methodology program.  All sites are expected to havethe 
+architecture in place for an effective business continuity plan published and available on or before Day 1 of Go Live.
+A summary of the BCM 10 Step Methodology is outlined below:
+Step 1 BCM Policy
+The site, in partnership with L'Occitane, will develop a policy that can be 
+clearly communicated to all key stakeholders.
+Step 2  Provision of Resource
+An individual (GM) with the relevant seniority and authority will lead the 
+BCM implementation at the site along with the guidance of the Business 
+Continuity management team.
+Step 3 Incident Management Team
+A team will be established, comprised of a primary and deputy member 
+with expert knowledge of each site function (Ops, Security, IT, HR).  In the 
+event of an incident, a representative of each function will be made 
+available to make business critical decisions
+Step 4 Business Impact Analysis 
+Step 5 Operational Risk Assessment
+Step 6 Determining Mitigation Measures
+Step 7  Determining BCM Strategy
+Step 8 Business Continuity Plans (BCP’s)
+Step 9 Maintaining and Reviewing 
+Step 10 Testing and Exercising
+=== PAGE 67 ===
+FOR INTERNAL USE
+#TOGETHERUNSTOPABLE

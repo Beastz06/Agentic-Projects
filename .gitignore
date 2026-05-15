@@ -1,0 +1,20 @@
+# Unrelated cloned project — kept locally but not part of this repo
+career-ops-main/
+
+# Claude Code local-only settings (personal allowlists / machine paths)
+.claude/settings.local.json
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# OS noise
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp

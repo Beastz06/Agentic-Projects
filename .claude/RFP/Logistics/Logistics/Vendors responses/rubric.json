@@ -1,0 +1,128 @@
+{
+  "category": "Logistics",
+  "sourcing_brief": "4PL for multi-brand omnichannel; US-capable; go-live by 2027",
+  "source_documents": [
+    "RFP - MULTI-BRAND AND OMNICHANEL 4PL.pdf",
+    "Appendix 1 - Processes and Information.xlsx",
+    "Appendix 3 - Code of Business Conduct.pdf",
+    "Appendix 4 - Responsible Procurement Letter.pdf",
+    "Appendix 5 - Price Matrix_V3.xlsx"
+  ],
+  "hard_constraints": [
+    {
+      "id": "H1",
+      "rule": "Code of Business Conduct alignment",
+      "source": "RFP \u00a72.10 + Appendix 3"
+    },
+    {
+      "id": "H2",
+      "rule": "Responsible Procurement Letter / EcoVadis (>=25)",
+      "source": "RFP \u00a72.10 + Appendix 4"
+    },
+    {
+      "id": "H3",
+      "rule": "4PL multi-brand multi-channel capability",
+      "source": "RFP cover + \u00a72.1, \u00a72.3"
+    },
+    {
+      "id": "H4",
+      "rule": "US operational capability (NJ or Mid-West facility option)",
+      "source": "RFP \u00a72.11"
+    },
+    {
+      "id": "H5",
+      "rule": "Go-live achievable before/by 2027 (target FY2024 in RFP)",
+      "source": "RFP \u00a72.3 + sourcing brief"
+    }
+  ],
+  "soft_rules": [
+    {
+      "id": "S1",
+      "rule": "Hazmat / cosmetics handling expertise (UN1266/1950/3175/1170)",
+      "source": "Appendix 1 row 4, 20"
+    },
+    {
+      "id": "S2",
+      "rule": "FEFO / batch-code shelf-life management",
+      "source": "Appendix 1 row 18,19"
+    },
+    {
+      "id": "S3",
+      "rule": "Manhattan/named WMS w/ EDI + API integration",
+      "source": "RFP \u00a72.9"
+    },
+    {
+      "id": "S4",
+      "rule": "Omnichannel B2B + B2C + e-commerce experience",
+      "source": "RFP \u00a72.6"
+    },
+    {
+      "id": "S5",
+      "rule": "Carbon footprint / sustainability commitment",
+      "source": "RFP \u00a72.10 (Net Zero 2030)"
+    },
+    {
+      "id": "S6",
+      "rule": "Peak-season scalability / flexibility",
+      "source": "RFP \u00a72.3"
+    },
+    {
+      "id": "S7",
+      "rule": "Two-facility option (NJ + Mid-West) priced",
+      "source": "RFP \u00a72.11"
+    },
+    {
+      "id": "S8",
+      "rule": "Quality / ISO-aligned certification",
+      "source": "RFP \u00a72.10"
+    }
+  ],
+  "pricing_schema": [
+    {
+      "line": "Fix Cost / Year",
+      "category": "fixed",
+      "uom": "$/yr"
+    },
+    {
+      "line": "Inventory Storage",
+      "category": "fixed",
+      "uom": "pallet/shelf"
+    },
+    {
+      "line": "Inbound Receipt to Putaway",
+      "category": "variable",
+      "uom": "pallet/carton/hour"
+    },
+    {
+      "line": "Outbound B2B",
+      "category": "variable",
+      "uom": "pallet/carton/unit"
+    },
+    {
+      "line": "Outbound B2C",
+      "category": "variable",
+      "uom": "unit"
+    },
+    {
+      "line": "VAS Labor",
+      "category": "variable",
+      "uom": "hour"
+    },
+    {
+      "line": "Startup Costs",
+      "category": "one-time",
+      "uom": "$ as incurred"
+    },
+    {
+      "line": "Rampup Costs",
+      "category": "one-time",
+      "uom": "$"
+    }
+  ],
+  "volume_basis": "Appendix 5 Volume Projections (FY2023 baseline through FY2027)",
+  "options": [
+    "Option A: New Jersey",
+    "Option B: Mid-West / Central"
+  ],
+  "currency": "USD"
+}

@@ -1,0 +1,154 @@
+{
+  "IDL": {
+    "identity": "ID Logistics \u2014 operating in US since 1930; 32 sites, 9.7M sqft, 3,500+ associates (US footprint)",
+    "locations_offered": [
+      "Option A: New Jersey (Somerset/Sayersville)",
+      "Option B: Columbus, OH"
+    ],
+    "preferred_start": "Q3 2023 partial / July 2024 full",
+    "WMS": "Manhattan SCALE 2019",
+    "evidence": {
+      "H1_code_of_conduct": {
+        "label": "AMBER",
+        "quote": "IDL Procurement CSR Charter to be signed by all Suppliers \u2014 IDL has internal CSR governance but proposal does not explicitly state it has signed L'Occitane Appendix 3.",
+        "source": "IDL proposal p.45"
+      },
+      "H2_ecovadis": {
+        "label": "GREEN",
+        "quote": "IDL EcoVadis rating of 64/100; 89th percentile",
+        "source": "IDL proposal p.45"
+      },
+      "H3_4PL_multibrand_multichannel": {
+        "label": "GREEN",
+        "quote": "A strong expertise in omnichannel activities; cosmetics & luxury fragrances know-how",
+        "source": "IDL proposal p.9, p.10"
+      },
+      "H4_US_capable": {
+        "label": "GREEN",
+        "quote": "Operating in US since 1930; 32 sites, 9.7M Sq Ft, 3,500+ associates",
+        "source": "IDL proposal p.8"
+      },
+      "H5_2027_golive": {
+        "label": "GREEN",
+        "quote": "PREFERRED START DATE: from Q3 2023 for the initial activity, July 24 for the complete activity",
+        "source": "IDL proposal p.14"
+      },
+      "S1_hazmat": {
+        "label": "AMBER",
+        "quote": "Highest Risk: Assessment and Calculation of Hazardous Storage Blocks Incomplete",
+        "source": "IDL proposal p.47"
+      },
+      "S2_FEFO": {
+        "label": "GREEN",
+        "quote": "Batch / lot numbers traceability; specific lot number picking",
+        "source": "IDL proposal p.10"
+      },
+      "S3_WMS": {
+        "label": "GREEN",
+        "quote": "IDL PROPOSED WMS: MANHATTAN SCALE 2019",
+        "source": "IDL proposal p.27"
+      },
+      "S4_omnichannel": {
+        "label": "GREEN",
+        "quote": "A strong expertise in omnichannel activities",
+        "source": "IDL proposal p.9"
+      },
+      "S5_sustainability": {
+        "label": "GREEN",
+        "quote": "A carbon neutral site \u2026 reducing the carbon footprint associated with an offset solution; EcoVadis 64/100",
+        "source": "IDL proposal p.44, p.45"
+      },
+      "S6_peak": {
+        "label": "GREEN",
+        "quote": "Variable Staffing is the average annual but will be adjusted based on seasonality",
+        "source": "IDL proposal p.48"
+      },
+      "S7_two_options": {
+        "label": "GREEN",
+        "quote": "NJ (preferred) and Columbus, OH both fully priced in Appendix 5",
+        "source": "IDL Price Sheet (both options completed)"
+      },
+      "S8_iso": {
+        "label": "GREEN",
+        "quote": "A certification that is broken down into 15 fundamental commitments \u2026 covers 80% of the items of the ISO 9001 standard (CID Certification)",
+        "source": "IDL proposal p.41"
+      }
+    }
+  },
+  "DHL": {
+    "identity": "DHL Supply Chain \u2014 global 3PL/4PL; Columbus, OH campus emphasized",
+    "locations_offered": [
+      "Option A: New Jersey",
+      "Option B: Columbus, OH (DHL's preferred)"
+    ],
+    "preferred_start": "March 2024 OB go-live (Phase I); Phase II FY2026/2027",
+    "WMS": "Manhattan",
+    "evidence": {
+      "H1_code_of_conduct": {
+        "label": "RED",
+        "quote": "No reference to L'Occitane Code of Business Conduct (Appendix 3) or signature thereof anywhere in the 67-page proposal",
+        "source": "DHL proposal \u2014 absent"
+      },
+      "H2_ecovadis": {
+        "label": "RED",
+        "quote": "No reference to EcoVadis assessment, score, or commitment to participate (RFP \u00a72.10 mandates min score 25)",
+        "source": "DHL proposal \u2014 absent"
+      },
+      "H3_4PL_multibrand_multichannel": {
+        "label": "GREEN",
+        "quote": "Transformational solution consolidating the 3 existing operations to 1 custom engineered multi-brand + multi-channel facility",
+        "source": "DHL proposal p.4"
+      },
+      "H4_US_capable": {
+        "label": "GREEN",
+        "quote": "Internal operations and functional leadership candidates are available in the Columbus campus that includes 20+ sites",
+        "source": "DHL proposal p.41"
+      },
+      "H5_2027_golive": {
+        "label": "GREEN",
+        "quote": "Phase I \u2014 facility outfitted for March 2024 OB go-live \u2026 Phase II network expansion supporting continued growth (FY 2026 or 2027)",
+        "source": "DHL proposal p.4"
+      },
+      "S1_hazmat": {
+        "label": "RED",
+        "quote": "Hazardous materials room not taken into consideration, will need to review SDS sheets to verify requirements; Hazmat shipping and storage requirements will need to be reviewed",
+        "source": "DHL proposal p.36 / p.40"
+      },
+      "S2_FEFO": {
+        "label": "GREEN",
+        "quote": "Respecting FEFO/Shelf Life",
+        "source": "DHL proposal p.27"
+      },
+      "S3_WMS": {
+        "label": "GREEN",
+        "quote": "WMS Solution Manhattan",
+        "source": "DHL proposal p.10"
+      },
+      "S4_omnichannel": {
+        "label": "GREEN",
+        "quote": "\u2026largely complex multi-channel operations",
+        "source": "DHL proposal p.41"
+      },
+      "S5_sustainability": {
+        "label": "AMBER",
+        "quote": "Priority will be placed on achieving a reduction in carbon footprint and increase in speed to delivery \u2014 narrative only; no metric, score, or program named",
+        "source": "DHL proposal p.5"
+      },
+      "S6_peak": {
+        "label": "GREEN",
+        "quote": "Designed to peak day based on FY2025 volume using an assumption of 1.93 peak factor",
+        "source": "DHL proposal p.12"
+      },
+      "S7_two_options": {
+        "label": "GREEN",
+        "quote": "New Jersey vs Columbus, OH \u2026 Columbus is DHL's preferred location \u2014 both options priced",
+        "source": "DHL proposal p.18 + Pricing Sheet"
+      },
+      "S8_iso": {
+        "label": "AMBER",
+        "quote": "No ISO/quality-cert reference found in proposal",
+        "source": "DHL proposal \u2014 absent"
+      }
+    }
+  }
+}
