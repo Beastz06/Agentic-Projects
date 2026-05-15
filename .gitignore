@@ -2,7 +2,8 @@
 career-ops-main/
 
 # Claude Code local-only settings (personal allowlists / machine paths)
-.claude/settings.local.json
+# Pattern covers per-project .claude/ folders (ProcureIQ/.claude/, future siblings, etc.)
+**/.claude/settings.local.json
 
 # Python
 __pycache__/
