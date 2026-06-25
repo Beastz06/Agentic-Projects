@@ -12,3 +12,6 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Generated vector store (regenerate via rag.build_index)
+data/chroma/

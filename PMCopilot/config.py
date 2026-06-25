@@ -17,3 +17,5 @@ def _require(key: str) -> str:
 ANTHROPIC_API_KEY = _require("ANTHROPIC_API_KEY")
 OPENAI_API_KEY = _require("OPENAI_API_KEY")
 GITHUB_TOKEN = _require("GITHUB_TOKEN")
+
+EMBEDDING_MODEL = "text-embedding-3-small"
