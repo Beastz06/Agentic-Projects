@@ -6,31 +6,13 @@ is validated against the issues actually retrieved this call. Invented IDs are
 stripped; pain points left with no real evidence are dropped. A thin or empty
 finding is a valid result, not an error.
 """
-from typing import Literal
 import anthropic
-from pydantic import BaseModel, Field, computed_field
 import config
 from rag.retriever import query
+from schemas.discovery import DiscoveryFinding, PainPoint
 
 RETRIEVAL_K = 8
 TOOL_NAME = "report_discovery_finding"
-
-
-class PainPoint(BaseModel):
-    cluster: str
-    evidence_issue_ids: list[int] = Field(default_factory=list)
-    severity: Literal["low", "medium", "high"]
-
-    @computed_field
-    @property
-    def frequency(self) -> int:
-        return len(self.evidence_issue_ids)
-
-
-class DiscoveryFinding(BaseModel):
-    theme: str
-    pain_points: list[PainPoint] = Field(default_factory=list)
-    suggested_prd_seed: str = Field(max_length=500)
 
 
 DISCOVERY_TOOL = {
