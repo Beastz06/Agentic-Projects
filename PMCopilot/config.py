@@ -19,3 +19,4 @@ OPENAI_API_KEY = _require("OPENAI_API_KEY")
 GITHUB_TOKEN = _require("GITHUB_TOKEN")
 
 EMBEDDING_MODEL = "text-embedding-3-small"
+AGENT_MODEL = "claude-sonnet-4-6"
