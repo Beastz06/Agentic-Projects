@@ -1,0 +1,39 @@
+{
+  "problem_statement": "Discovery on the theme of MCP header forwarding surfaced a coherent seed but did not cluster any pain points with validated issue evidence, so this PRD is drafted from a thin finding and its user stories could not be grounded.",
+  "target_user": "Developers configuring MCP servers behind authenticating proxies who expect custom authorization headers to be forwarded during server discovery.",
+  "user_stories": [],
+  "acceptance_criteria": [
+    {
+      "given": "an MCP server discovery request with a custom Authorization header",
+      "when": "the proxy forwards the discovery call",
+      "then": "the Authorization header is preserved on the forwarded request"
+    },
+    {
+      "given": "an auth-protected MCP server",
+      "when": "discovery is attempted without header forwarding",
+      "then": "the failure surfaces a clear 403-with-cause error rather than a silent empty result"
+    },
+    {
+      "given": "an MCP server requiring no auth",
+      "when": "discovery runs",
+      "then": "behavior is unchanged from today"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "discovery success rate against auth-protected servers",
+      "definition": "share of discovery attempts against authenticating MCP servers that complete without a 403",
+      "target": "above 95 percent"
+    }
+  ],
+  "out_of_scope": [
+    "Header forwarding for non-discovery MCP traffic",
+    "Credential storage or secret management"
+  ],
+  "risks": [
+    {
+      "description": "This PRD rests on a finding with no grounded pain points, so problem framing may be weaker than the seed implies and should be revalidated before build",
+      "severity": "high"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "problem_statement": "validate_safe_url() can be bypassed by attacker-controlled hostnames when LANGCHAIN_ENV is set to local_test, and the allowed-hosts logic over-matches on environment variable prefixes, creating an SSRF vector.",
+  "target_user": "Security engineers hardening LangChain deployments that accept user-influenced URLs.",
+  "user_stories": [
+    {
+      "persona": "security engineer",
+      "action": "trust that validate_safe_url() blocks SSRF even under local_test configuration",
+      "value": "I can deploy without a hidden bypass that only appears in certain env states"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "LANGCHAIN_ENV is local_test and an attacker-controlled hostname is supplied",
+      "when": "validate_safe_url() is called",
+      "then": "the URL is rejected rather than passed through"
+    },
+    {
+      "given": "an allowed-hosts entry that is a prefix of an attacker hostname",
+      "when": "the host is checked",
+      "then": "the match requires an exact host boundary and does not over-match on prefix"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "SSRF bypass closure",
+      "definition": "whether the known local_test bypass and prefix over-match are both closed by a regression test",
+      "target": "both regression tests pass"
+    }
+  ],
+  "out_of_scope": [
+    "General URL parsing rewrite"
+  ],
+  "risks": [
+    {
+      "description": "A stricter host match could break legitimate subdomain use cases that relied on prefix matching",
+      "severity": "medium"
+    }
+  ]
+}

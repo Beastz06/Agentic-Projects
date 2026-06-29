@@ -1,0 +1,60 @@
+{
+  "problem_statement": "Enterprise users integrating LangChain in regulated environments cannot configure mutual TLS, custom certificate chains, or corporate proxies on the Anthropic chat client, because ChatAnthropic does not accept a custom httpx client the way ChatOpenAI does. This blocks adoption in security-controlled deployments.",
+  "target_user": "Platform engineers at regulated enterprises (finance, healthcare) who deploy LangChain behind corporate proxies and must enforce certificate-based auth and SSL verification policies.",
+  "user_stories": [
+    {
+      "persona": "platform engineer",
+      "action": "pass a pre-configured httpx client to ChatAnthropic",
+      "value": "I can enforce mTLS and route through our corporate proxy without forking the integration"
+    },
+    {
+      "persona": "security reviewer",
+      "action": "control SSL verification behavior on every outbound model call",
+      "value": "I can certify the deployment against our compliance baseline"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "a ChatAnthropic instance configured with a custom httpx client",
+      "when": "the client issues a completion request",
+      "then": "the request is routed through the supplied httpx client, honoring its mTLS and proxy settings"
+    },
+    {
+      "given": "a custom httpx client with SSL verification disabled for an internal CA",
+      "when": "ChatAnthropic makes a call",
+      "then": "the verification setting from the supplied client is respected, not overridden by a default"
+    },
+    {
+      "given": "no custom httpx client is supplied",
+      "when": "ChatAnthropic is instantiated",
+      "then": "it falls back to the existing default client with no behavior change for current users"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "regulated-deployment adoption",
+      "definition": "count of enterprise accounts enabling the custom-httpx path in production within one quarter of release",
+      "target": "at least 15 accounts in the first quarter"
+    },
+    {
+      "name": "support ticket reduction",
+      "definition": "monthly volume of proxy/SSL configuration support tickets for the Anthropic integration",
+      "target": "reduce by 50 percent versus the trailing three-month average"
+    }
+  ],
+  "out_of_scope": [
+    "Changes to ChatOpenAI, which already supports custom httpx clients",
+    "Automatic proxy discovery from system environment",
+    "Certificate lifecycle management or rotation tooling"
+  ],
+  "risks": [
+    {
+      "description": "A user-supplied httpx client with overly permissive SSL settings could weaken security posture without the team realizing it",
+      "severity": "medium"
+    },
+    {
+      "description": "Divergence from ChatOpenAI's exact configuration surface could create inconsistent cross-provider behavior",
+      "severity": "low"
+    }
+  ]
+}

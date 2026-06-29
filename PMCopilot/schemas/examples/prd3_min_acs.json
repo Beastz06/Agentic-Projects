@@ -1,0 +1,45 @@
+{
+  "problem_statement": "AzureChatOpenAI creates a new connection pool per instance instead of reusing a shared default httpx client the way BaseChatOpenAI does, wasting connection resources in high-instance-count deployments.",
+  "target_user": "Backend engineers running many short-lived AzureChatOpenAI instances in a request-scoped service.",
+  "user_stories": [
+    {
+      "persona": "backend engineer",
+      "action": "have AzureChatOpenAI reuse the shared default httpx client",
+      "value": "I avoid per-instance connection pool churn and reduce resource usage under load"
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "multiple AzureChatOpenAI instances created without an explicit client",
+      "when": "they issue requests",
+      "then": "they share a single default httpx connection pool rather than each creating its own"
+    },
+    {
+      "given": "an AzureChatOpenAI instance created with an explicit custom client",
+      "when": "it issues requests",
+      "then": "the explicit client is used and no shared default is substituted"
+    },
+    {
+      "given": "the shared-default behavior is enabled",
+      "when": "an existing AzureChatOpenAI user upgrades",
+      "then": "observable request behavior is unchanged aside from reduced pool creation"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "connection pool count under load",
+      "definition": "number of distinct httpx connection pools created during a fixed high-instance benchmark",
+      "target": "reduced to a single shared pool for the default path"
+    }
+  ],
+  "out_of_scope": [
+    "Connection pool tuning parameters",
+    "Behavior of non-Azure OpenAI clients"
+  ],
+  "risks": [
+    {
+      "description": "Sharing a default pool across instances could couple their lifecycles in ways that surprise users who assumed isolation",
+      "severity": "medium"
+    }
+  ]
+}
