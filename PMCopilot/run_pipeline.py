@@ -1,9 +1,10 @@
 """End-to-end slice: Discovery (C2) -> PRD Drafter (C3) -> JSON artifact."""
+import sys
 from pathlib import Path
 from agents.discovery import research
 from agents.prd_drafter import draft_prd
 
-THEME = "authentication"
+THEME = sys.argv[1] if len(sys.argv) > 1 else "authentication"
 OUT = Path("data/output")
 
 finding = research(THEME)
