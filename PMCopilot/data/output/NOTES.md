@@ -1,0 +1,73 @@
+# Vertical Slice Checkpoint — Observed Failure Modes
+
+Three themes run end-to-end (Discovery → PRD Drafter): authentication (Day 20
+specimen), streaming, tool_calling. Each PRD reviewed by hand against three
+axes: (a) problem-statement specificity, (b) AC testability, (c) citation
+relevance (provenance is code-guaranteed; relevance is not).
+
+## Cross-cutting: provenance held, relevance is the real test
+Across all three PRDs, every cited issue ID traced to a real in-theme corpus
+issue — zero fabricated IDs. The code-attaches-IDs architecture (model writes
+indices only; code overwrites evidence_issue_ids from the verified pain-point
+pool) held on all three themes. The repair loop never fired across any run.
+Relevance — does the cited issue actually support the story's claim — is where
+the defects live, and it is not something provenance guarantees.
+
+## Per-theme findings
+
+### authentication
+- Problem statement says "three categories of failure" then lists four —
+  structure passes Pydantic, a judge dings the prose. (Drafter prose discipline.)
+- Story 5 is cross-cutting (merged indices) — evidence supports the synthesized
+  story, verified.
+- Several success metrics are "0 new issues" targets — see zero-target note below.
+
+### streaming (6 pain points; predicted 4 — corpus split finer, not coarser)
+- Problem statement structure correct: six defects claimed, six delivered. The
+  auth three-vs-four miscount did NOT recur.
+- All six citations provenance-clean and relevance-valid. Story 2 initially
+  looked like an overclaim (one citation, two claims) but the cited issue
+  (35436) itself reports both bugs — grounded. Lesson: a citation-count/claim-
+  count mismatch is a prompt to check the source, not a verdict.
+- FLAW — Story 6 persona/target-user conflict: target_user is "LangChain
+  users/integration developers," but Story 6's persona is "a LangChain
+  contributor maintaining the test suite" (issue 36866, a test-assertion bug).
+  Discovery clustered by theme and swept a maintenance/internal issue into a
+  user-facing PRD. Scope-filtering gap at the Discovery stage.
+
+### tool_calling (7 pain points; predicted 8)
+- Problem statement + ACs clean. AC #8 (budget signaled before planning) is
+  correctly tied to pain point 6 — apparent disconnect was a non-linear
+  story→AC mapping artifact (pain point 1 split into two stories/ACs), not a defect.
+- Issue 35836 correctly dual-cited by Story 3 (Gemini rejects replayed tool-call
+  history) and Story 6 (missing injection API) — the single issue genuinely
+  raises both threads.
+- FLAW — Stories 1/2 citation cross-contamination: pain point 1 fissioned into
+  two narrower stories (parser crash 36679; streaming empty-args 35514), but
+  the code copied the pain point's FULL pooled ID list onto both child stories.
+  Each story now carries one on-target and one off-target citation. Provenance
+  intact (both IDs trace to PP1); relevance broke at the split. This is a CODE
+  attribution-granularity gap (how IDs propagate when one pain point yields
+  multiple stories), not a prompt issue.
+
+## Zero-target metrics (all three themes)
+Success metrics split into two kinds: measurable-by-us (Pydantic warning count,
+xfail count, 100% parallel-call attribution in the test harness — deterministic,
+runnable) and world-dependent ("0 open crash reports within a release cycle" —
+depends on users filing issues, which we do not control). The latter are wishful
+as written; absence of reports is not proof of a fix.
+
+## Topic 3 decision: no prompt revision
+Three distinct defect CLASSES, each appearing exactly once: prose miscount
+(auth), Discovery scope-filter (streaming), code attribution-granularity
+(tool_calling). None is an n>=2 pattern. Per parked-items discipline, all three
+are logged here and will trigger a fix only on recurrence in future themes.
+Two of the three are not even prompt-fixable (one is code logic, one is
+borderline-promptable but premature on n=1).
+
+## Prediction scorecard
+- Pain-point counts: predicted 4/8 (streaming/tool_calling), actual 6/7. Both
+  misses in the direction of "clustering granularity does not track title-hit
+  volume linearly" — a corrected mental model going forward.
+- Repair loop: predicted "won't fire" both themes — correct, 2/2. Grounding
+  design absorbed two token-dense new corpus regions without a single retry.
