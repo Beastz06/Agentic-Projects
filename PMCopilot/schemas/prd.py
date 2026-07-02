@@ -26,6 +26,8 @@ class UserStory(BaseModel):
     persona: str
     action: str
     value: str
+    source_pain_point_indices: list[int] = Field(default_factory=list)
+    evidence_issue_ids: list[int] = Field(default_factory=list)
 
 
 class AcceptanceCriterion(BaseModel):
