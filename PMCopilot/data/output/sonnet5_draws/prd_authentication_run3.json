@@ -1,0 +1,130 @@
+{
+  "problem_statement": "LangChain's authentication and transport-security handling is inconsistent across provider integrations and core components, forcing enterprise users into fragile workarounds or leaving them exposed to security gaps. ChatAnthropic lacks support for custom HTTP clients, mutual TLS, and certificate-based authentication that ChatOpenAI already supports, blocking use in enterprise networks that require client certificates or custom proxying. Separately, httpx client construction and reuse is handled differently between Azure OpenAI and base OpenAI integrations, creating duplicated, inconsistent auth/connection setup logic that is hard to maintain and reason about. During MCP tool discovery, authentication headers such as Authorization and Accept are not forwarded to the MCP server, causing 403 failures whenever the server requires authentication. Most seriously, the core SSRF protection layer's allowlist logic can be bypassed via environment-variable checks (LANGCHAIN_ENV), letting untrusted hosts circumvent host validation entirely. Together these gaps mean authentication and transport security are treated as an afterthought bolted on per-integration rather than a consistent, hardened capability of the framework.",
+  "target_user": "Engineers and platform teams integrating LangChain-based LLM applications into enterprise environments that require mTLS, custom certificate authentication, authenticated MCP tool servers, or strict outbound network security (SSRF) controls",
+  "user_stories": [
+    {
+      "persona": "an enterprise developer using ChatAnthropic",
+      "action": "configure a custom HTTP client with mTLS/certificate-based authentication",
+      "value": "I can connect through my organization's secured network the same way I already can with ChatOpenAI",
+      "source_pain_point_indices": [
+        1
+      ],
+      "evidence_issue_ids": [
+        35843,
+        35977,
+        36056
+      ]
+    },
+    {
+      "persona": "a LangChain integration maintainer",
+      "action": "use a single, consistent pattern for httpx client construction and reuse across OpenAI and Azure OpenAI integrations",
+      "value": "authentication and connection configuration behaves predictably and is easier to maintain across providers",
+      "source_pain_point_indices": [
+        2
+      ],
+      "evidence_issue_ids": [
+        36259
+      ]
+    },
+    {
+      "persona": "a developer connecting to an authenticated MCP server",
+      "action": "have my Authorization and Accept headers forwarded during MCP tool discovery",
+      "value": "tool discovery succeeds instead of failing with 403 errors",
+      "source_pain_point_indices": [
+        3
+      ],
+      "evidence_issue_ids": [
+        35574
+      ]
+    },
+    {
+      "persona": "a security-conscious platform engineer",
+      "action": "rely on SSRF allowlist validation that cannot be bypassed through environment-variable-based checks",
+      "value": "untrusted hosts cannot circumvent host validation in production deployments",
+      "source_pain_point_indices": [
+        4
+      ],
+      "evidence_issue_ids": [
+        37297
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "a developer instantiates ChatAnthropic with a custom httpx client configured for mTLS",
+      "when": "a request is made to the Anthropic API",
+      "then": "the client certificate is presented and the request succeeds without requiring a workaround"
+    },
+    {
+      "given": "the OpenAI and Azure OpenAI integrations both construct httpx clients",
+      "when": "a maintainer inspects the client-construction code path",
+      "then": "both integrations use the same shared client configuration and reuse logic"
+    },
+    {
+      "given": "an MCP server requires an Authorization header for tool discovery",
+      "when": "LangChain performs MCP tool discovery against that server",
+      "then": "the configured Authorization and Accept headers are included in the discovery request and the call succeeds with no 403 error"
+    },
+    {
+      "given": "the SSRF allowlist validation logic is invoked",
+      "when": "a request targets a host not on the allowlist, regardless of LANGCHAIN_ENV environment variable value",
+      "then": "the request is blocked and no environment-variable-based bypass is possible"
+    },
+    {
+      "given": "a security reviewer audits the SSRF protection layer after the fix",
+      "when": "they attempt to set LANGCHAIN_ENV to a value intended to disable allowlist checks",
+      "then": "allowlist validation remains enforced"
+    },
+    {
+      "given": "a developer migrates existing ChatOpenAI mTLS configuration code to ChatAnthropic",
+      "when": "they follow the documented configuration steps",
+      "then": "the same certificate and custom client configuration pattern works without provider-specific special-casing"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "mTLS/custom client support parity",
+      "definition": "number of chat model integrations (including ChatAnthropic) supporting custom httpx client and mTLS configuration",
+      "target": "ChatAnthropic reaches feature parity with ChatOpenAI within one release cycle"
+    },
+    {
+      "name": "MCP auth discovery failures",
+      "definition": "count of reported 403 failures during MCP tool discovery due to missing forwarded auth headers",
+      "target": "zero reported occurrences in the two releases following the fix"
+    },
+    {
+      "name": "SSRF bypass reports",
+      "definition": "count of confirmed SSRF allowlist bypass reports referencing environment-variable-based circumvention",
+      "target": "zero confirmed bypass reports post-fix"
+    },
+    {
+      "name": "client construction consistency",
+      "definition": "number of distinct httpx client construction code paths across OpenAI-family integrations",
+      "target": "reduced to a single shared implementation"
+    }
+  ],
+  "out_of_scope": [
+    "Adding new authentication providers or OAuth flows beyond certificate-based and header-based auth already implied by the pain points",
+    "Rewriting the MCP protocol itself or its discovery mechanism",
+    "General httpx client performance tuning unrelated to auth/connection configuration",
+    "Broader SSRF threat modeling beyond closing the identified environment-variable bypass"
+  ],
+  "risks": [
+    {
+      "description": "Evidence for the httpx client reuse inconsistency and MCP header forwarding issues is each based on a single reported issue, so the scope and downstream impact may be broader or narrower than currently understood",
+      "severity": "medium"
+    },
+    {
+      "description": "Hardening SSRF allowlist logic could break legitimate internal deployments that currently rely on the LANGCHAIN_ENV bypass, requiring careful migration communication",
+      "severity": "high"
+    },
+    {
+      "description": "Unifying httpx client construction across OpenAI and Azure OpenAI integrations risks introducing regressions in existing auth configurations if not carefully tested",
+      "severity": "medium"
+    },
+    {
+      "description": "Overall theme is supported by only four pain points with mostly low frequency counts, so prioritization across these four distinct problem areas is based on limited sample size",
+      "severity": "medium"
+    }
+  ]
+}

@@ -71,3 +71,43 @@ borderline-promptable but premature on n=1).
   volume linearly" — a corrected mental model going forward.
 - Repair loop: predicted "won't fire" both themes — correct, 2/2. Grounding
   design absorbed two token-dense new corpus regions without a single retry.
+  
+## Sonnet 5 regeneration — auth theme
+
+_Baseline note: the checkpoint sections above describe the reviewed 4.6 output.
+Everything in this section is Sonnet 5, generated during the model regeneration._
+
+**Counts stable across 3 draws: 4 pain points / 4 stories / 6 ACs (all three).**
+Contrast with the streaming theme, which varied on every axis (6/7/6 points,
+6/5/6 stories, 7/8/8 ACs). Auth's four defects (mTLS/custom-client, httpx
+inconsistency across Azure/base OpenAI, MCP header forwarding, SSRF LANGCHAIN_ENV
+bypass) are cleanly separable, so clustering lands identically run-to-run.
+Streaming's clusters are borderline (issue-template boilerplate compresses
+embedding space on this corpus).
+HYPOTHESIS (pending third theme): Sonnet 5 structural variance tracks cluster
+separability of the theme, not a global model constant.
+
+**Prose-consistency defect (problem_statement miscounts its own enumeration)
+CLEARED on Sonnet 5, 3/3.** All three auth draws enumerate four defects in
+problem_statement matching 4 pain points — the 4.6 auth "says three, lists four"
+miscount did not recur. Contrast the Discovery scope-filter defect logged in the
+4.6 streaming section (a maintainer-scoped test-suite issue swept into a
+developer-facing PRD): that one REPRODUCED on Sonnet 5, confirming it is
+model-invariant.
+HYPOTHESIS (pending third theme): defect *location* predicts model-swap
+sensitivity — upstream/data defects (Discovery scope-filtering) are model-
+invariant; downstream/drafting defects (prose discipline) are model-responsive.
+
+**`prd`-envelope nesting failure fired on auth draw 3.**
+Previously observed only on the streaming theme. Confirms it is stochastic and
+theme-independent, not streaming-specific. Repair loop caught it, repaired
+first-try, saved a valid PRD (validates against PRD schema). Reinforces prior
+call: this quirk belongs in the repair loop, not an upstream extraction fix.
+
+**Repair-provenance / canonical selection.**
+auth run 3 is a POST-REPAIR sample (attempt-1 nesting failure → repair loop →
+valid). Runs 1 and 2 are clean-first-pass. Canonical = run 1 (clean-first-pass —
+a principled choice, unlike the streaming theme where all three were clean and
+selection was arbitrary). Run 3 kept as an eval fixture WITH this repair flag:
+for raw-output-distribution characterization, a repaired sample is
+post-intervention, not raw — it must not be treated as an equivalent raw sample.

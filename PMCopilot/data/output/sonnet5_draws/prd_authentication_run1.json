@@ -1,0 +1,131 @@
+{
+  "problem_statement": "Enterprise teams integrating LangChain chat model and tool providers cannot reliably configure authentication and transport security. ChatAnthropic and similar chat model integrations lack support for custom HTTP clients and mutual-TLS (mTLS), which blocks organizations that require certificate-based authentication behind corporate proxies or internal PKI. Separately, MCP (Model Context Protocol) tool discovery fails to forward auth headers/tokens consistently, causing 403 errors even when credentials are correctly configured. Provider integrations also diverge in how they manage the underlying httpx client: AzureChatOpenAI and BaseChatOpenAI do not share connection/auth setup, creating redundant connection overhead and inconsistent behavior across providers. Finally, SSRF/allowlist host validation can be bypassed via environment-based auth checks, allowing requests to untrusted hosts to slip past security validation. Together these gaps mean enterprise users cannot securely and consistently connect through proxies, custom certificates, and MCP servers without writing fragile, integration-specific workarounds.",
+  "target_user": "Enterprise developers and platform engineers integrating LangChain chat model providers and MCP tool servers within organizations that enforce certificate-based authentication, corporate proxies, and strict egress/host validation policies",
+  "user_stories": [
+    {
+      "persona": "an enterprise developer deploying ChatAnthropic behind a corporate proxy",
+      "action": "configure a custom HTTP client with mTLS certificates",
+      "value": "I can authenticate through my organization's PKI without forking or patching the library",
+      "source_pain_point_indices": [
+        1
+      ],
+      "evidence_issue_ids": [
+        35843,
+        35977,
+        36056
+      ]
+    },
+    {
+      "persona": "a developer integrating an MCP tool server",
+      "action": "have my configured auth headers/tokens reliably forwarded during tool discovery",
+      "value": "I stop getting spurious 403 errors when my credentials are actually correct",
+      "source_pain_point_indices": [
+        2
+      ],
+      "evidence_issue_ids": [
+        35574
+      ]
+    },
+    {
+      "persona": "a platform engineer maintaining multiple provider integrations",
+      "action": "rely on a shared, consistent httpx client/connection-pooling layer across AzureChatOpenAI, BaseChatOpenAI, and other providers",
+      "value": "I avoid redundant connection and auth setup overhead and get predictable behavior across providers",
+      "source_pain_point_indices": [
+        3
+      ],
+      "evidence_issue_ids": [
+        36259
+      ]
+    },
+    {
+      "persona": "a security engineer responsible for outbound request policy",
+      "action": "have SSRF/allowlist validation enforced consistently regardless of environment-based auth configuration",
+      "value": "untrusted hosts cannot bypass security validation through environment manipulation",
+      "source_pain_point_indices": [
+        4
+      ],
+      "evidence_issue_ids": [
+        37297
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "a user supplies a custom httpx client configured with mTLS client certificates to ChatAnthropic",
+      "when": "a request is made to the Anthropic API",
+      "then": "the request completes successfully using the provided certificate-based authentication without additional workarounds"
+    },
+    {
+      "given": "an MCP client has valid auth headers/tokens configured",
+      "when": "tool discovery is performed against an MCP server",
+      "then": "the configured headers are forwarded on every discovery request and no 403 is returned due to missing/dropped headers"
+    },
+    {
+      "given": "AzureChatOpenAI and BaseChatOpenAI are both used in the same process",
+      "when": "each provider issues requests requiring authentication",
+      "then": "both integrations reuse a shared httpx client/connection pool rather than creating redundant client instances"
+    },
+    {
+      "given": "an environment variable or auth-related config attempts to disable or bypass host allowlist validation",
+      "when": "a request is made to a host not on the allowlist",
+      "then": "the request is blocked and the SSRF validation cannot be bypassed via environment-based auth settings"
+    },
+    {
+      "given": "a developer passes a custom HTTP client to any supported chat model integration",
+      "when": "the integration initializes",
+      "then": "the custom client's TLS/proxy/auth settings are honored consistently, matching documented behavior across providers"
+    },
+    {
+      "given": "auth header forwarding or mTLS configuration fails",
+      "when": "an authentication-related error occurs",
+      "then": "the error message clearly identifies the auth/transport failure cause rather than a generic 403 or connection error"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "Custom client / mTLS support coverage",
+      "definition": "count of chat model integrations (starting with ChatAnthropic) that accept a user-supplied custom httpx client supporting mTLS",
+      "target": "all in-scope integrations (at least the 1 flagged: ChatAnthropic) support custom mTLS clients within the release"
+    },
+    {
+      "name": "Auth-related MCP discovery failures",
+      "definition": "count of reported issues describing 403s during MCP tool discovery despite correctly configured credentials",
+      "target": "reduce to 0 reopened/reported instances in the two releases following the fix"
+    },
+    {
+      "name": "Shared client adoption across providers",
+      "definition": "count of provider integrations (AzureChatOpenAI, BaseChatOpenAI, and others) migrated to the shared httpx client/connection-pooling layer",
+      "target": "at least 2 provider integrations migrated within the first release cycle"
+    },
+    {
+      "name": "SSRF bypass reports",
+      "definition": "count of confirmed reports of SSRF/allowlist bypass via environment-based auth checks after the fix ships",
+      "target": "0 confirmed bypass reports in the release following the fix"
+    }
+  ],
+  "out_of_scope": [
+    "Building a full enterprise proxy/certificate management UI or dashboard",
+    "Adding new authentication protocols (e.g., OAuth device flow, SAML) not already requested in the pain points",
+    "Rewriting MCP protocol specification or transport layer beyond header forwarding",
+    "Performance tuning of connection pooling beyond eliminating redundant client creation",
+    "Auditing or hardening authentication for providers not mentioned in the pain points"
+  ],
+  "risks": [
+    {
+      "description": "Evidence for this theme is thin: three of the four pain points have a frequency of only 1, meaning most of this PRD rests on a single high-frequency cluster (custom HTTP client/mTLS support) and isolated individual reports rather than broad, repeated evidence.",
+      "severity": "medium"
+    },
+    {
+      "description": "Introducing shared httpx client/connection pooling across providers (AzureChatOpenAI, BaseChatOpenAI, etc.) risks regressions in existing auth flows that currently work, since these integrations were built independently.",
+      "severity": "medium"
+    },
+    {
+      "description": "Hardening SSRF/allowlist validation could break legitimate enterprise configurations that currently rely on environment-based auth checks to reach internal hosts, causing support friction if not carefully scoped.",
+      "severity": "high"
+    },
+    {
+      "description": "mTLS/custom client support may vary by underlying provider SDK capabilities, meaning full parity across all chat model integrations may not be achievable in a single release.",
+      "severity": "low"
+    }
+  ]
+}
