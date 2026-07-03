@@ -1,11 +1,11 @@
 {
-  "problem_statement": "LangChain's streaming layer contains a cluster of distinct but interrelated defects across its sync and async execution paths that collectively cause crashes, silent data loss, missing metadata, and spurious warnings in production deployments. First, an SSE format mismatch between non-standard proxies (such as the AWS Bedrock Anthropic proxy) and the Anthropic SDK causes streaming to fail entirely, producing zero chunks with no actionable error. Second, the disable_streaming=\"tool_calling\" flag crashes with an AttributeError in async streaming mode because _default_params unconditionally forces stream=True, and the flag's suppression logic is over-broad — incorrectly disabling streaming for all conversation turns whenever any tools are bound, not just tool-calling turns. Third, the agent factory's async execution path uses ainvoke instead of astream, silently preventing on_llm_new_token callbacks from firing; LangGraph's use_astream=True does not propagate down to model-level token streaming, meaning callers who depend on streaming callbacks receive no tokens without any error signal. Fourth, the structured-output streaming path emits Pydantic serializer warnings because it serializes chunks using a bare model_dump() call, inconsistent with the already-corrected non-streaming path. Fifth, HTTP response headers — including x-request-id and other provider correlation identifiers — are dropped from response_metadata when using with_structured_output(..., method=\"json_schema\").stream(), making distributed tracing and provider-side debugging impossible. Finally, a test covering the empty-stream error callback case carries an incorrect assertion masked by an xfail marker, meaning the regression coverage for this scenario is illusory. Together these defects erode confidence in streaming as a reliable, observable, and debuggable execution mode across LangChain's supported model integrations.",
-  "target_user": "LangChain library users and integration developers who rely on streaming — including developers building real-time LLM-powered applications with async agents, structured-output pipelines, tool-calling workflows, and non-standard model proxies such as AWS Bedrock",
+  "problem_statement": "LangChain's streaming layer is unreliable and inconsistent across model providers and higher-level abstractions (structured output, agents/graphs, tool-calling). Specific failures include: provider-proxied SSE streams that omit the standard 'event:' field (e.g., Anthropic accessed via a Bedrock proxy) causing hard failures with no generation chunks returned; streaming combined with structured output (with_structured_output) producing spurious Pydantic serializer warnings and silently dropping response metadata/headers such as x-request-id; the disable_streaming='tool_calling' flag crashing with an AttributeError because an AsyncStream object is passed where a ChatCompletion is expected, and even when it doesn't crash, disabling streaming globally instead of only for tool-calling turns; and agent/graph execution paths that call ainvoke instead of astream internally, meaning on_llm_new_token callbacks never fire even when graph-level streaming is explicitly enabled. There is also weaker supporting infrastructure: gaps in standard test coverage and release sequencing for tool-call streaming across integration packages, and at least one known-incorrect assertion in the core streaming error-callback test suite that masks whether error-path behavior is actually correct. Collectively these issues mean developers cannot trust that streaming will work uniformly across providers, output modes, and execution paths, forcing workarounds or abandonment of streaming for affected features.",
+  "target_user": "Developers building LLM applications with LangChain who rely on streaming responses across different providers (including proxied/non-standard endpoints), who use structured output, tool-calling, or agent/graph execution patterns and need consistent token-level streaming and metadata propagation.",
   "user_stories": [
     {
-      "persona": "a developer integrating LangChain with AWS Bedrock via its Anthropic-compatible proxy",
-      "action": "receive correctly parsed SSE chunks from the streaming endpoint without format-mismatch failures",
-      "value": "streaming works end-to-end against Bedrock without zero-chunk failures or silent drops",
+      "persona": "a developer using Anthropic models through a Bedrock proxy",
+      "action": "receive streamed generation chunks even when the proxy's SSE payloads omit the 'event:' field",
+      "value": "my application doesn't hard-fail with 'No generation chunks were returned' just because of a non-standard but valid proxy implementation",
       "source_pain_point_indices": [
         1
       ],
@@ -14,53 +14,54 @@
       ]
     },
     {
-      "persona": "a developer using disable_streaming=\"tool_calling\" in an async streaming workflow",
-      "action": "run async streaming with tools bound without encountering an AttributeError crash, and have streaming suppressed only on tool-calling turns rather than all turns",
-      "value": "tool-calling streaming control is reliable and precisely scoped, eliminating both crashes and over-broad suppression",
+      "persona": "a developer using with_structured_output while streaming",
+      "action": "get parsed structured chunks without spurious Pydantic serializer warnings and with response metadata/headers like x-request-id preserved",
+      "value": "I can debug and trace requests reliably without noisy logs or missing diagnostic data",
       "source_pain_point_indices": [
         2
+      ],
+      "evidence_issue_ids": [
+        38034,
+        37421
+      ]
+    },
+    {
+      "persona": "a developer who sets disable_streaming='tool_calling'",
+      "action": "have tool-calling turns run non-streamed while all other turns continue to stream normally, without any crash",
+      "value": "I can selectively disable streaming for tool-calling without breaking my whole application or losing streaming elsewhere",
+      "source_pain_point_indices": [
+        3
       ],
       "evidence_issue_ids": [
         35436
       ]
     },
     {
-      "persona": "a developer using LangGraph or the agent factory with async execution",
-      "action": "receive on_llm_new_token callbacks firing for each streamed token during async agent runs",
-      "value": "real-time token streaming is observable through callbacks in async contexts, enabling progress indicators, logging, and latency monitoring",
+      "persona": "a developer running an agent inside a graph with use_astream=True",
+      "action": "have the agent's internal LLM calls use astream so on_llm_new_token callbacks fire for every token",
+      "value": "I get true token-level streaming end-to-end through my agent/graph pipeline instead of silently falling back to batched output",
       "source_pain_point_indices": [
-        3
+        4
       ],
       "evidence_issue_ids": [
         37869
       ]
     },
     {
-      "persona": "a developer using with_structured_output in streaming mode",
-      "action": "stream structured output chunks without Pydantic serializer warnings appearing in logs or stderr",
-      "value": "the streaming path is clean and consistent with the non-streaming path, eliminating noise that obscures real issues",
-      "source_pain_point_indices": [
-        4
-      ],
-      "evidence_issue_ids": [
-        38034
-      ]
-    },
-    {
-      "persona": "a developer tracing requests through a structured-output streaming pipeline",
-      "action": "access HTTP response headers such as x-request-id in response_metadata after calling with_structured_output(..., method=\"json_schema\").stream()",
-      "value": "provider-side request correlation and distributed tracing remain possible even when streaming structured output",
+      "persona": "a maintainer of an integration package",
+      "action": "rely on standard tests and a clear release sequence that validates tool-call streaming support before stricter langchain-tests are enforced",
+      "value": "I can ship provider integrations (including ones not yet supported, like Mistral) with confidence they meet the streaming contract",
       "source_pain_point_indices": [
         5
       ],
       "evidence_issue_ids": [
-        37421
+        38058
       ]
     },
     {
-      "persona": "a LangChain contributor maintaining the streaming test suite",
-      "action": "rely on the empty-stream error callback test to assert the correct expected value without an xfail mask",
-      "value": "the regression test genuinely catches regressions rather than silently passing with an incorrect assertion",
+      "persona": "a core LangChain maintainer",
+      "action": "have the streaming error-callback test assert the correct shape for empty streamed generations on error",
+      "value": "I can trust the test suite to actually validate error-path streaming behavior instead of masking a possible bug",
       "source_pain_point_indices": [
         6
       ],
@@ -71,96 +72,95 @@
   ],
   "acceptance_criteria": [
     {
-      "given": "LangChain is configured to use an AWS Bedrock Anthropic-compatible proxy",
-      "when": "a streaming call is made and the proxy returns SSE events in its native format",
-      "then": "at least one chunk is received by the caller and no format-mismatch or zero-chunk failure is raised"
+      "given": "an Anthropic model is accessed through a Bedrock proxy that sends SSE events without an 'event:' field",
+      "when": "a streaming request is made",
+      "then": "generation chunks are correctly parsed and returned instead of raising 'No generation chunks were returned'"
     },
     {
-      "given": "a model has tools bound and disable_streaming=\"tool_calling\" is set",
-      "when": "an async streaming call is initiated",
-      "then": "the call completes without an AttributeError and streaming is active on non-tool-calling turns while suppressed only on tool-calling turns"
+      "given": "with_structured_output is combined with streaming",
+      "when": "chunks are streamed and the final response is assembled",
+      "then": "no spurious Pydantic serializer warnings are logged and response metadata including x-request-id is present on the final response"
     },
     {
-      "given": "an async agent is executed via the agent factory with a registered on_llm_new_token callback",
-      "when": "the model produces tokens during async execution",
-      "then": "on_llm_new_token is called at least once per streamed response, confirming astream is used instead of ainvoke in the async path"
+      "given": "disable_streaming='tool_calling' is set on a chat model",
+      "when": "a tool-calling turn is executed",
+      "then": "the turn completes without an AttributeError and without an AsyncStream object being passed where a ChatCompletion is expected"
     },
     {
-      "given": "LangGraph's use_astream=True is set and a model is invoked asynchronously",
-      "when": "the model streams tokens",
-      "then": "on_llm_new_token callbacks fire at the model level, confirming the flag propagates to model-level token streaming"
+      "given": "disable_streaming='tool_calling' is set on a chat model",
+      "when": "a non-tool-calling turn is executed",
+      "then": "that turn still streams normally rather than having streaming disabled globally"
     },
     {
-      "given": "a chain using with_structured_output in streaming mode processes a response",
-      "when": "output chunks are serialized and yielded",
-      "then": "no Pydantic serializer warnings are emitted to stderr or the logging system"
+      "given": "an agent is invoked inside a graph with use_astream=True",
+      "when": "the agent generates a response",
+      "then": "on_llm_new_token callbacks fire for each token produced, confirming the agent internally used astream rather than ainvoke"
     },
     {
-      "given": "a request is made using with_structured_output(..., method=\"json_schema\").stream()",
-      "when": "the stream is fully consumed",
-      "then": "response_metadata on the streamed output contains the x-request-id header value returned by the provider"
+      "given": "the core streaming error-callback test suite",
+      "when": "an error occurs during streaming with no generations produced",
+      "then": "the test asserts the correct nested-list shape ([[]]) for empty streamed generations, and passes against the corrected implementation"
     },
     {
-      "given": "a streaming call produces an empty stream triggering the error callback",
-      "when": "the test_stream_error_callback test runs without the xfail marker",
-      "then": "the assertion passes with the correct expected value and the test is green"
-    },
-    {
-      "given": "any of the above fixes are applied",
-      "when": "the full streaming test suite is executed",
-      "then": "no previously passing tests regress and no new xfail markers are introduced"
+      "given": "an integration package implements tool-call streaming",
+      "when": "the package's test suite is run against langchain-tests",
+      "then": "standard tests covering tool-call streaming pass before the stricter langchain-tests version is released"
     }
   ],
   "success_metrics": [
     {
-      "name": "streaming crash count",
-      "definition": "count of open GitHub issues or bug reports describing an unhandled exception (AttributeError or equivalent) in any sync or async streaming code path addressed by this PRD",
-      "target": "0 open crash reports within one release cycle of shipping all fixes"
+      "name": "Streaming hard-failure incidents",
+      "definition": "count of reported issues where streaming raises an unhandled exception or returns zero generation chunks across supported providers",
+      "target": "reduce open high-severity streaming failure reports from current baseline of 2 to 0 within one release cycle"
     },
     {
-      "name": "silent data-loss reports",
-      "definition": "count of open issues describing zero-chunk responses, missing callbacks, or dropped response_metadata in the streaming paths covered by this PRD",
-      "target": "0 open reports within one release cycle of shipping all fixes"
+      "name": "Structured-output streaming metadata integrity",
+      "definition": "count of reported cases where response metadata/headers are dropped or spurious warnings are emitted during structured-output streaming",
+      "target": "0 open reports after fix ships, down from current baseline of 2"
     },
     {
-      "name": "streaming test suite xfail markers",
-      "definition": "count of xfail markers in the streaming test suite that mask incorrect assertions rather than known upstream limitations",
-      "target": "0 masking xfail markers after the test correction is merged"
+      "name": "disable_streaming tool_calling correctness",
+      "definition": "count of reported crashes or global-disable-instead-of-scoped-disable bugs for disable_streaming='tool_calling'",
+      "target": "0 open reports after fix, down from current baseline of 1"
     },
     {
-      "name": "Pydantic warning occurrences",
-      "definition": "count of Pydantic serializer warnings emitted during the structured-output streaming integration test run",
-      "target": "0 warnings emitted after the streaming serialization fix is merged"
+      "name": "Agent/graph token-level streaming coverage",
+      "definition": "count of agent/graph execution paths verified (via test) to fire on_llm_new_token when astream-based streaming is enabled",
+      "target": "100% of existing agent/graph factory functions covered by a passing token-callback test"
+    },
+    {
+      "name": "Core test suite correctness",
+      "definition": "whether the streaming error-callback test assertion shape matches actual expected behavior",
+      "target": "corrected assertion merged and passing in 1 release cycle"
     }
   ],
   "out_of_scope": [
-    "Adding streaming support to model integrations that do not currently support it",
-    "Redesigning the callback system architecture beyond the async propagation fix",
-    "Adding new structured-output methods or JSON schema formats beyond fixing the existing json_schema stream path",
-    "Performance optimization of the streaming pipeline (e.g., reducing chunk latency or buffering strategy changes)",
-    "Support for non-Anthropic provider proxies beyond the Bedrock SSE fix",
-    "End-to-end tracing or observability platform integrations beyond preserving existing response headers in metadata"
+    "Adding streaming support for entirely new providers not currently integrated (e.g., full Mistral tool-call streaming support)",
+    "Redesigning the overall streaming API/interface (astream, astream_events, callback signatures)",
+    "General performance optimization of streaming throughput/latency",
+    "Non-streaming structured output correctness issues unrelated to streaming",
+    "Building new observability/tracing tooling beyond preserving existing metadata/headers"
   ],
   "risks": [
     {
-      "description": "Each of the six pain points has a frequency of 1, meaning the evidence base is thin. It is possible some defects are environment-specific or already partially addressed in recent commits, making prioritization difficult without broader user signal.",
+      "description": "Several of the pain points have frequency of 1, meaning each is backed by a single reported issue; the evidence base for prioritizing these fixes over other work is thin and may not represent the most impactful streaming problems for the broader user base.",
       "severity": "medium"
     },
     {
-      "description": "Fixing the disable_streaming=\"tool_calling\" suppression logic requires changing turn-level streaming control behavior; the new scoped suppression may interact unexpectedly with multi-turn or parallel tool-calling patterns not covered by existing tests.",
-      "severity": "high"
-    },
-    {
-      "description": "Replacing ainvoke with astream in the agent factory async path is a behavioral change; any caller relying on the current (broken) non-streaming behavior as a side effect — e.g., expecting a single complete response object — may see regressions.",
+      "description": "Fixing provider-specific SSE parsing (e.g., tolerating missing 'event:' fields) risks masking genuinely malformed responses from other providers or proxies, potentially hiding real errors instead of surfacing them.",
       "severity": "medium"
     },
     {
-      "description": "The SSE format fix for Bedrock proxy compatibility may require maintaining a compatibility shim that diverges from the canonical Anthropic SDK stream format, creating a long-term maintenance burden if the SDK evolves its SSE contract.",
+      "description": "Changing disable_streaming='tool_calling' behavior to be turn-scoped rather than global is a behavioral change that could break existing user code relying on the current (buggy) global-disable behavior.",
       "severity": "medium"
     },
     {
-      "description": "Preserving HTTP response headers through the structured-output streaming path may require threading header data through multiple abstraction layers; if those layers do not expose headers today, the fix scope may be significantly larger than a targeted patch.",
-      "severity": "medium"
+      "description": "Routing agent/graph execution paths through astream instead of ainvoke may introduce performance or ordering regressions in agent frameworks that were not designed with token-level streaming in mind.",
+      "severity": "low"
+    },
+    {
+      "description": "The known-incorrect test assertion (pain point 6) suggests other tests in the streaming suite may also mask incorrect behavior, so fixing only the identified case may leave similar latent issues undetected.",
+      "severity": "low"
     }
   ]
 }
