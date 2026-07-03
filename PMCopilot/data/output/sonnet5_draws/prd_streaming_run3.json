@@ -1,0 +1,171 @@
+{
+  "problem_statement": "LangChain's streaming pipeline is unreliable across providers, integrations, and execution paths, causing developers to hit silent failures rather than clear errors. Provider or proxy variations in SSE formatting (for example, an Anthropic-via-Bedrock proxy omitting the 'event:' field) cause chunks to be silently dropped, surfacing only as a confusing 'No generation chunks were returned' error instead of a diagnosable failure. When streaming is combined with structured output, the parsed object metadata and response headers (such as x-request-id) are inconsistently preserved, and Pydantic serializer warnings leak into user-facing output. Tool-call streaming behavior is not standardized across partner packages, requiring fragile manual coordination of standard-tests and leaving known gaps for some providers. Agent and runtime layers can silently bypass token-level streaming entirely—using ainvoke instead of astream—so on_llm_new_token callbacks never fire even though the developer believes graph-level streaming is enabled. Separately, the disable_streaming='tool_calling' option is broken: it can crash on AsyncStream objects lacking model_dump, and it incorrectly disables streaming for all turns whenever any tool is bound, not just tool-calling turns. Underlying test-suite gaps around streaming error handling mean these regressions can go undetected. Collectively, these issues mean developers cannot trust that streaming will behave consistently, forcing them to add defensive workarounds or avoid streaming features altogether.",
+  "target_user": "Developers building LLM applications with LangChain who rely on streaming responses across multiple model providers, including those using proxied endpoints, structured output, tool calling, and agent/graph execution.",
+  "user_stories": [
+    {
+      "persona": "a developer using an LLM behind a proxy (e.g., Anthropic via Bedrock)",
+      "action": "have streaming succeed or fail with a clear, diagnosable error even when the proxy's SSE format deviates from the standard",
+      "value": "I don't lose hours debugging silent chunk drops disguised as generic errors",
+      "source_pain_point_indices": [
+        1
+      ],
+      "evidence_issue_ids": [
+        35442
+      ]
+    },
+    {
+      "persona": "a developer combining streaming with structured output",
+      "action": "receive correctly typed parsed objects and intact response headers on every streamed chunk without serializer warnings",
+      "value": "I can rely on structured-output metadata in production without extra validation code",
+      "source_pain_point_indices": [
+        2
+      ],
+      "evidence_issue_ids": [
+        38034,
+        37421
+      ]
+    },
+    {
+      "persona": "an integration maintainer for a partner package",
+      "action": "run a standardized, well-bundled tool_call_streaming test suite that covers my provider",
+      "value": "I can verify and guarantee tool-call streaming parity without manual cross-repo coordination",
+      "source_pain_point_indices": [
+        3
+      ],
+      "evidence_issue_ids": [
+        38058
+      ]
+    },
+    {
+      "persona": "a developer using LangChain's agent framework",
+      "action": "have on_llm_new_token callbacks fire reliably whenever graph-level streaming is enabled",
+      "value": "I can build responsive token-level UIs on top of agents without silent gaps in streaming",
+      "source_pain_point_indices": [
+        4
+      ],
+      "evidence_issue_ids": [
+        37869
+      ]
+    },
+    {
+      "persona": "a developer who binds tools to a model",
+      "action": "set disable_streaming='tool_calling' and have it only disable streaming on turns that actually invoke tools, without crashing",
+      "value": "I get correct, scoped streaming behavior instead of unexpected crashes or fully disabled streaming",
+      "source_pain_point_indices": [
+        5
+      ],
+      "evidence_issue_ids": [
+        35436
+      ]
+    },
+    {
+      "persona": "a LangChain core maintainer",
+      "action": "trust that the streaming error-handling test suite accurately reflects real callback behavior",
+      "value": "I can catch real regressions instead of chasing stale test expectations",
+      "source_pain_point_indices": [
+        6
+      ],
+      "evidence_issue_ids": [
+        36866
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "a provider or proxy sends SSE data without an 'event:' field",
+      "when": "a developer streams a response through that provider",
+      "then": "the chunk is still parsed and delivered, or a specific error naming the malformed SSE field is raised instead of a generic 'No generation chunks were returned' error"
+    },
+    {
+      "given": "a model is streamed with with_structured_output enabled",
+      "when": "chunks are emitted during the stream",
+      "then": "no Pydantic serializer warnings are logged and the final parsed object matches the schema exactly"
+    },
+    {
+      "given": "a streamed structured-output response includes response headers such as x-request-id",
+      "when": "the stream completes",
+      "then": "those headers are present and accessible on the final response object"
+    },
+    {
+      "given": "a partner integration package implements tool-call streaming",
+      "when": "the standard-tests suite for tool_call_streaming is run against it",
+      "then": "the suite executes without manual bundling workarounds and reports pass/fail per provider, including Perplexity and MistralAI"
+    },
+    {
+      "given": "an agent is executed with graph-level streaming enabled",
+      "when": "the underlying model generates tokens",
+      "then": "on_llm_new_token callbacks fire for each token produced during agent execution"
+    },
+    {
+      "given": "disable_streaming is set to 'tool_calling' and tools are bound to the model",
+      "when": "a turn does not involve a tool call",
+      "then": "streaming proceeds normally for that turn without crashing"
+    },
+    {
+      "given": "disable_streaming is set to 'tool_calling' and a turn does invoke a tool call",
+      "when": "that specific turn executes",
+      "then": "streaming is disabled only for that turn, and no AsyncStream/model_dump crash occurs"
+    },
+    {
+      "given": "the core streaming error-handling test suite is run",
+      "when": "a real regression is introduced in callback error handling",
+      "then": "at least one test fails, demonstrating the suite's expectations are current and not stale"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "SSE compatibility failures",
+      "definition": "count of open GitHub issues reporting silent streaming failures due to provider/proxy SSE format incompatibilities",
+      "target": "reduce from current 1 known case to 0 within two release cycles"
+    },
+    {
+      "name": "structured-output streaming defects",
+      "definition": "count of open GitHub issues reporting missing metadata, dropped headers, or serializer warnings during streaming with structured output",
+      "target": "reduce from current 2 known cases to 0 within two release cycles"
+    },
+    {
+      "name": "tool-call streaming provider coverage",
+      "definition": "number of partner integration packages passing the standardized tool_call_streaming test suite, including Perplexity and MistralAI",
+      "target": "all actively maintained partner packages passing, up from documented gaps in at least 2 providers"
+    },
+    {
+      "name": "disable_streaming correctness",
+      "definition": "count of open GitHub issues reporting crashes or mis-scoped behavior for disable_streaming='tool_calling'",
+      "target": "reduce from current 1 known case to 0 within one release cycle"
+    },
+    {
+      "name": "agent token-callback reliability",
+      "definition": "count of open GitHub issues reporting on_llm_new_token not firing during agent execution with streaming enabled",
+      "target": "reduce from current 1 known case to 0 within one release cycle"
+    }
+  ],
+  "out_of_scope": [
+    "Building a universal SSE parser/spec for third-party proxies beyond documented LangChain-supported providers",
+    "Adding new streaming features or new callback types not already in the current API surface",
+    "Performance optimization of streaming throughput or latency",
+    "UI/UX design for consuming streamed tokens in client applications",
+    "Broad rewrite of the agent framework's execution model beyond fixing the ainvoke/astream gap"
+  ],
+  "risks": [
+    {
+      "description": "Most pain points in this finding have a frequency of only 1, meaning each issue is backed by a single reported case; the evidence base is thin and may not represent the full scope or prevalence of streaming problems across the user base.",
+      "severity": "medium"
+    },
+    {
+      "description": "Fixing SSE parsing to tolerate non-standard proxy formats risks masking genuinely malformed responses from misbehaving providers, potentially trading one class of silent failure for another.",
+      "severity": "medium"
+    },
+    {
+      "description": "Coordinating fixes across langchain-core and multiple partner packages for tool-call streaming standardization introduces release-sequencing risk; a partial rollout could leave some providers non-compliant longer than others.",
+      "severity": "medium"
+    },
+    {
+      "description": "The disable_streaming='tool_calling' scoping fix touches core control flow for tool-bound models; an incorrect fix could introduce new regressions in streaming behavior for tool-calling turns.",
+      "severity": "high"
+    },
+    {
+      "description": "Stale test expectations (pain point 6) suggest existing test coverage cannot be fully trusted to catch regressions introduced by these fixes, increasing risk of undetected breakage post-release.",
+      "severity": "medium"
+    }
+  ]
+}

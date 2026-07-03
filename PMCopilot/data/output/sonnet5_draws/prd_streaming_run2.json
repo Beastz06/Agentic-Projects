@@ -1,0 +1,154 @@
+{
+  "problem_statement": "LangChain's streaming support is inconsistent and unreliable across providers, features, and abstraction layers. Some provider/proxy configurations break streaming outright — for example, Anthropic served through Bedrock proxies omits the SSE 'event:' field, causing streaming calls to fail with 'No generation chunks were returned' rather than falling back gracefully or surfacing a clear error. Configuration options meant to control streaming behavior are themselves broken: setting disable_streaming='tool_calling' can crash with an AttributeError when a tool call forces a fallback to non-streaming, and separately causes streaming to be disabled for all turns whenever any tool is bound, not just tool-calling turns as documented. Structured-output streaming has its own defects independent of these: chunks emit spurious Pydantic serializer warnings because the typed 'parsed' field isn't excluded from serialization (a bug already fixed on the non-streaming code path but not ported to streaming), and response metadata such as HTTP headers (e.g., x-request-id) is silently dropped in structured-output streaming even though it is preserved in both non-structured streaming and non-streaming structured output, breaking observability and log correlation. At the agent-orchestration layer, the async agent factory calls ainvoke internally instead of astream, so on_llm_new_token callbacks never fire even when a user enables astream at the graph level — giving the false impression of real-time token streaming when none is occurring. Underlying all of this, the standard test suite and release process have gaps: tool_call_streaming profile data has known provider-specific inconsistencies (a Perplexity profile mismatch, MistralAI returning complete tool_call objects instead of tool_call_chunk deltas) that could cause premature enforcement of stricter streaming conformance tests, and existing test assertions for streaming error callback edge cases (empty generations) are already incorrect, indicating latent quality issues in how streaming error handling is verified.",
+  "target_user": "Developers building applications on LangChain who rely on streaming responses from LLM providers — including those using Bedrock-proxied models, tool-calling agents, structured-output chains, and async agent/graph orchestration — and who need streaming to behave predictably and be observable in production.",
+  "user_stories": [
+    {
+      "persona": "a developer using Anthropic models via a Bedrock proxy",
+      "action": "get a clear error or automatic fallback when the proxy's SSE stream omits standard fields",
+      "value": "my application doesn't fail opaquely with 'no generation chunks were returned' and I can diagnose or recover from the incompatibility",
+      "source_pain_point_indices": [
+        1
+      ],
+      "evidence_issue_ids": [
+        35442
+      ]
+    },
+    {
+      "persona": "a developer who sets disable_streaming='tool_calling' on a model with tools bound",
+      "action": "have streaming correctly disabled only for turns that actually trigger tool calls, without crashing",
+      "value": "I get the documented behavior instead of an AttributeError or unexpectedly non-streaming responses on every turn",
+      "source_pain_point_indices": [
+        2
+      ],
+      "evidence_issue_ids": [
+        35436
+      ]
+    },
+    {
+      "persona": "a developer using structured output with streaming enabled",
+      "action": "receive chunks without spurious serializer warnings and with the same response metadata (like x-request-id) that non-streaming structured output provides",
+      "value": "my logs stay clean and I can correlate streamed responses with provider-side request logs",
+      "source_pain_point_indices": [
+        3,
+        4
+      ],
+      "evidence_issue_ids": [
+        38034,
+        37421
+      ]
+    },
+    {
+      "persona": "a developer building an async agent with graph-level astream enabled",
+      "action": "have the agent's underlying model calls actually stream tokens instead of silently using ainvoke",
+      "value": "my on_llm_new_token callbacks fire as expected and I can build genuine real-time UI experiences",
+      "source_pain_point_indices": [
+        5
+      ],
+      "evidence_issue_ids": [
+        37869
+      ]
+    },
+    {
+      "persona": "a LangChain maintainer coordinating standard-test releases",
+      "action": "have accurate, provider-aware tool_call_streaming profile data and correct streaming error-callback test assertions before enforcing stricter conformance tests",
+      "value": "provider-specific quirks (like Perplexity or MistralAI) don't cause false test failures or premature breaking releases",
+      "source_pain_point_indices": [
+        6,
+        7
+      ],
+      "evidence_issue_ids": [
+        38058,
+        36866
+      ]
+    }
+  ],
+  "acceptance_criteria": [
+    {
+      "given": "an Anthropic model is called through a Bedrock proxy that omits the SSE 'event:' field",
+      "when": "a streaming request is made",
+      "then": "the client either successfully parses the stream via a fallback mechanism or raises a specific, actionable error identifying the missing SSE field, instead of a generic 'no generation chunks were returned' failure"
+    },
+    {
+      "given": "disable_streaming='tool_calling' is set and tools are bound to the model",
+      "when": "a turn does not trigger a tool call",
+      "then": "the response streams normally with no AttributeError and no fallback to non-streaming"
+    },
+    {
+      "given": "disable_streaming='tool_calling' is set and tools are bound to the model",
+      "when": "a turn triggers a tool call requiring fallback to non-streaming",
+      "then": "the fallback completes without raising AttributeError on the AsyncStream object"
+    },
+    {
+      "given": "structured output is requested with streaming enabled",
+      "when": "chunks are serialized (e.g., via model_dump or similar)",
+      "then": "no Pydantic serializer warning is emitted for the 'parsed' field"
+    },
+    {
+      "given": "structured output is requested with streaming enabled",
+      "when": "the provider returns response metadata such as HTTP headers (e.g., x-request-id)",
+      "then": "that metadata is present on the aggregated streamed response, matching what non-streaming structured output returns"
+    },
+    {
+      "given": "an async agent is invoked with graph-level astream enabled",
+      "when": "the agent calls the underlying chat model",
+      "then": "the model is invoked via astream (not ainvoke) and on_llm_new_token callbacks fire for each token produced"
+    },
+    {
+      "given": "the standard test suite's tool_call_streaming profile is run against Perplexity and MistralAI",
+      "when": "provider-specific behavior differs from the generic profile (e.g., complete tool_call instead of tool_call_chunk)",
+      "then": "the test suite reflects a documented per-provider exception rather than failing or forcing incorrect behavior"
+    },
+    {
+      "given": "the streaming error callback test for empty generations",
+      "when": "the test suite is executed",
+      "then": "the assertion correctly matches the actual empty-generations shape with no false pass or false fail"
+    }
+  ],
+  "success_metrics": [
+    {
+      "name": "Streaming crash reports resolved",
+      "definition": "count of the currently identified streaming-breaking defects (Bedrock SSE incompatibility, disable_streaming tool_calling crash) closed with a merged fix and regression test",
+      "target": "2 of 2 fixed within the release cycle"
+    },
+    {
+      "name": "Structured-output streaming parity",
+      "definition": "count of known parity gaps between structured-output streaming and non-streaming (serializer warning, dropped metadata) eliminated",
+      "target": "2 of 2 resolved"
+    },
+    {
+      "name": "Agent token-streaming correctness",
+      "definition": "verification that async agent factory calls astream and on_llm_new_token fires, confirmed via an automated test added to the suite",
+      "target": "1 new regression test added and passing"
+    },
+    {
+      "name": "Streaming test suite accuracy",
+      "definition": "count of identified incorrect or premature streaming-related test issues (profile mismatches, wrong assertions) corrected",
+      "target": "2 of 2 addressed before enforcing stricter streaming conformance tests"
+    }
+  ],
+  "out_of_scope": [
+    "Building a universal SSE-compliance shim for arbitrary third-party proxies beyond the documented Bedrock case",
+    "Redesigning the overall streaming API or chunk data model",
+    "Adding new provider integrations or expanding tool_call_streaming to providers not currently covered by standard tests",
+    "General agent framework redesign beyond fixing the ainvoke/astream discrepancy",
+    "Performance optimization of streaming throughput or latency"
+  ],
+  "risks": [
+    {
+      "description": "The finding is based on a small number of pain points (one issue each), so the true scope and downstream impact of each defect across the broader user base is not well established; prioritization is based on severity labels rather than confirmed frequency.",
+      "severity": "medium"
+    },
+    {
+      "description": "Fixing disable_streaming='tool_calling' touches fallback logic shared across many provider integrations, risking regressions in currently-working streaming paths.",
+      "severity": "high"
+    },
+    {
+      "description": "Provider-specific quirks (Bedrock proxy SSE omission, MistralAI tool_call vs tool_call_chunk, Perplexity profile mismatch) may require ongoing per-provider maintenance rather than a one-time fix, since they stem from upstream API behavior LangChain does not control.",
+      "severity": "medium"
+    },
+    {
+      "description": "Tightening streaming standard tests before fixing known provider profile mismatches could break CI for integrations that are otherwise functioning, if sequencing is not carefully managed.",
+      "severity": "low"
+    }
+  ]
+}
