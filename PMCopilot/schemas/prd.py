@@ -53,6 +53,10 @@ class Risk(BaseModel):
 
 
 class PRD(BaseModel):
+    # Intrinsic identity — the corpus theme this PRD addresses. Code-set at
+    # draft time from DiscoveryFinding.theme (never model-judged); required so
+    # a PRD cannot exist without the identity that C4/C5/C6 reference.
+    theme: str
     # Grounded (loosely) in DiscoveryFinding.suggested_prd_seed; the model expands.
     problem_statement: str
     # Pure model judgement — nothing in the finding feeds this.

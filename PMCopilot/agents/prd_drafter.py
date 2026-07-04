@@ -33,6 +33,8 @@ frequency — the count of evidence issues behind it), and a suggested_prd_seed
 synthesized by the researcher.
 
 ## How to fill each field
+- theme: Leave as an empty string — it is set programmatically from the
+  finding. Do not author it.
 - problem_statement: Expand the suggested_prd_seed into a specific, concrete
   problem statement. Draw on the pain points for substance. Do NOT include
   issue numbers or citations anywhere in the prose.
@@ -71,6 +73,7 @@ or domain in any way.
 Example input theme: "substitutions" (grocery delivery app)
 Example output PRD:
 {
+  "theme": "",
   "problem_statement": "When an ordered item is out of stock, shoppers substitute on gut feel. Across 14 support threads last quarter, wrong-size swaps, wrong brand-tier swaps, and dietary conflicts (dairy substituted into a dairy-free order) were the three most repeated complaints. There is no way for a customer to state substitution preferences before checkout, and no way for a shopper to see them.",
   "target_user": "Weekly grocery-delivery customers with consistent dietary or brand constraints",
   "user_stories": [
@@ -201,7 +204,11 @@ def draft_prd(finding: DiscoveryFinding) -> PRD:
         error_text = None
         prd = None
         try:
-            prd = PRD.model_validate(tool_use.input)
+            # Stamp intrinsic identity at construction: model-emitted theme is
+            # discarded, code sets it from the finding. Inside the loop so every
+            # attempt — including repairs — builds a themed PRD; there is no
+            # window where an identity-less PRD exists.
+            prd = PRD.model_validate({**tool_use.input, "theme": finding.theme})
         except ValidationError as e:
             error_text = str(e)
 
