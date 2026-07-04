@@ -1,58 +1,45 @@
 {
-  "problem_statement": "Agents built on the current tool-calling pipeline face a cascade of reliability, compatibility, and ergonomics failures that collectively make production deployments brittle. On the parsing front, malformed tool-call payloads crash the pipeline entirely, and streaming fragmentation causes valid calls to be executed prematurely with empty argument objects or silently dropped — both of which corrupt agent state in ways that are hard to detect or recover from. On the model-compatibility front, the tool_choice='required' parameter is rejected outright by thinking-class models, and replayed tool-call message patterns are rejected by newer generative model families, meaning that a pipeline tuned for one model breaks when the underlying model is swapped. For developers building streaming UIs that fan out parallel tool calls, the on_tool_start lifecycle event carries no tool_call_id, making it impossible to deterministically map progress events back to the originating call. The human-in-the-loop middleware compounds execution risk by leaving rejected tool calls attached to the AIMessage that ToolNode subsequently processes, creating a path to unintended execution of calls the user explicitly declined. There is no first-class API for injecting pre-computed or programmatic tool results into a running agent; developers must hand-craft and replay raw message history, a pattern that is fragile, undocumented, and easy to get wrong. Finally, the ToolCallLimitMiddleware only signals budget exhaustion after the limit has already been breached, giving the model no opportunity to plan within its remaining budget, and agent-level error handling requires per-tool boilerplate because no middleware layer can intercept exceptions and convert them into structured ToolException values.",
-  "target_user": "Application developers and AI engineers building production agentic systems that invoke tools via LLM-driven pipelines, particularly those integrating multiple model providers, streaming UIs with parallel tool calls, or human-in-the-loop approval workflows.",
+  "problem_statement": "LangChain's tool-calling pipeline has accumulated a cluster of reliability and developer-experience gaps that make it hard to build robust, provider-agnostic tool-using agents. Developers injecting precomputed or programmatic tool-call history into agent workflows hit strict provider validation rules (such as Gemini's thought-signature and turn-order requirements) that reject otherwise valid message histories. When tool-call payloads arrive malformed or fragmented (bad function dicts, partially streamed arguments), the pipeline crashes or silently executes the wrong tool instead of degrading gracefully. Agents unconditionally force tool_choice='required', which breaks reasoning/thinking models that only support 'auto' or 'none'. Human-in-the-loop rejection flows are fragile: a tool call that a human rejects can still be executed by ToolNode because rejection enforcement is not reliably wired into execution. Observability is incomplete because tool_call_id is missing from on_tool_start (and reportedly on_tool_end) streaming events, making it impossible to attribute streamed output to a specific tool call when multiple tool calls run in parallel. Tool-call limits are enforced only after the fact, so agents waste calls and behave abruptly once a limit is hit with no prior warning. Finally, tool-level exception handling is inconsistent: ToolException raised inside wrap_tool_call middleware is not caught properly at the agent level, and handle_tool_error behaves differently between the @tool decorator and ToolNode, forcing developers to write workarounds. Together these gaps mean agent builders cannot fully trust that tool calls will be validated, executed, observed, limited, and error-handled consistently across providers and model types.",
+  "target_user": "Developers building and operating LLM agents on LangChain who integrate tool-calling across multiple model providers, including those who inject programmatic tool-call history, use reasoning/thinking models, require human-in-the-loop approval, or run parallel tool calls in production.",
   "user_stories": [
     {
-      "persona": "an agent framework developer",
-      "action": "have malformed tool-call payloads handled gracefully without crashing the pipeline and without silently dropping valid sibling calls",
-      "value": "a single bad tool-call object cannot corrupt or halt an otherwise healthy agent run",
+      "persona": "an agent developer integrating with a strict-validation provider like Gemini",
+      "action": "inject precomputed tool-call messages into the conversation history without violating provider-specific turn-order or thought-signature rules",
+      "value": "I can build programmatic agent workflows that work across providers without hand-tuning message formats",
       "source_pain_point_indices": [
         1
       ],
       "evidence_issue_ids": [
-        36679,
-        35514
-      ]
-    },
-    {
-      "persona": "an agent framework developer",
-      "action": "receive fully assembled tool-call arguments before any tool execution begins during streaming",
-      "value": "tools are never invoked with empty or partial argument objects, eliminating a class of silent data-corruption bugs",
-      "source_pain_point_indices": [
-        1
-      ],
-      "evidence_issue_ids": [
-        36679,
-        35514
-      ]
-    },
-    {
-      "persona": "a developer targeting multiple LLM providers",
-      "action": "use tool_choice='required' and standard tool-call message replay patterns without provider-specific workarounds",
-      "value": "I can swap the underlying model without rewriting pipeline logic or hitting hard API rejections",
-      "source_pain_point_indices": [
-        2
-      ],
-      "evidence_issue_ids": [
-        36120,
         35836
       ]
     },
     {
-      "persona": "a streaming UI developer",
-      "action": "receive a tool_call_id on every on_tool_start lifecycle event",
-      "value": "I can reliably map progress indicators, intermediate results, and errors back to the exact parallel call that produced them",
+      "persona": "an agent developer whose LLM streams tool-call arguments",
+      "action": "have malformed or partially streamed tool-call payloads detected and handled gracefully instead of crashing or silently executing incorrect tool calls",
+      "value": "my agent stays available and doesn't take unintended actions on bad input",
+      "source_pain_point_indices": [
+        2
+      ],
+      "evidence_issue_ids": [
+        36679,
+        35514
+      ]
+    },
+    {
+      "persona": "a developer using a reasoning/thinking model",
+      "action": "have the agent select a tool_choice value the model actually supports instead of forcing 'required'",
+      "value": "my agent works with reasoning models without erroring out or requiring manual overrides",
       "source_pain_point_indices": [
         3
       ],
       "evidence_issue_ids": [
-        37426
+        36120
       ]
     },
     {
-      "persona": "a developer using human-in-the-loop approval middleware",
-      "action": "have rejected tool calls automatically removed from the AIMessage before ToolNode processes it",
-      "value": "a user's explicit rejection cannot be bypassed by downstream execution, preserving trust and safety guarantees",
+      "persona": "a developer building a human-in-the-loop approval flow",
+      "action": "trust that a rejected tool call is never executed by ToolNode",
+      "value": "I can safely gate sensitive tool actions behind human approval",
       "source_pain_point_indices": [
         4
       ],
@@ -61,20 +48,20 @@
       ]
     },
     {
-      "persona": "an agent developer with pre-computed or cached tool results",
-      "action": "inject programmatic tool results through a first-class API without hand-crafting raw message history",
-      "value": "I can short-circuit expensive or redundant tool executions cleanly and without risking malformed conversation state",
+      "persona": "a developer debugging an agent that runs tool calls in parallel",
+      "action": "see tool_call_id included on on_tool_start and on_tool_end streaming events",
+      "value": "I can attribute streamed events to the correct tool call and debug parallel execution accurately",
       "source_pain_point_indices": [
         5
       ],
       "evidence_issue_ids": [
-        35836
+        37426
       ]
     },
     {
-      "persona": "an agent developer operating under a tool-call budget",
-      "action": "have the remaining call budget surfaced to the model before it plans its next action",
-      "value": "the model can self-organize within constraints rather than hitting a hard stop mid-plan",
+      "persona": "a developer running agents with a bounded tool-call budget",
+      "action": "receive a proactive warning as the tool-call limit approaches rather than only learning after it's hit",
+      "value": "my agent can wrap up gracefully instead of behaving abruptly when the limit is reached",
       "source_pain_point_indices": [
         6
       ],
@@ -83,9 +70,9 @@
       ]
     },
     {
-      "persona": "an agent developer",
-      "action": "register a single agent-level error-handling middleware that converts arbitrary tool exceptions into structured ToolException values",
-      "value": "I eliminate repetitive per-tool boilerplate and get consistent error surfacing across every tool in the agent",
+      "persona": "an agent developer handling tool errors",
+      "action": "have ToolException from wrap_tool_call middleware caught consistently at the agent level, with handle_tool_error behaving the same way across @tool and ToolNode",
+      "value": "I can write one error-handling strategy instead of separate workarounds for each code path",
       "source_pain_point_indices": [
         7
       ],
@@ -96,101 +83,94 @@
   ],
   "acceptance_criteria": [
     {
-      "given": "a streaming tool-call response contains one malformed call object and one valid call object",
-      "when": "the parser processes the stream",
-      "then": "the valid call is executed normally and the malformed call is surfaced as a structured error without crashing the pipeline or dropping the valid call"
+      "given": "a precomputed tool-call message history is injected for a provider with strict turn-order/thought-signature validation",
+      "when": "the agent sends the history to the provider",
+      "then": "the request is accepted without validation errors caused solely by injected message ordering or missing signatures"
     },
     {
-      "given": "a streaming tool-call response is mid-flight and argument tokens are still arriving",
-      "when": "the execution layer receives the partial call",
-      "then": "tool execution does not begin until the argument payload for that call is confirmed complete"
+      "given": "a streamed tool-call payload arrives malformed or only partially complete",
+      "when": "the agent attempts to parse and execute it",
+      "then": "the agent does not crash and does not execute the tool with incorrect arguments, instead surfacing a recoverable error or skipping execution"
     },
     {
-      "given": "an agent is configured with tool_choice='required' and the active model is a thinking-class model",
-      "when": "the agent submits a request",
-      "then": "the framework translates or omits the incompatible parameter automatically and the request succeeds without a caller-visible error"
+      "given": "the active model only supports tool_choice values of 'auto' or 'none'",
+      "when": "the agent configures the tool-calling request",
+      "then": "the agent does not send tool_choice='required' and instead uses a supported value"
     },
     {
-      "given": "a tool-call message replay is required and the active model is a Gemini-family model that rejects the legacy pattern",
-      "when": "the agent replays the conversation history",
-      "then": "the framework transforms the message structure to the accepted format and the model responds without an API rejection error"
+      "given": "a human reviewer rejects a proposed tool call in a human-in-the-loop flow",
+      "when": "ToolNode processes the rejected call",
+      "then": "the tool is not executed and the rejection is recorded in the conversation state"
     },
     {
-      "given": "an agent is executing two tool calls in parallel during a streaming session",
-      "when": "each on_tool_start event is emitted",
-      "then": "every event carries a non-null tool_call_id that uniquely matches the originating call in the AIMessage"
+      "given": "two or more tool calls are executed in parallel",
+      "when": "on_tool_start and on_tool_end events are emitted",
+      "then": "each event includes the tool_call_id matching the originating tool call"
     },
     {
-      "given": "a human-in-the-loop middleware receives a rejection decision for one tool call within an AIMessage that also contains an approved call",
-      "when": "ToolNode processes the AIMessage",
-      "then": "only the approved call is executed and the rejected call is absent from the message ToolNode acts on"
+      "given": "an agent is approaching its configured tool-call limit",
+      "when": "the agent has one call remaining before the limit",
+      "then": "the agent emits a proactive warning signal before the limit-triggered behavior occurs"
     },
     {
-      "given": "a developer calls the programmatic tool-result injection API with a tool_call_id and a result payload",
-      "when": "the agent continues its run",
-      "then": "the injected result is treated identically to a result produced by live tool execution and no raw ToolMessage needs to be manually constructed"
-    },
-    {
-      "given": "an agent has consumed all but one of its allowed tool calls",
-      "when": "the model is prompted for its next action",
-      "then": "the system prompt or context provided to the model explicitly states the remaining call budget before the model generates its response"
+      "given": "a tool raises ToolException inside wrap_tool_call middleware",
+      "when": "the exception propagates to the agent level",
+      "then": "the agent catches it and applies the configured handle_tool_error behavior identically whether the tool was defined via @tool or invoked through ToolNode"
     }
   ],
   "success_metrics": [
     {
-      "name": "Tool-call parse failure rate",
-      "definition": "Count of agent runs that terminate with an unhandled tool-call parsing exception per week, measured across the integration test suite and production telemetry",
-      "target": "Zero crashes on malformed-input test cases within one release cycle; production parse failures reduced to fewer than 2 per week"
+      "name": "provider validation failures",
+      "definition": "count of reported issues where injected tool-call history fails strict provider validation (e.g., Gemini turn-order/thought-signature errors)",
+      "target": "zero recurrences of the reported case within two release cycles"
     },
     {
-      "name": "Premature tool execution incidents",
-      "definition": "Count of tool invocations where the argument payload was empty or incomplete at execution time, detected via argument-schema validation in the test harness",
-      "target": "Zero confirmed premature executions in the streaming test suite within one release cycle"
+      "name": "malformed payload crash rate",
+      "definition": "count of crash or silent-incorrect-execution reports tied to malformed or fragmented streamed tool-call payloads",
+      "target": "reduce from 2 known reports to 0 within two release cycles"
     },
     {
-      "name": "Model-compatibility breakages",
-      "definition": "Count of open bug reports describing hard API rejections caused by tool_choice or message-replay incompatibilities across tracked model providers",
-      "target": "Fewer than 1 open compatibility breakage per supported model family at any point after the feature ships"
+      "name": "rejected tool call execution incidents",
+      "definition": "count of reported cases where a human-rejected tool call was executed by ToolNode",
+      "target": "zero incidents post-fix"
     },
     {
-      "name": "Parallel-call UI disambiguation accuracy",
-      "definition": "Fraction of on_tool_start events in parallel-tool integration tests that carry a tool_call_id matching the corresponding AIMessage entry",
-      "target": "100% attribution across all parallel-tool test scenarios"
+      "name": "tool_call_id observability coverage",
+      "definition": "proportion of tool streaming event types (on_tool_start, on_tool_end) that include tool_call_id in their payload, measured out of 2 target event types",
+      "target": "2 of 2 event types include tool_call_id"
     },
     {
-      "name": "Human-in-the-loop rejection bypass incidents",
-      "definition": "Count of test cases where a user-rejected tool call is nonetheless executed by ToolNode",
-      "target": "Zero bypass incidents in the human-in-the-loop integration test suite"
+      "name": "tool error handling consistency",
+      "definition": "count of distinct code paths (@tool decorator, ToolNode, wrap_tool_call middleware) with divergent handle_tool_error/ToolException behavior",
+      "target": "reduce from the current 2+ divergent paths to 1 unified behavior"
     }
   ],
   "out_of_scope": [
-    "Automatic retry logic for failed tool executions beyond error surfacing",
-    "UI components or visual widgets for human-in-the-loop approval workflows",
-    "Model fine-tuning or prompt optimization to improve tool-call format compliance from the model side",
-    "Per-tool rate limiting or quota enforcement at the infrastructure level",
-    "Tool-call result caching layer or cache invalidation strategy",
-    "Discovery or registration of tools at runtime from external registries",
-    "Multi-agent orchestration or cross-agent tool-call routing"
+    "Adding support for new LLM providers beyond fixing compatibility with existing strict-validation providers",
+    "Building a new UI for human-in-the-loop tool approval workflows",
+    "Redesigning the overall agent orchestration/state-machine architecture",
+    "Performance optimization of tool execution latency",
+    "Adding new built-in tools or tool libraries"
   ],
   "risks": [
     {
-      "description": "Model-compatibility shims for tool_choice and message-replay normalization must be updated each time a provider changes its API contract; without an automated compatibility test matrix, regressions will recur at the same rate as today.",
+      "description": "Each pain point in this theme has a frequency of only 1 or 2 reported issues, so the evidence base per individual sub-problem is thin; prioritization across these seven fixes is based on limited signal rather than broad usage data.",
+      "severity": "medium"
+    },
+    {
+      "description": "Hardening message-history validation for one strict provider (e.g., Gemini) risks introducing regressions or special-casing that complicates behavior for other providers.",
+      "severity": "medium"
+    },
+    {
+      "description": "Changing tool_choice defaults for reasoning models could alter existing agent behavior for users who rely on the current forced 'required' setting, causing silent behavior changes.",
+      "severity": "medium"
+    },
+    {
+      "description": "Human-in-the-loop rejection enforcement touches safety-critical paths; an incomplete fix could give developers false confidence that rejected calls are blocked when edge cases remain unhandled.",
       "severity": "high"
     },
     {
-      "description": "Holding streaming chunks until a tool-call argument payload is confirmed complete introduces latency in time-to-first-execution; for high-frequency, low-latency agent loops this may be an unacceptable trade-off that requires a configurable opt-out.",
-      "severity": "medium"
-    },
-    {
-      "description": "The programmatic tool-result injection API introduces a new surface for misuse: callers who inject results with incorrect tool_call_ids or malformed payloads may corrupt conversation state in ways that are harder to debug than the raw-message approach it replaces.",
-      "severity": "medium"
-    },
-    {
-      "description": "Several pain points (missing tool_call_id, HumanInTheLoop rejection propagation, proactive budget signaling, agent-level error middleware) each have a frequency of only 1 in the evidence, making it possible that these represent edge cases rather than broad user needs; the relative prioritization of these items against the high-frequency parsing and compatibility issues should be revisited after broader user validation.",
-      "severity": "low"
-    },
-    {
-      "description": "Surfacing the remaining tool-call budget in the model's context window consumes tokens; for models with small context windows or cost-sensitive deployments, this overhead may outweigh the planning benefit.",
+      "description": "Unifying handle_tool_error semantics across @tool and ToolNode may be a breaking change for existing agents that depend on the current divergent behavior.",
       "severity": "low"
     }
   ]
