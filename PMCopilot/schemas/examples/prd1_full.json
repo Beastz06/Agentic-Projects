@@ -1,4 +1,5 @@
 {
+  "theme": "example",
   "problem_statement": "Enterprise users integrating LangChain in regulated environments cannot configure mutual TLS, custom certificate chains, or corporate proxies on the Anthropic chat client, because ChatAnthropic does not accept a custom httpx client the way ChatOpenAI does. This blocks adoption in security-controlled deployments.",
   "target_user": "Platform engineers at regulated enterprises (finance, healthcare) who deploy LangChain behind corporate proxies and must enforce certificate-based auth and SSL verification policies.",
   "user_stories": [

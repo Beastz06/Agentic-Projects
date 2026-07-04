@@ -1,4 +1,5 @@
 {
+  "theme": "example",
   "problem_statement": "Discovery on the theme of MCP header forwarding surfaced a coherent seed but did not cluster any pain points with validated issue evidence, so this PRD is drafted from a thin finding and its user stories could not be grounded.",
   "target_user": "Developers configuring MCP servers behind authenticating proxies who expect custom authorization headers to be forwarded during server discovery.",
   "user_stories": [],

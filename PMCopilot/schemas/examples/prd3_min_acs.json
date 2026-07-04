@@ -1,4 +1,5 @@
 {
+  "theme": "example",
   "problem_statement": "AzureChatOpenAI creates a new connection pool per instance instead of reusing a shared default httpx client the way BaseChatOpenAI does, wasting connection resources in high-instance-count deployments.",
   "target_user": "Backend engineers running many short-lived AzureChatOpenAI instances in a request-scoped service.",
   "user_stories": [
