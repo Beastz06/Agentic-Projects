@@ -1,0 +1,98 @@
+{
+  "audience": "customer",
+  "headline": "Making your AI apps more reliable: streaming, secure connections, and smarter tool use",
+  "body": "If you've ever had a streaming response suddenly fail, seen odd warnings pop up while using structured output, or hit a confusing crash when trying to selectively control streaming behavior, you're not alone — and we're working on fixing it. We're improving how streaming works across different AI providers and setups, including cases like using Anthropic models through a Bedrock proxy, so you get reliable, token-by-token responses instead of hard failures or silent fallbacks to batched output. This also covers making sure structured output streaming doesn't drop useful debugging information or throw noisy warnings, and fixing a crash that can happen when trying to disable streaming just for tool-calling turns.\n\nFor teams working in enterprise environments, we know that connecting securely through corporate proxies and internal certificate systems has been a real blocker. We're adding support for custom HTTP clients and mutual-TLS authentication so you can connect through your organization's PKI without needing workarounds. We're also fixing an issue where correctly configured credentials were still triggering 403 errors during tool discovery, and making connection handling more consistent across providers. Alongside this, we're tightening up security validation to make sure requests to untrusted hosts can't slip through.\n\nLater on, we're turning to how tool-calling agents behave. This includes making sure precomputed tool-call histories work smoothly with providers that have strict validation rules (like Gemini), handling malformed or partial tool-call data gracefully instead of crashing or running the wrong tool, and respecting model types that don't support forced tool use. We're also making human-in-the-loop approval flows more trustworthy so a rejected tool call truly doesn't run, improving visibility into which streamed events belong to which tool call, giving proactive warnings as you approach tool-call limits, and unifying how tool errors are handled so you don't need separate workarounds for different code paths.",
+  "call_to_action": "Once these improvements land, try streaming, structured output, mTLS connections, and tool-calling agents in your own setup and let us know how they work for you — your feedback helps us prioritize what to fix next.",
+  "key_claims": [
+    {
+      "text": "Streaming can hard-fail when using Anthropic through a Bedrock proxy because the proxy's SSE payloads omit the 'event:' field.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming with structured output can produce spurious warnings and drop response metadata/headers like x-request-id.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Setting disable_streaming='tool_calling' can crash instead of only disabling streaming for tool-calling turns.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Agent/graph execution can silently fall back to batched output instead of true token-level streaming, even when streaming is enabled.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Chat model integrations like ChatAnthropic will gain support for custom HTTP clients with mutual-TLS (mTLS) for enterprise PKI setups.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "MCP tool discovery can currently fail with 403 errors even when credentials are correctly configured, due to auth headers/tokens not being forwarded consistently.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Connection/auth setup will be made more consistent and shared across provider integrations like AzureChatOpenAI and BaseChatOpenAI.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "SSRF/allowlist host validation can currently be bypassed via environment-based auth checks, and this will be hardened.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Injecting precomputed tool-call history can fail strict provider validation rules, such as Gemini's thought-signature and turn-order requirements.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Malformed or partially streamed tool-call payloads can currently crash the pipeline or cause the wrong tool to be silently executed.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Agents currently force tool_choice='required', which breaks reasoning/thinking models that only support 'auto' or 'none'.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "A tool call rejected by a human can currently still be executed by ToolNode due to rejection enforcement not being reliably wired in.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "tool_call_id is currently missing from on_tool_start (and reportedly on_tool_end) streaming events, making it hard to attribute streamed output during parallel tool calls.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool-call limits are currently enforced only after being hit, with no proactive warning as the limit approaches.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool error handling is currently inconsistent between the @tool decorator, ToolNode, and wrap_tool_call middleware.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}

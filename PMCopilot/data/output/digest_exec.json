@@ -1,0 +1,66 @@
+{
+  "audience": "exec",
+  "headline": "Shoring Up Trust in LangChain: Streaming and Enterprise Auth Lead Q1, Tool-Calling Follows in Q2",
+  "body": "Two major reliability workstreams are scheduled for Q1: making streaming behave consistently across model providers, structured output, and agent/graph execution, and closing enterprise authentication and transport-security gaps. Both are rated high impact because they undermine core, widely-used capabilities and currently force developers into workarounds. Streaming issues include hard failures with certain provider proxies, silent loss of diagnostic metadata during structured-output streaming, a crash in a streaming-disable option, and agent/graph paths that silently fall back to non-streamed output. The authentication workstream addresses blockers for enterprise adoption, including lack of custom HTTP client/mTLS support for certificate-based authentication, unreliable auth header forwarding during MCP tool discovery, inconsistent connection handling across provider integrations, and a security bypass in SSRF/allowlist validation.\n\nTool-calling pipeline improvements are sequenced for Q2, after the Q1 work, with no stated dependency between the three workstreams. This effort targets reliability and developer-experience gaps in how tool calls are validated across providers, how malformed tool-call payloads are handled, how human-in-the-loop rejections are enforced, and how tool-call observability and error-handling behave. Both the authentication and tool-calling workstreams carry a high-severity risk each: enterprise auth hardening (SSRF validation) could break legitimate configurations that rely on current environment-based auth checks, and tool-calling work touches human-in-the-loop rejection enforcement, where an incomplete fix could create false confidence that rejected tool calls are blocked.\n\nAll three initiatives are rated similarly high in effort and impact, and all rest partly on a thin evidence base — many underlying issues are backed by only one or two reported cases rather than broad usage data, which is a shared caveat across the streaming, authentication, and tool-calling PRDs.",
+  "call_to_action": "Approve the proposed sequencing: streaming reliability and enterprise auth/transport security in Q1, followed by tool-calling pipeline hardening in Q2.",
+  "key_claims": [
+    {
+      "text": "Streaming work is scheduled for Q1 and addresses provider-proxy hard failures, structured-output metadata loss, a disable_streaming crash, and agent/graph paths falling back to non-streamed output.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming reliability is rated high impact because streaming is a core, widely-used capability and these bugs undermine trust and force workarounds.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Enterprise authentication work is scheduled for Q1 and addresses lack of custom HTTP client/mTLS support, unreliable MCP auth header forwarding, inconsistent connection handling across providers, and an SSRF/allowlist validation bypass.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Enterprise auth is rated high impact because it blocks enterprise adoption via proxy/mTLS/PKI requirements and includes a high-severity SSRF security bypass risk.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling pipeline work is scheduled for Q2 and covers provider-specific validation, malformed payload handling, human-in-the-loop rejection enforcement, observability, and error-handling consistency.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "All three roadmap items are marked as having no dependency on each other.",
+      "grounded_in": [
+        "streaming",
+        "authentication",
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "SSRF/allowlist hardening carries a high risk of breaking legitimate enterprise configurations that currently rely on environment-based auth checks.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Human-in-the-loop rejection enforcement in tool-calling is safety-critical, and an incomplete fix could give false confidence that rejected calls are blocked.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Across all three PRDs, many individual pain points are backed by only one or two reported issues, representing a thin evidence base.",
+      "grounded_in": [
+        "streaming",
+        "authentication",
+        "tool_calling"
+      ]
+    }
+  ]
+}

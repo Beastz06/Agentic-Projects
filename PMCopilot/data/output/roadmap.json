@@ -1,0 +1,44 @@
+[
+  {
+    "title": "Streaming Reliability Across Providers, Structured Output, and Agents",
+    "prd_ref": "streaming",
+    "effort": {
+      "score": 8,
+      "rationale": "Six distinct user stories spanning provider SSE parsing, structured output metadata handling, disable_streaming logic fixes, agent/graph astream routing, test infra, and release sequencing represent multiple independent, moderately complex fixes across several packages."
+    },
+    "impact": {
+      "score": 4,
+      "rationale": "Streaming is a core, widely-used capability and these bugs (hard failures, crashes, silent fallbacks, lost metadata) undermine trust and force workarounds across providers and abstractions, though some issues are reported at low frequency."
+    },
+    "depends_on": [],
+    "quarter": "Q1"
+  },
+  {
+    "title": "Enterprise Auth & Transport Security for LangChain Integrations",
+    "prd_ref": "authentication",
+    "effort": {
+      "score": 8,
+      "rationale": "Four distinct user stories spanning multiple integrations (ChatAnthropic mTLS, MCP header forwarding, shared httpx layer refactor across providers, SSRF validation hardening) with 6 acceptance criteria implies substantial cross-cutting engineering work."
+    },
+    "impact": {
+      "score": 4,
+      "rationale": "Blocks enterprise adoption via proxy/mTLS/PKI requirements and includes a high-severity SSRF security bypass risk, though evidence is thin with mostly single-report frequency across sub-issues."
+    },
+    "depends_on": [],
+    "quarter": "Q1"
+  },
+  {
+    "title": "Tool-Calling Pipeline Reliability & DX Hardening",
+    "prd_ref": "tool_calling",
+    "effort": {
+      "score": 8,
+      "rationale": "Seven distinct user stories spanning provider-specific validation, streaming payload parsing, tool_choice logic, HITL execution gating, observability plumbing, proactive limit warnings, and error-handling unification represent a broad, multi-subsystem effort."
+    },
+    "impact": {
+      "score": 4,
+      "rationale": "The gaps span safety-critical human-in-the-loop enforcement, cross-provider reliability, and observability, all of which materially affect developer trust in production agents, though the high-severity risk is scoped to one specific flow."
+    },
+    "depends_on": [],
+    "quarter": "Q2"
+  }
+]

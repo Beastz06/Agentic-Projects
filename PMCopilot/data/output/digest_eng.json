@@ -1,0 +1,141 @@
+{
+  "audience": "eng",
+  "headline": "Q1: Streaming Reliability + Enterprise Auth hardening; Q2: Tool-Calling Pipeline overhaul",
+  "body": "Two effort-8, impact-4/5 workstreams land in Q1 with no cross-dependencies, followed by a Q2 tool-calling hardening effort of the same size and impact.\n\nStreaming (Q1) touches six distinct failure modes across packages: provider-proxied SSE streams that omit the 'event:' field (e.g. Anthropic via Bedrock proxy) currently hard-fail with no generation chunks; with_structured_output streaming emits spurious Pydantic serializer warnings and drops response metadata/headers like x-request-id; disable_streaming='tool_calling' throws an AttributeError from an AsyncStream being passed where a ChatCompletion is expected, and needs to become turn-scoped rather than global; agent/graph paths call ainvoke internally instead of astream, so on_llm_new_token never fires even when graph-level streaming is enabled; there's also a known-incorrect assertion in the core streaming error-callback test suite masking whether error-path behavior is correct, plus gaps in standard test coverage/release sequencing for tool-call streaming across integration packages (including unsupported providers like Mistral). Flag if the SSE-tolerance fix for missing 'event:' fields risks masking genuinely malformed responses from other providers — that's called out as an open risk, not resolved.\n\nAuthentication (Q1) covers four areas: ChatAnthropic (and similar integrations) lack custom HTTP client / mTLS support, blocking certificate-based auth behind corporate proxies; MCP tool discovery fails to forward auth headers/tokens consistently, causing 403s despite correct credentials; AzureChatOpenAI and BaseChatOpenAI don't share httpx client/connection-pooling setup, creating redundant overhead and inconsistent behavior; and SSRF/allowlist host validation can be bypassed via environment-based auth checks. The SSRF fix is flagged high-risk — hardening it could break legitimate enterprise configs currently relying on environment-based auth to reach internal hosts, so scope that carefully. The shared httpx client refactor also risks regressions since AzureChatOpenAI/BaseChatOpenAI were built independently.\n\nTool-calling (Q2) is the largest cluster: Gemini's thought-signature/turn-order validation rejects injected precomputed tool-call history; malformed/fragmented streamed tool-call payloads crash or silently execute the wrong tool; tool_choice is unconditionally forced to 'required', breaking reasoning models that only support 'auto'/'none'; ToolNode can still execute a human-rejected tool call because rejection enforcement isn't reliably wired in (flagged high-risk — safety-critical, and an incomplete fix could give false confidence); tool_call_id is missing from on_tool_start (and reportedly on_tool_end) events, breaking attribution during parallel tool execution; tool-call limits are enforced only after the fact with no proactive warning; and ToolException from wrap_tool_call middleware isn't caught consistently at the agent level, with handle_tool_error diverging between @tool and ToolNode.",
+  "call_to_action": "Review the disable_streaming='tool_calling' behavioral change (global→turn-scoped) and the SSRF/allowlist hardening scope in the authentication PRD for sequencing/breaking-change risk, and flag any dependency concerns before Q1 work begins.",
+  "key_claims": [
+    {
+      "text": "Provider-proxied SSE streams that omit the 'event:' field (e.g., Anthropic via Bedrock proxy) cause hard failures with no generation chunks returned",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "with_structured_output streaming produces spurious Pydantic serializer warnings and drops response metadata/headers such as x-request-id",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "disable_streaming='tool_calling' crashes with an AttributeError due to an AsyncStream object being passed where a ChatCompletion is expected, and needs to become turn-scoped rather than global",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Agent/graph execution paths call ainvoke instead of astream internally, so on_llm_new_token never fires even when graph-level streaming is enabled",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "There is a known-incorrect assertion in the core streaming error-callback test suite masking whether error-path behavior is correct",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "There are gaps in standard test coverage and release sequencing for tool-call streaming across integration packages, including unsupported providers like Mistral",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Tolerating missing 'event:' fields risks masking genuinely malformed responses from other providers",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "ChatAnthropic and similar integrations lack custom HTTP client / mTLS support, blocking certificate-based auth behind corporate proxies",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "MCP tool discovery fails to forward auth headers/tokens consistently, causing 403 errors despite correctly configured credentials",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "AzureChatOpenAI and BaseChatOpenAI do not share httpx client/connection setup, creating redundant connection overhead and inconsistent behavior",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "SSRF/allowlist host validation can be bypassed via environment-based auth checks",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Hardening SSRF/allowlist validation could break legitimate enterprise configurations relying on environment-based auth checks to reach internal hosts",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "The shared httpx client/connection-pooling refactor risks regressions since AzureChatOpenAI and BaseChatOpenAI were built independently",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Gemini's thought-signature and turn-order validation rejects injected precomputed tool-call history",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Malformed or partially streamed tool-call payloads crash the pipeline or cause it to silently execute the wrong tool",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Agents unconditionally force tool_choice='required', which breaks reasoning/thinking models that only support 'auto' or 'none'",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "ToolNode can still execute a tool call that a human has rejected because rejection enforcement is not reliably wired into execution",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "tool_call_id is missing from on_tool_start (and reportedly on_tool_end) streaming events, breaking attribution during parallel tool execution",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool-call limits are enforced only after the fact with no proactive warning as the limit approaches",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "ToolException raised inside wrap_tool_call middleware is not caught consistently at the agent level, and handle_tool_error behaves differently between the @tool decorator and ToolNode",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Streaming and authentication are both scheduled for Q1 with effort 8 and impact 4/5, and have no dependencies",
+      "grounded_in": [
+        "streaming",
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling is scheduled for Q2 with effort 8 and impact 4/5, and has no dependencies",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}
