@@ -152,3 +152,106 @@ which stayed inert across all nine draws.
 none). Selection is arbitrary (as with streaming), not principled-by-repair (as
 with auth). Canonical = run 1 by convention — the 7-point variant; the count
 difference is NOT a quality ranking.
+
+## C5 Stakeholder Summarizer — key_claims defect chain
+
+_Baseline: Sonnet 5, agents/summarizer.py. Input held constant against the
+persisted roadmap.json + the three canonical PRDs. Fixtures in sonnet5_draws/
+named by provenance stage (_prefix_baseline / _prefix_gate / _promptfix_only /
+run1-2 unsuffixed / _v1_rationale_fabrication)._
+
+### Three stacked defects, each unmasked by fixing the one above it
+A single symptom (eng digest produced 0 key_claims while being the most
+claim-dense of the three; gradient 12/6/0 customer/exec/eng) turned out to be
+THREE independent defects in series. Each fix exposed the next. The lesson is
+the shape, not any one defect: **a symptom stable across runs can still be
+multi-causal; fixing the top layer and re-running is how the next layer becomes
+visible.**
+
+1. **Authorship gate (prompt-layer).** The model self-indexes by PERCEIVED
+   AUTHORSHIP: near-verbatim relay of the input (eng) does not feel like "claims
+   I am making," so it indexed nothing; heavy translation (customer) feels
+   authored, so it indexed everything. Transformation distance drove the 12/6/0
+   gradient. Load-bearing factual claim ≠ numeric claim — customer's 12 were all
+   qualitative. Fix: prompt text stating a claim counts whether restated verbatim
+   or translated ("restating a fact from the input is still making that claim").
+
+2. **Freeloading schema default (schema-layer) — the real root cause of eng=0.**
+   `key_claims: list[Claim] = Field(default_factory=list)` EXCLUDED the field from
+   the JSON-Schema `required` array (Pydantic drops any defaulted field from
+   `required`). The tool contract therefore advertised key_claims as OMISSIBLE.
+   Per the banked C3 lesson read in reverse — SCHEMA OVERRIDES PROSE — the "you
+   must index" prose lost to the "optional" schema. Proof: the prompt-only fix
+   (stage _promptfix_only) produced ZERO behavioral delta across 3 calls. A
+   prompt fix with no behavioral delta means the defect is not at the prompt
+   layer. Worse: the default also LAUNDERED truncation — an omitted field became
+   a clean `[]`, so our own code could not distinguish "model said nothing" from
+   "model said empty." Fix: remove the default (field becomes required-present);
+   omission now fails validation → repair loop. Same freeloading default was on
+   `grounded_in` — fixed too. **General: a defaulted Pydantic field is silently
+   optional in the tool schema; if the model must fill it, no default.**
+
+3. **Token budget (generation-layer).** With presence forced AND relay licensed,
+   a COMPLIANT eng digest (dense body + 15-20 technical claims) overran
+   max_tokens=2000. The API returns partial tool input on a max_tokens cut; the
+   unterminated key_claims array drops whole → dict arrives missing exactly the
+   last field, deterministically, 3/3. The repair loop was retrying a BUDGET
+   problem as a COMPLIANCE problem (re-running into the same ceiling) because
+   nothing read `response.stop_reason`. Fix: MAX_TOKENS=4000 (calibrated from
+   evidence) + detect stop_reason=="max_tokens" as a DISTINCT, non-retried
+   failure that names itself. **General: a repair loop that ignores stop_reason
+   will burn its full retry budget on any truncation. Detect budget cuts before
+   validation; do not feed them back.**
+
+### Layering blind spot: the judge cannot catch unindexed prose
+Anti-hallucination layering assigned invented content to prompt + judge. But the
+C9 judge verifies INDEXED claims against sources — a fabrication living in
+unindexed body prose is invisible to it. Surfaced concretely below.
+
+### Qualitative fabrication via the tone channel (exec)
+Exec fabricated a CAUSAL claim with no numbers: "sequenced after streaming and
+auth because it depends on a stable foundation" — but roadmap depends_on is []
+for all three (Q2 is pure budget packing). Same digest's own key_claims stated
+the truth ("no dependencies"): **the body contradicted its own index.**
+Reproduced 2/2 across prompt versions (stage _v1_rationale_fabrication). Cause:
+the exec tone block demands why-framing ("what ships first and why"); when the
+input has a sequencing with no stated why, the model manufactures one. **The
+tone instruction created the fabrication pressure — a channel never audited
+because we audited schema and the numbers-rule, not the tone blocks.** Fix: a
+grounding-discipline line forbidding invented reasons/causes/rationales,
+explicitly overriding the tone block's why-demand ("absence of a stated
+rationale is information; fabricating one destroys it"). Post-fix, the model,
+denied a fake reason, surfaced the PRDs' REAL epistemics instead (thin evidence
+base / one-or-two-report frequency) — the fix redirected rather than silenced.
+**General: any tone instruction that demands a rhetorical move (a "why", a
+benefit, a stakes-frame) is a fabrication channel when the input lacks the
+material for that move. Audit tone blocks as fabrication surfaces, not just
+schema and explicit content rules.**
+
+### Provenance / fill-party (bank alongside evidence_issue_ids and PRD.theme)
+grounded_in has the SAME SHAPE as C4's code-filled evidence_issue_ids (a list of
+source refs) but is MODEL-filled. **Fill-party is set by who holds the
+provenance, not by field shape:** retrieval provenance lives in code (code
+stamps issue IDs); authorship provenance — which theme motivated the sentence —
+lives only in the model. audience is the third instance of the code-stamp idiom
+(caller holds it). Grounding is THEME-level, not artifact-level: a real number
+is real whichever artifact (PRD or roadmap item) holds it, so a PRD-vs-roadmap
+source_type discriminator was cut as over-engineering. PARKED: this cannot
+express PRD-vs-roadmap-item misattribution of a real number — acceptable while
+the guardrail is invented-number detection.
+
+### Count behavior (feeds C9 multi-sample eval design)
+Post-fix key_claims counts: eng 17/17 (converged — index tracks the actual claim
+population once the gate is open), exec 9→11 (variance band), customer 13→15.
+Sidecar carries FULL jargon (ToolNode, mTLS, SSRF) even in the customer digest
+whose prose is plain — emergent and correct: the sidecar is machine-facing (judge
+verification), tone governs reader-facing fields only. Cross-theme claims
+(grounded in all three themes for roadmap-level facts) validated cleanly; the
+membership check handled multi-theme grounding though it was never explicitly
+tested for it.
+
+### Parked items added this session
+- Backport stop_reason detection to the C3/C4 repair loops (same latent blindness).
+- Tone-block fabrication-surface audit as a general pass on any why/benefit/
+  stakes-demanding tone instruction (recurrence-gated beyond exec n=2).
+- Commit-message convention drift (C4 `feat:` vs C5 `C5:`) — pick one going forward.
