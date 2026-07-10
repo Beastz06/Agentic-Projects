@@ -1,0 +1,76 @@
+{
+  "audience": "exec",
+  "headline": "Shoring Up Trust in Streaming, Enterprise Auth, and Tool-Calling Reliability",
+  "body": "We're addressing three reliability gaps that are eroding developer trust and blocking enterprise adoption of our platform's core agent capabilities. Two of these — streaming reliability and enterprise authentication — are scheduled first in Q1, with tool-calling reliability following in Q2.\n\nStreaming today is inconsistent across model providers, structured output, and agent execution paths: some proxy configurations hard-fail, structured-output streaming silently drops diagnostic metadata, a key configuration flag can crash, and agents sometimes silently fall back to non-streamed behavior even when streaming is explicitly requested. Fixing this in Q1 restores confidence that streaming \"just works\" across our supported providers and features, which is foundational to how developers build with us.\n\nIn parallel, enterprise authentication gaps are actively blocking adoption: organizations requiring certificate-based authentication (mTLS) behind corporate proxies cannot currently connect, tool discovery via MCP servers can incorrectly reject valid credentials, and there's a security exposure where SSRF host-allowlist protections can be bypassed under certain auth configurations. This work is equally high priority for Q1 given both the adoption blocker and the security risk.\n\nTool-calling pipeline reliability is scheduled for Q2. This covers making tool-calling work safely and consistently across providers, including ensuring human-in-the-loop rejections are always honored (a safety-critical gap today), improving observability for parallel tool calls, and unifying inconsistent error-handling behavior. We sequenced this after streaming and auth because it depends on a stable foundation, though it addresses real safety and consistency risks in production agent deployments.",
+  "call_to_action": "We're asking leadership to approve the proposed Q1 sequencing (streaming reliability and enterprise auth in parallel) followed by tool-calling reliability in Q2, and to endorse the SSRF and human-in-the-loop fixes as priority safety items within their respective workstreams.",
+  "key_claims": [
+    {
+      "text": "Streaming is inconsistent across providers, structured output, and agent execution paths, including proxy hard-failures, dropped diagnostic metadata, a crashing configuration flag, and silent fallback to non-streamed behavior in agents.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming reliability work is scheduled for Q1.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Organizations requiring certificate-based authentication (mTLS) behind corporate proxies cannot currently connect.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "MCP tool discovery can incorrectly reject valid credentials, causing 403 errors.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "SSRF host-allowlist protections can be bypassed via environment-based auth configuration, a security exposure.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Enterprise authentication work is scheduled for Q1.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling pipeline reliability work is scheduled for Q2.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Human-in-the-loop tool call rejections are not reliably enforced today, a safety-critical gap.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool-calling observability is incomplete, making it hard to attribute streamed output to specific tool calls in parallel execution.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool error-handling behavior is inconsistent across code paths, forcing developers to write separate workarounds.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "None of the three roadmap items have dependencies on one another.",
+      "grounded_in": [
+        "streaming",
+        "authentication",
+        "tool_calling"
+      ]
+    }
+  ]
+}

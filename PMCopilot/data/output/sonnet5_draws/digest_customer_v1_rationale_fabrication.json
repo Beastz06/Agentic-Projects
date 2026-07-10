@@ -1,0 +1,86 @@
+{
+  "audience": "customer",
+  "headline": "Making streaming, security, and tool-use just work — coming soon",
+  "body": "If you've ever had your app crash mid-stream, seen a puzzling warning, or watched a tool call run when it should have been blocked, you're not alone — and we're fixing it.\n\nFirst up, later this year we're overhauling streaming reliability. That includes fixing hard failures when using certain providers through proxies, cleaning up spurious warnings and missing diagnostic data when you combine streaming with structured output, making sure turning off streaming for tool-calling doesn't break your whole app, and ensuring agents built with graphs actually stream token-by-token like they're supposed to instead of silently falling back to batched responses.\n\nWe're also investing in enterprise-grade authentication and security. If your organization needs custom certificates or connects through a corporate proxy, you'll be able to configure that directly. We're also fixing cases where correctly configured credentials were still getting rejected during tool discovery, and tightening up security checks so untrusted hosts can't slip through.\n\nFinally, we're hardening how tool-calling works across the board — so precomputed tool histories won't get rejected by stricter providers, malformed tool data won't crash your agent or trigger the wrong action, tool calls you reject in a human-in-the-loop flow will actually stay blocked, and you'll get clearer visibility into which streamed output belongs to which tool call. We're also adding proactive warnings before tool-call limits are hit, and making error handling consistent no matter which part of the pipeline you're using.",
+  "call_to_action": "Keep an eye out as these improvements roll out, and please share any streaming, auth, or tool-calling issues you hit — your reports directly shape what we fix next.",
+  "key_claims": [
+    {
+      "text": "Streaming can hard-fail when using certain providers accessed through proxies that omit standard fields.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Combining streaming with structured output can produce spurious warnings and drop diagnostic metadata like request IDs.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Disabling streaming just for tool-calling turns currently can crash or wrongly disable streaming everywhere instead of just tool-calling turns.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Agents running inside graphs can silently fall back to batched output instead of true token-by-token streaming even when streaming is enabled.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Enterprise users will be able to configure custom HTTP clients with mTLS certificate-based authentication for chat models like ChatAnthropic.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "MCP tool discovery currently fails to forward auth headers/tokens reliably, causing 403 errors despite correct credentials, and this will be fixed.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "SSRF/allowlist host validation can currently be bypassed via environment-based auth checks, and this will be hardened.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Precomputed tool-call histories can currently be rejected by strict providers like Gemini due to turn-order/thought-signature rules.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Malformed or partially streamed tool-call payloads can currently crash the pipeline or cause the wrong tool to execute silently.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "A tool call rejected in a human-in-the-loop flow can currently still be executed by ToolNode, and this will be fixed.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "tool_call_id is currently missing from tool streaming events, making it hard to attribute output to specific parallel tool calls, and this will be added.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Proactive warnings will be added before tool-call limits are hit, instead of only enforcing limits after the fact.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool error handling behavior will be made consistent across different code paths instead of diverging as it does today.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}

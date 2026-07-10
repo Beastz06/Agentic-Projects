@@ -1,0 +1,112 @@
+{
+  "audience": "eng",
+  "headline": "Q1/Q2 hardening: streaming, auth/transport, and tool-calling pipelines get cross-cutting fixes",
+  "body": "Three parallel workstreams are landing to close reliability gaps that currently force workarounds. Streaming (Q1) touches provider SSE parsing, structured output, disable_streaming, and agent/graph execution paths — six independent fixes bundled together. Notably: Bedrock-proxied Anthropic streams omit the 'event:' SSE field and hard-fail with \"no generation chunks returned\"; with_structured_output streaming emits spurious Pydantic serializer warnings and drops response metadata/headers like x-request-id; disable_streaming='tool_calling' currently crashes with an AttributeError (AsyncStream passed where ChatCompletion expected) and, even when it doesn't crash, disables streaming globally instead of scoping it to tool-calling turns only; and agent/graph paths call ainvoke internally instead of astream, so on_llm_new_token never fires even with graph-level streaming enabled. There's also a known-incorrect assertion in the core streaming error-callback test suite that may be masking real error-path bugs — worth double-checking before trusting that suite's green status.\n\nAuthentication (Q1, parallel to streaming) covers four areas: ChatAnthropic lacks custom HTTP client / mTLS support, blocking corporate-proxy and internal-PKI setups; MCP tool discovery fails to forward auth headers/tokens consistently, causing 403s despite correct credentials; AzureChatOpenAI and BaseChatOpenAI don't share httpx client/connection-pooling setup, causing redundant connections and inconsistent behavior; and SSRF/allowlist host validation can be bypassed via environment-based auth checks — flagged as high risk since hardening it could break enterprise configs that currently rely on that env-based path to reach internal hosts.\n\nTool-calling (Q2, depends on nothing but builds on more surface area) is the broadest of the three: Gemini's thought-signature/turn-order validation rejects injected precomputed tool-call history; malformed or partially-streamed tool-call payloads can crash the pipeline or silently execute the wrong tool; tool_choice='required' is forced unconditionally and breaks reasoning/thinking models that only support 'auto' or 'none'; ToolNode can still execute a tool call a human has rejected (safety-critical gap); tool_call_id is missing from on_tool_start/on_tool_end streaming events, breaking attribution during parallel tool execution; tool-call limits are enforced only after the fact with no proactive warning; and ToolException from wrap_tool_call middleware isn't caught consistently at the agent level, with handle_tool_error diverging between @tool and ToolNode.\n\nAll three roadmap items are scoped at effort 8 and impact 4/5, and each PRD notes most sub-issues are backed by only 1-2 reported instances — thin evidence that's worth factoring into review priority. The HITL rejection-enforcement gap in tool-calling and the SSRF bypass in authentication are both flagged high-risk and touch safety/security-critical paths, so those deserve the most scrutiny relative to their effort.",
+  "call_to_action": "Review the disable_streaming='tool_calling' fix and the astream-routing change in agent/graph paths for sequencing risk against the tool-calling Q2 work (both touch agent execution internals), and flag if you see a dependency that should reorder the roadmap; also weigh in on scoping the SSRF/allowlist hardening so it doesn't break existing environment-based auth configs.",
+  "key_claims": [
+    {
+      "text": "Bedrock-proxied Anthropic SSE streams omit the 'event:' field, causing hard failures with no generation chunks returned.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming with with_structured_output produces spurious Pydantic serializer warnings and drops response metadata/headers such as x-request-id.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "disable_streaming='tool_calling' crashes with an AttributeError because an AsyncStream is passed where a ChatCompletion is expected, and otherwise disables streaming globally instead of only for tool-calling turns.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Agent/graph execution paths call ainvoke instead of astream internally, so on_llm_new_token never fires even when graph-level streaming is enabled.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "There is a known-incorrect assertion in the core streaming error-callback test suite that may mask whether error-path behavior is actually correct.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "ChatAnthropic lacks support for custom HTTP clients and mTLS, blocking certificate-based auth behind corporate proxies or internal PKI.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "MCP tool discovery fails to forward auth headers/tokens consistently, causing 403 errors even with correctly configured credentials.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "AzureChatOpenAI and BaseChatOpenAI do not share httpx client/connection-pooling setup, creating redundant connection overhead and inconsistent behavior.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "SSRF/allowlist host validation can be bypassed via environment-based auth checks, and hardening this is flagged as high risk to legitimate enterprise configs.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Gemini's thought-signature and turn-order validation rejects injected precomputed tool-call history.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Malformed or partially streamed tool-call payloads can crash the pipeline or cause silent execution of the wrong tool.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Agents unconditionally force tool_choice='required', breaking reasoning/thinking models that only support 'auto' or 'none'.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "ToolNode can still execute a tool call that a human has rejected, a safety-critical gap.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "tool_call_id is missing from on_tool_start and on_tool_end streaming events, breaking attribution during parallel tool execution.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool-call limits are enforced only after the fact with no proactive warning as the limit approaches.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "ToolException from wrap_tool_call middleware is not caught consistently at the agent level, and handle_tool_error diverges between the @tool decorator and ToolNode.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "All three roadmap items (streaming, authentication, tool-calling) are scheduled at effort 8 and impact 4/5, with most sub-issues backed by only 1-2 reported instances.",
+      "grounded_in": [
+        "streaming",
+        "authentication",
+        "tool_calling"
+      ]
+    }
+  ]
+}

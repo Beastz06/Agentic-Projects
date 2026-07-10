@@ -1,0 +1,64 @@
+{
+  "audience": "exec",
+  "headline": "Shoring Up Trust in Streaming, Enterprise Auth, and Tool-Calling",
+  "body": "This quarter's work targets three areas that shape whether developers and enterprises can rely on our platform for production agent workloads: streaming reliability, enterprise-grade authentication, and tool-calling robustness.\n\nFirst priority, landing in Q1, is fixing core streaming reliability. Today, streaming breaks or silently falls back to non-streamed behavior across several common scenarios - provider proxies, structured output, selective streaming controls, and agent/graph execution - which undermines confidence in a capability that is central to how developers build with our product. Alongside this, we're closing an enterprise adoption gap: teams that require custom certificate-based authentication or secure proxy access currently cannot connect reliably, and a security validation gap could let requests reach untrusted hosts. Both of these Q1 workstreams are similarly sized and similarly impactful, addressing core trust and enterprise-readiness issues respectively.\n\nFollowing in Q2, we'll harden the tool-calling pipeline that underlies agent products. This includes making sure human-in-the-loop rejections are always honored (a safety-critical gap today), improving reliability when tool-call data is malformed, and improving observability and error-handling consistency for developers building multi-tool agents. Sequencing this after the Q1 work lets us first stabilize the foundational streaming and auth layers that agents depend on.\n\nAcross all three areas, the underlying evidence is a mix of a few high-frequency, high-confidence problems and several lower-frequency individual reports, so we are prioritizing based on severity and strategic importance (enterprise unblocking, safety-critical gaps) rather than volume alone.",
+  "call_to_action": "Requesting endorsement of the proposed sequencing: streaming reliability and enterprise auth/transport security in Q1, followed by tool-calling pipeline hardening in Q2.",
+  "key_claims": [
+    {
+      "text": "Streaming breaks or silently falls back to non-streamed behavior across provider proxies, structured output, selective streaming controls, and agent/graph execution.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming reliability work is scheduled for Q1.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Enterprise teams cannot reliably configure custom certificate-based authentication (mTLS) or secure proxy access today.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "A security validation gap could allow SSRF/allowlist bypass via environment-based auth checks, letting requests reach untrusted hosts.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Enterprise auth and transport security work is scheduled for Q1.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling pipeline hardening is scheduled for Q2 and does not depend on the Q1 workstreams.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Human-in-the-loop tool-call rejection is not reliably enforced today, meaning a rejected tool call can still be executed.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool-calling work also addresses malformed/fragmented tool-call payload handling, observability of parallel tool calls, and inconsistent error-handling across code paths.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Streaming, authentication, and tool-calling issues are each backed by a mix of a few higher-frequency problems and several individual (frequency of 1-2) reports.",
+      "grounded_in": [
+        "streaming",
+        "authentication",
+        "tool_calling"
+      ]
+    }
+  ]
+}

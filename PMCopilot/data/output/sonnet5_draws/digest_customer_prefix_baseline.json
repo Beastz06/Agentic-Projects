@@ -1,0 +1,80 @@
+{
+  "audience": "customer",
+  "headline": "Making chat streaming, secure connections, and tool-using agents more reliable",
+  "body": "If you've ever had a streaming response suddenly fail, seen a crash when trying to selectively turn off streaming, or noticed your agent wasn't actually streaming tokens even though you turned it on — we hear you, and we're fixing it. Coming soon, streaming will work more consistently across different AI providers (including when accessed through proxies), will play nicely with structured output without dropping useful debugging information or throwing confusing warnings, and will behave correctly when you selectively disable it for tool-calling. Agents running inside larger workflows will also properly stream token-by-token instead of silently falling back to batched responses.\n\nFor teams working in enterprise environments, we know that connecting securely through corporate proxies and internal certificate systems has been a pain point. We're adding support for custom secure connections (including mutual-TLS) so you can authenticate through your organization's security infrastructure without workarounds. We're also fixing cases where correctly configured credentials were still getting rejected during tool discovery, and tightening up security checks so that requests can't slip past host validation through configuration loopholes.\n\nLater this year, we're also turning our attention to making tool-using agents more trustworthy end to end: handling messy or malformed tool-call data gracefully instead of crashing or doing the wrong thing, making sure human-rejected tool calls are actually never executed, giving agents advance warning as they approach usage limits instead of stopping abruptly, and giving you clearer visibility into which streamed output belongs to which tool call when several run in parallel. We're also making error-handling behavior consistent no matter which part of the tool-calling system you're using.\n\nThese improvements are about restoring trust: so you can rely on streaming, secure connections, and tool-calling behaving predictably, without needing custom workarounds.",
+  "call_to_action": "Try streaming, custom secure connections, and tool-calling in your workflows as these improvements roll out, and let us know what you're seeing — your feedback directly shapes what we fix next.",
+  "key_claims": [
+    {
+      "text": "Streaming will work more reliably across providers accessed through proxies, fixing hard failures.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Structured output streaming will no longer drop debugging metadata or throw spurious warnings.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Selectively disabling streaming for tool-calling will no longer crash or disable streaming everywhere.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Agents running inside larger workflows will properly stream tokens instead of silently batching output.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Support for custom HTTP clients and mutual-TLS is being added so enterprises can authenticate through corporate proxies and internal PKI.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Fixes are coming for tool discovery failures where correctly configured credentials were still rejected with 403 errors.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Security host-validation checks will be hardened so they cannot be bypassed via environment configuration.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Malformed or fragmented tool-call data will be handled gracefully instead of crashing or executing the wrong tool.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Human-rejected tool calls will be reliably prevented from executing.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Agents will get proactive warnings as they approach tool-call limits instead of stopping abruptly.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Streamed tool call events will include identifiers so output from parallel tool calls can be attributed correctly.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    },
+    {
+      "text": "Tool error-handling behavior will be made consistent across different parts of the tool-calling system.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}

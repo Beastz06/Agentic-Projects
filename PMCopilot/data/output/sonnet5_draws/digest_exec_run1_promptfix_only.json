@@ -1,0 +1,44 @@
+{
+  "audience": "exec",
+  "headline": "Shoring up trust in our AI platform: streaming, enterprise auth, and tool-calling reliability",
+  "body": "We're addressing three clusters of reliability and trust issues that currently force developers to build workarounds or avoid key features of our AI platform. Two workstreams — streaming reliability and enterprise authentication/transport security — are sequenced first in Q1, given they both carry high impact and are independent of each other, letting us run them in parallel. A third workstream, tool-calling pipeline reliability, follows in Q2.\n\nStreaming today is inconsistent across model providers and higher-level features like structured output and agents: it can hard-fail, silently drop diagnostic data, crash on certain configurations, or quietly fall back to non-streaming behavior even when streaming was explicitly requested. Fixing this restores confidence that streaming — a core, widely-used capability — works uniformly, so developers stop avoiding or working around it.\n\nIn parallel, enterprise customers are currently blocked from securely connecting through corporate proxies, custom certificates, and internal tool servers, and there is a security gap where host-allowlist validation can be bypassed under certain configurations. This workstream both unblocks enterprise adoption and closes a security exposure, making it a high-priority, high-impact investment alongside streaming.\n\nOnce these two foundations are in place, we'll turn to hardening the tool-calling pipeline in Q2 — improving how agents validate, execute, observe, and recover from tool calls, including ensuring human-in-the-loop rejections are always honored. This is sequenced after streaming and auth because it depends less on immediate enterprise blockers and more on broad developer trust in agent behavior over time.",
+  "call_to_action": "Approve the proposed sequencing: streaming reliability and enterprise auth/transport security as parallel Q1 priorities, with tool-calling pipeline hardening following in Q2.",
+  "key_claims": [
+    {
+      "text": "Streaming can hard-fail, drop diagnostic metadata, crash on certain configurations, or silently fall back to non-streaming behavior even when streaming is explicitly requested.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming is scheduled in Q1 and rated high impact because it's a core, widely-used capability undermined by these bugs.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Enterprise customers are currently blocked from securely connecting through corporate proxies, custom certificates, and internal tool servers (MCP).",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "There is a security gap where SSRF/allowlist host validation can be bypassed via environment-based auth configuration.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Enterprise auth/transport security is scheduled in Q1, independent of streaming, and rated high impact due to both enterprise adoption blockers and the security bypass risk.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling pipeline reliability work is scheduled in Q2 and covers validation, execution, observability, limits, and error handling, including ensuring human-in-the-loop rejected tool calls are never executed.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}

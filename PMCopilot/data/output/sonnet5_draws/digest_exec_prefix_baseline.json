@@ -1,0 +1,44 @@
+{
+  "audience": "exec",
+  "headline": "Hardening the Core: Reliability and Enterprise Trust for Streaming, Auth, and Tool-Calling",
+  "body": "We're launching three parallel workstreams to close reliability gaps that are undermining developer trust in our core capabilities: streaming, enterprise authentication, and tool-calling. All three carry the same impact rating and reflect real, if sometimes narrowly-reported, pain points that block adoption or force users into fragile workarounds.\n\nFirst up in Q1: Streaming Reliability. Today, streaming can hard-fail with certain provider proxies, silently drop diagnostic metadata when combined with structured output, crash on a specific configuration flag, and fail to deliver true token-by-token output inside agent pipelines. Fixing this restores confidence that streaming \"just works\" across providers and use cases, which is foundational since streaming underpins much of the interactive product experience.\n\nRunning alongside it in Q1 is Enterprise Auth & Transport Security. Enterprise customers who need certificate-based authentication through corporate proxies are currently blocked, and tool-integration auth failures are causing spurious access errors even with correct credentials. This workstream also closes a security gap where host-allowlist validation can be bypassed under certain configurations — the most urgent item in this set given its security implications. Together these changes are prerequisites for deeper enterprise adoption.\n\nTool-Calling Pipeline Hardening is sequenced for Q2, after the two Q1 efforts. This work addresses safety and reliability in agent tool use: ensuring human-in-the-loop rejections are actually enforced, making malformed tool payloads fail gracefully instead of crashing or misfiring, fixing tool selection for reasoning models, and improving observability and error-handling consistency for developers building production agents. The Q2 sequencing lets us build on a more reliable streaming and auth foundation first.",
+  "call_to_action": "Please approve the proposed Q1/Q2 sequencing — streaming and enterprise auth in Q1, tool-calling hardening in Q2 — with particular attention to greenlighting the SSRF/allowlist security fix as a priority within the Q1 auth workstream.",
+  "key_claims": [
+    {
+      "text": "Streaming can hard-fail with certain provider proxies, drop diagnostic metadata during structured-output streaming, crash on a configuration flag, and fail to deliver token-level streaming inside agents.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Streaming reliability work is scheduled for Q1.",
+      "grounded_in": [
+        "streaming"
+      ]
+    },
+    {
+      "text": "Enterprise customers cannot currently configure certificate-based authentication (mTLS) through corporate proxies, and tool-integration auth failures cause spurious access errors despite correct credentials.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "There is a security gap where host-allowlist (SSRF) validation can be bypassed via environment-based auth configuration.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Enterprise auth and transport security work is scheduled for Q1.",
+      "grounded_in": [
+        "authentication"
+      ]
+    },
+    {
+      "text": "Tool-calling pipeline hardening, including human-in-the-loop rejection enforcement, graceful handling of malformed tool payloads, tool selection fixes for reasoning models, and observability/error-handling consistency, is scheduled for Q2.",
+      "grounded_in": [
+        "tool_calling"
+      ]
+    }
+  ]
+}
