@@ -6,7 +6,14 @@ from schemas.discovery import DiscoveryFinding   # adjust if your import path di
 from schemas.prd import PRD
 from agents.discovery import research
 from agents.prd_drafter import draft_prd
+from schemas.roadmap import RoadmapItem
+from schemas.digest import StakeholderDigest
+from agents.planner import plan
+from agents.summarizer import summarize, TONE_BLOCKS
 from langgraph.graph import StateGraph, START, END
+import sqlite3
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
 
 class PMCopilotState(TypedDict):
@@ -16,8 +23,8 @@ class PMCopilotState(TypedDict):
     # artifacts (typed — objects flow through the graph)
     findings: Optional[DiscoveryFinding]
     prds: list[PRD]
-    roadmap: Optional[dict]          # placeholder until C4 is wired (Part 2)
-    digests: list[dict]              # placeholder until C5 is wired (Part 2)
+    roadmap: Optional[list[RoadmapItem]]  # C4 artifact; last-write-wins (redo replaces, same class as prds)
+    digests: Annotated[list[StakeholderDigest], operator.add]  # C5 artifacts + progress ledger; append-only by channel
 
     # control
     current_step: str
@@ -29,6 +36,8 @@ STEP_START = "start"
 STEP_DISCOVERY_DONE = "discovery_done"
 STEP_DRAFTING_DONE = "drafting_done"
 STEP_ERROR = "error"
+STEP_PLANNING_DONE = "planning_done"
+STEP_SUMMARIZING_DONE = "summarizing_done"
 
 
 def discovery_node(state: PMCopilotState) -> dict:
@@ -55,6 +64,41 @@ def prd_node(state: PMCopilotState) -> dict:
         }
 
 
+def _remaining_audiences(state: PMCopilotState) -> list[str]:
+    """Progress derived from the digests ledger itself — no separate bookkeeping field."""
+    done = {d.audience for d in state["digests"]}
+    return sorted(set(TONE_BLOCKS) - done)
+
+
+def planner_node(state: PMCopilotState) -> dict:
+    """C4 wrapper: [PRD] -> [RoadmapItem]."""
+    try:
+        roadmap = plan(state["prds"])
+        return {"roadmap": roadmap, "current_step": STEP_PLANNING_DONE}
+    except Exception as exc:
+        return {
+            "error_messages": [f"planner_node: {type(exc).__name__}: {exc}"],
+            "current_step": STEP_ERROR,
+        }
+
+
+def summarizer_node(state: PMCopilotState) -> dict:
+    """C5 wrapper: one audience per superstep; each digest is its own checkpoint.
+
+    The router only sends control here while audiences remain, so [0] is
+    safe by invariant — a violated invariant fails loud (IndexError).
+    """
+    audience = _remaining_audiences(state)[0]
+    try:
+        digest = summarize(state["prds"], state["roadmap"], audience)
+        return {"digests": [digest], "current_step": STEP_SUMMARIZING_DONE}
+    except Exception as exc:
+        return {
+            "error_messages": [f"summarizer_node[{audience}]: {type(exc).__name__}: {exc}"],
+            "current_step": STEP_ERROR,
+        }
+
+
 def supervisor_node(state: PMCopilotState) -> dict:
     """Deterministic supervisor: holds no logic, writes nothing.
 
@@ -67,25 +111,52 @@ def supervisor_node(state: PMCopilotState) -> dict:
 ROUTE_TABLE = {
     STEP_START: "discovery",
     STEP_DISCOVERY_DONE: "drafter",
-    STEP_DRAFTING_DONE: END,
+    STEP_DRAFTING_DONE: "planner",   # approval gate will intercept this hop later today
+    STEP_PLANNING_DONE: "summarizer",
     STEP_ERROR: END,
 }
 
 
 def route_from_supervisor(state: PMCopilotState) -> str:
     step = state.get("current_step", STEP_START)
+    if step == STEP_SUMMARIZING_DONE:
+        return "summarizer" if _remaining_audiences(state) else END
     return ROUTE_TABLE[step]
 
 
-def build_graph():
+def build_graph(checkpointer=None, interrupt_before=None):
     g = StateGraph(PMCopilotState)
     g.add_node("supervisor", supervisor_node)
     g.add_node("discovery", discovery_node)
     g.add_node("drafter", prd_node)
+    g.add_node("planner", planner_node)
+    g.add_node("summarizer", summarizer_node)
 
     g.add_edge(START, "supervisor")
-    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", END],)
+    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "planner", "summarizer", END],)
     g.add_edge("discovery", "supervisor")
     g.add_edge("drafter", "supervisor")
+    g.add_edge("planner", "supervisor")
+    g.add_edge("summarizer", "supervisor")
 
-    return g.compile()
+    return g.compile(checkpointer=checkpointer, interrupt_before=interrupt_before)
+
+
+# Explicit registration of checkpoint-crossing artifact types.
+# Guards the typed-state lock against langgraph's announced default-block.
+CHECKPOINT_SERDE = JsonPlusSerializer(
+    allowed_msgpack_modules=[
+        ("schemas.discovery", "DiscoveryFinding"),
+        ("schemas.prd", "PRD"),
+        ("schemas.roadmap", "RoadmapItem"),
+        ("schemas.digest", "StakeholderDigest"),
+    ]
+)
+
+
+def make_saver(db_path: str) -> SqliteSaver:
+    """Standard saver construction — callers still decide *whether* to persist."""
+    return SqliteSaver(
+        sqlite3.connect(db_path, check_same_thread=False),
+        serde=CHECKPOINT_SERDE,
+    )
