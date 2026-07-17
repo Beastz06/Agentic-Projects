@@ -16,3 +16,5 @@ Thumbs.db
 # Generated vector store (regenerate via rag.build_index)
 data/chroma/
 *.sqlite
+*.sqlite-shm
+*.sqlite-wal

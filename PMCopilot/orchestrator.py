@@ -14,6 +14,7 @@ from langgraph.graph import StateGraph, START, END
 import sqlite3
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+from langgraph.types import interrupt
 
 
 class PMCopilotState(TypedDict):
@@ -29,6 +30,7 @@ class PMCopilotState(TypedDict):
     # control
     current_step: str
     error_messages: Annotated[list[str], operator.add]
+    revision_feedback: Optional[str]  # gate → drafter channel; set on revise, cleared on approve
 
 
 # Stamp vocabulary — the router (Step 3) keys off exactly these values.
@@ -38,6 +40,8 @@ STEP_DRAFTING_DONE = "drafting_done"
 STEP_ERROR = "error"
 STEP_PLANNING_DONE = "planning_done"
 STEP_SUMMARIZING_DONE = "summarizing_done"
+STEP_APPROVED = "approved"
+STEP_REVISION_REQUESTED = "revision_requested"
 
 
 def discovery_node(state: PMCopilotState) -> dict:
@@ -55,7 +59,7 @@ def discovery_node(state: PMCopilotState) -> dict:
 def prd_node(state: PMCopilotState) -> dict:
     """C3 wrapper: DiscoveryFinding -> [PRD]."""
     try:
-        prd = draft_prd(state["findings"])
+        prd = draft_prd(state["findings"], feedback=state.get("revision_feedback"))
         return {"prds": [prd], "current_step": STEP_DRAFTING_DONE}
     except Exception as exc:
         return {
@@ -99,6 +103,36 @@ def summarizer_node(state: PMCopilotState) -> dict:
         }
 
 
+def _prd_review_payload(prd: PRD) -> dict:
+    """Serializable projection of the PRD for human review at the gate."""
+    return {
+        "theme": prd.theme,
+        "problem_statement": prd.problem_statement,
+        "target_user": prd.target_user,
+        "user_stories": [us.model_dump() for us in prd.user_stories],
+        "acceptance_criteria": [ac.model_dump() for ac in prd.acceptance_criteria],
+    }
+
+
+def approval_node(state: PMCopilotState) -> dict:
+    """Human-in-loop gate after C3.
+
+    Pauses with the drafted PRD; the resume value is an already-confirmed
+    structured decision — interpret-then-confirm is caller protocol
+    (demo script today, Streamlit in C8), not graph topology.
+    """
+    decision = interrupt({
+        "review": _prd_review_payload(state["prds"][-1]),
+        "resume_contract": "{'action': 'approve'|'revise', 'feedback': str|None}",
+    })
+    if decision["action"] == "approve":
+        return {"revision_feedback": None, "current_step": STEP_APPROVED}
+    return {
+        "revision_feedback": decision.get("feedback"),
+        "current_step": STEP_REVISION_REQUESTED,
+    }
+
+
 def supervisor_node(state: PMCopilotState) -> dict:
     """Deterministic supervisor: holds no logic, writes nothing.
 
@@ -111,7 +145,9 @@ def supervisor_node(state: PMCopilotState) -> dict:
 ROUTE_TABLE = {
     STEP_START: "discovery",
     STEP_DISCOVERY_DONE: "drafter",
-    STEP_DRAFTING_DONE: "planner",   # approval gate will intercept this hop later today
+    STEP_DRAFTING_DONE: "approval_gate",
+    STEP_APPROVED: "planner",
+    STEP_REVISION_REQUESTED: "drafter",
     STEP_PLANNING_DONE: "summarizer",
     STEP_ERROR: END,
 }
@@ -131,13 +167,15 @@ def build_graph(checkpointer=None, interrupt_before=None):
     g.add_node("drafter", prd_node)
     g.add_node("planner", planner_node)
     g.add_node("summarizer", summarizer_node)
+    g.add_node("approval_gate", approval_node)
 
     g.add_edge(START, "supervisor")
-    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "planner", "summarizer", END],)
+    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "approval_gate", "planner", "summarizer", END],)
     g.add_edge("discovery", "supervisor")
     g.add_edge("drafter", "supervisor")
     g.add_edge("planner", "supervisor")
     g.add_edge("summarizer", "supervisor")
+    g.add_edge("approval_gate", "supervisor")
 
     return g.compile(checkpointer=checkpointer, interrupt_before=interrupt_before)
 

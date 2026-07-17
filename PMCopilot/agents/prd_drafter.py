@@ -109,7 +109,7 @@ Example output PRD:
 """
 
 
-def _build_user_prompt(finding: DiscoveryFinding) -> str:
+def _build_user_prompt(finding: DiscoveryFinding, feedback: str | None = None) -> str:
     if finding.pain_points:
         blocks = []
         for i, pp in enumerate(finding.pain_points, start=1):
@@ -121,13 +121,19 @@ def _build_user_prompt(finding: DiscoveryFinding) -> str:
     else:
         pain_section = "(none — the researcher found no coherent pain points)"
 
-    return (
+    base = (
         f"Theme: {finding.theme}\n\n"
         f"Pain points (numbered — cite these numbers in "
         f"source_pain_point_indices):\n{pain_section}\n\n"
         f"Suggested PRD seed:\n{finding.suggested_prd_seed}\n\n"
-        f"Write the PRD."
     )
+    if feedback:
+        base += (
+            f"A human reviewer rejected a previous draft of this PRD "
+            f"with the following revision instruction. Address it directly:\n"
+            f"{feedback}\n\n"
+        )
+    return base + "Write the PRD."
 
 
 def _prose_fields(prd: PRD) -> list[tuple[str, str]]:
@@ -178,14 +184,15 @@ def _attach_evidence(prd: PRD, finding: DiscoveryFinding) -> PRD:
     return prd
 
 
-def draft_prd(finding: DiscoveryFinding) -> PRD:
+def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
     """Draft a PRD from a DiscoveryFinding, with validated grounding.
+    feedback: optional human revision instruction from the approval gate; appended to the drafting prompt when present.
 
     Raises RuntimeError if the model produces no tool_use block or fails
     validation (structural or semantic) after MAX_RETRIES repair attempts.
     """
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
-    messages = [{"role": "user", "content": _build_user_prompt(finding)}]
+    messages = [{"role": "user", "content": _build_user_prompt(finding, feedback)}]
     last_error = "unknown"
 
     for attempt in range(1 + MAX_RETRIES):
