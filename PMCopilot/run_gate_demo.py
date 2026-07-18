@@ -4,19 +4,19 @@ Graph pauses at approval_gate; free text -> interpret -> confirm -> resume
 (the caller-side protocol from gate_protocol.py). Loops until END.
 """
 import json
-
 from langgraph.types import Command
-
 from gate_protocol import interpret_verdict
 from orchestrator import build_graph, make_saver
+from datetime import datetime, timezone
 
 DB = "pmcopilot_demo.sqlite"
-CFG = {"configurable": {"thread_id": "gate-demo-1"}}
+THREAD_ID = f"gate-demo-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+CFG = {"configurable": {"thread_id": THREAD_ID}}
 
 
 def main() -> None:
     g = build_graph(checkpointer=make_saver(DB))
-    g.invoke({"topic": "authentication", "prds": [], "digests": []}, CFG)
+    g.invoke({"topic": "authentication"}, CFG)
 
     while True:
         snapshot = g.get_state(CFG)
@@ -39,7 +39,9 @@ def main() -> None:
     final = g.get_state(CFG).values
     print("\n=== PIPELINE COMPLETE ===")
     print("current_step:", final["current_step"])
+    print("thread:", THREAD_ID)
     print("prds:", len(final["prds"]))
+    print("jira_issue_id:", final.get("jira_issue_id"))
     print("roadmap items:", len(final["roadmap"] or []))
     print("digests:", [d.audience for d in final["digests"]])
     print("errors:", final["error_messages"] if final["error_messages"] else "none")

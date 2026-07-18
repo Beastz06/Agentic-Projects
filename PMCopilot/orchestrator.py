@@ -15,6 +15,7 @@ import sqlite3
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 from langgraph.types import interrupt
+from mcp_client import call_tool
 
 
 class PMCopilotState(TypedDict):
@@ -31,6 +32,7 @@ class PMCopilotState(TypedDict):
     current_step: str
     error_messages: Annotated[list[str], operator.add]
     revision_feedback: Optional[str]  # gate → drafter channel; set on revise, cleared on approve
+    jira_issue_id: Optional[int]  # C7 artifact ref; written by jira_node post-approval
 
 
 # Stamp vocabulary — the router (Step 3) keys off exactly these values.
@@ -42,6 +44,7 @@ STEP_PLANNING_DONE = "planning_done"
 STEP_SUMMARIZING_DONE = "summarizing_done"
 STEP_APPROVED = "approved"
 STEP_REVISION_REQUESTED = "revision_requested"
+STEP_JIRA_FILED = "jira_filed"
 
 
 def discovery_node(state: PMCopilotState) -> dict:
@@ -133,6 +136,30 @@ def approval_node(state: PMCopilotState) -> dict:
     }
 
 
+def jira_node(state: PMCopilotState) -> dict:
+    """C7 wrapper: file the approved PRD as a tracking issue via MCP.
+
+    Deterministic by design — the human gate already ratified the PRD's wording,
+    so issue fields are a code mapping from the approved artifact, not a model
+    composition. The MCP protocol boundary is real (stdio subprocess); only the
+    argument authorship is code-side.
+    """
+    prd = state["prds"][-1]
+    try:
+        issue = call_tool("create_issue", {
+            "data": {
+                "title": f"[PRD] {prd.theme}",
+                "body": prd.problem_statement,
+            }
+        })
+        return {"jira_issue_id": issue["id"], "current_step": STEP_JIRA_FILED}
+    except Exception as exc:
+        return {
+            "error_messages": [f"jira_node: {type(exc).__name__}: {exc}"],
+            "current_step": STEP_ERROR,
+        }
+
+
 def supervisor_node(state: PMCopilotState) -> dict:
     """Deterministic supervisor: holds no logic, writes nothing.
 
@@ -146,8 +173,9 @@ ROUTE_TABLE = {
     STEP_START: "discovery",
     STEP_DISCOVERY_DONE: "drafter",
     STEP_DRAFTING_DONE: "approval_gate",
-    STEP_APPROVED: "planner",
+    STEP_APPROVED: "jira",
     STEP_REVISION_REQUESTED: "drafter",
+    STEP_JIRA_FILED: "planner",
     STEP_PLANNING_DONE: "summarizer",
     STEP_ERROR: END,
 }
@@ -168,14 +196,16 @@ def build_graph(checkpointer=None, interrupt_before=None):
     g.add_node("planner", planner_node)
     g.add_node("summarizer", summarizer_node)
     g.add_node("approval_gate", approval_node)
+    g.add_node("jira", jira_node)
 
     g.add_edge(START, "supervisor")
-    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "approval_gate", "planner", "summarizer", END],)
+    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "approval_gate", "planner", "summarizer", "jira", END],)
     g.add_edge("discovery", "supervisor")
     g.add_edge("drafter", "supervisor")
     g.add_edge("planner", "supervisor")
     g.add_edge("summarizer", "supervisor")
     g.add_edge("approval_gate", "supervisor")
+    g.add_edge("jira", "supervisor")
 
     return g.compile(checkpointer=checkpointer, interrupt_before=interrupt_before)
 
