@@ -255,3 +255,32 @@ tested for it.
 - Tone-block fabrication-surface audit as a general pass on any why/benefit/
   stakes-demanding tone instruction (recurrence-gated beyond exec n=2).
 - Commit-message convention drift (C4 `feat:` vs C5 `C5:`) — pick one going forward.
+
+## C7 MCP Server: Jira tools + orchestrator integration
+
+**Deterministic filing over model-driven (deliberate).** The post-approval Jira
+node maps issue fields from the approved PRD in code (`title` from theme, `body`
+from problem_statement verbatim); no model composes the arguments. Rationale:
+the human gate ratifies exact wording, so model rephrasing after the gate is
+pure fabrication surface with no remaining judgment to exercise. The MCP
+protocol boundary is unchanged either way (real stdio subprocess, real
+schema-validated call) — only argument authorship is code-side. Model-driven
+composition is additive later if wanted; the Slack digest post (Day 27) is the
+better home for it since digests are already model-authored prose.
+
+**Approval now means tracked.** STEP_APPROVED routes through the jira node
+unconditionally — there is no approve-without-filing path. Corollary: a filing
+failure is a broken invariant, not a cosmetic gap, so jira_node fails the run
+(STEP_ERROR → END) rather than degrading to planner.
+
+**Side-effect asymmetry in external tool calls.** A client-side failure after
+the server writes (observed live: a response-parse bug) halts the run *after*
+the issue exists in Jira. "Run failed" ≠ "no side effects happened." Any retry
+or resume logic added later must account for possibly-existing artifacts.
+
+**Checkpointed invoke input is mutation, not initialization.** Seeding
+`prds: []` in a demo script silently wiped the restored PRD on a stale thread
+(last-write-wins channel), while `digests: []` was harmless (reducer identity)
+and `roadmap` survived by absence. Rule: on persistent threads, pass only the
+keys you mean to write. Demo script now derives a fresh thread_id per run —
+the pattern C8's Streamlit layer inherits.
