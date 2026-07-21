@@ -18,3 +18,7 @@ data/chroma/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Generated mock stores (regenerate via server init_* on next run)
+*.jsonl
+*_mock.json
