@@ -9,7 +9,7 @@ from agents.prd_drafter import draft_prd
 from schemas.roadmap import RoadmapItem
 from schemas.digest import StakeholderDigest
 from agents.planner import plan
-from agents.summarizer import summarize, TONE_BLOCKS
+from agents.summarizer import summarize, TONE_BLOCKS, compose_slack_post
 from langgraph.graph import StateGraph, START, END
 import sqlite3
 from langgraph.checkpoint.sqlite import SqliteSaver
@@ -33,6 +33,8 @@ class PMCopilotState(TypedDict):
     error_messages: Annotated[list[str], operator.add]
     revision_feedback: Optional[str]  # gate → drafter channel; set on revise, cleared on approve
     jira_issue_id: Optional[int]  # C7 artifact ref; written by jira_node post-approval
+    notion_page_id: Optional[str]  # C7 artifact ref; written by notion_node on success, stays None on degrade
+    slack_message_ts: Optional[str]  # C7 artifact ref; written by slack_node on success, stays None on degrade
 
 
 # Stamp vocabulary — the router (Step 3) keys off exactly these values.
@@ -45,6 +47,8 @@ STEP_SUMMARIZING_DONE = "summarizing_done"
 STEP_APPROVED = "approved"
 STEP_REVISION_REQUESTED = "revision_requested"
 STEP_JIRA_FILED = "jira_filed"
+STEP_NOTION_DONE = "notion_done"
+STEP_SLACK_DONE = "slack_done"
 
 
 def discovery_node(state: PMCopilotState) -> dict:
@@ -160,6 +164,76 @@ def jira_node(state: PMCopilotState) -> dict:
         }
 
 
+def _render_prd_content(prd: PRD) -> str:
+    """Deterministic PRD -> page body. Verbatim fields under fixed headers — no composition.
+    Renders reader-facing prose only; provenance ids (source_pain_point_indices,
+    evidence_issue_ids) are machine-facing and stay out, same reasoning as
+    excluding key_claims from the Slack composer."""
+    lines = [
+        "## Problem", prd.problem_statement,
+        "## Target user", prd.target_user,
+        "## User stories",
+        *[f"- As {us.persona}, I want to {us.action}, so that {us.value}" for us in prd.user_stories],
+        "## Acceptance criteria",
+        *[f"- Given {ac.given}, when {ac.when}, then {ac.then}" for ac in prd.acceptance_criteria],
+        "## Success metrics",
+        *[f"- {m.name}: {m.definition} (target: {m.target})" for m in prd.success_metrics],
+        "## Out of scope",
+        *[f"- {o}" for o in prd.out_of_scope],
+        "## Risks",
+        *[f"- [{r.severity}] {r.description}" for r in prd.risks],
+    ]
+    return "\n".join(lines)
+
+
+def notion_node(state: PMCopilotState) -> dict:
+    """C7 wrapper: publish the approved PRD as a Notion page via MCP.
+
+    Deterministic mapping, same rationale as jira_node. Degrades on failure:
+    the page is a rendering of an artifact that lives fully in checkpointed
+    state — a lost view doesn't damage the system of record, so a failure is
+    logged into error_messages and the run proceeds to planner.
+    """
+    prd = state["prds"][-1]
+    try:
+        page = call_tool("create_page", {
+            "data": {
+                "database_id": "prd-db",
+                "title": f"[PRD] {prd.theme}",
+                "properties": {"status": "approved"},
+                "content": _render_prd_content(prd),
+            }
+        })
+        return {"notion_page_id": page["id"], "current_step": STEP_NOTION_DONE}
+    except Exception as exc:
+        return {
+            "error_messages": [f"notion_node (degraded, run continues): {type(exc).__name__}: {exc}"],
+            "current_step": STEP_NOTION_DONE,
+        }
+
+
+def slack_node(state: PMCopilotState) -> dict:
+    """C7 wrapper: compose + post the exec digest to Slack via MCP.
+
+    The one model-authored argument in the C7 surface: composition is genuine
+    editorial judgment (digest -> channel post), so the model writes the text;
+    code owns the tool call. Degrades on failure, same ontology as notion —
+    the post is a notification about artifacts that live in state.
+    """
+    # Router invariant: control reaches here only after all audiences are
+    # summarized, so the exec digest exists — a violated invariant fails loud.
+    digest = next(d for d in state["digests"] if d.audience == "exec")
+    try:
+        text = compose_slack_post(digest)
+        message = call_tool("post_message", {"data": {"channel": "#product", "text": text}})
+        return {"slack_message_ts": message["ts"], "current_step": STEP_SLACK_DONE}
+    except Exception as exc:
+        return {
+            "error_messages": [f"slack_node (degraded, run completes without post): {type(exc).__name__}: {exc}"],
+            "current_step": STEP_SLACK_DONE,
+        }
+
+
 def supervisor_node(state: PMCopilotState) -> dict:
     """Deterministic supervisor: holds no logic, writes nothing.
 
@@ -175,16 +249,18 @@ ROUTE_TABLE = {
     STEP_DRAFTING_DONE: "approval_gate",
     STEP_APPROVED: "jira",
     STEP_REVISION_REQUESTED: "drafter",
-    STEP_JIRA_FILED: "planner",
+    STEP_JIRA_FILED: "notion",
+    STEP_NOTION_DONE: "planner",
     STEP_PLANNING_DONE: "summarizer",
     STEP_ERROR: END,
+    STEP_SLACK_DONE: END,
 }
 
 
 def route_from_supervisor(state: PMCopilotState) -> str:
     step = state.get("current_step", STEP_START)
     if step == STEP_SUMMARIZING_DONE:
-        return "summarizer" if _remaining_audiences(state) else END
+        return "summarizer" if _remaining_audiences(state) else "slack"
     return ROUTE_TABLE[step]
 
 
@@ -197,15 +273,20 @@ def build_graph(checkpointer=None, interrupt_before=None):
     g.add_node("summarizer", summarizer_node)
     g.add_node("approval_gate", approval_node)
     g.add_node("jira", jira_node)
+    g.add_node("notion", notion_node)
+    g.add_node("slack", slack_node)
 
     g.add_edge(START, "supervisor")
-    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "approval_gate", "planner", "summarizer", "jira", END],)
+    g.add_conditional_edges("supervisor", route_from_supervisor, ["discovery", "drafter", "approval_gate", "planner",
+                                                                  "summarizer", "jira", "notion", "slack", END],)
     g.add_edge("discovery", "supervisor")
     g.add_edge("drafter", "supervisor")
     g.add_edge("planner", "supervisor")
     g.add_edge("summarizer", "supervisor")
     g.add_edge("approval_gate", "supervisor")
     g.add_edge("jira", "supervisor")
+    g.add_edge("notion", "supervisor")
+    g.add_edge("slack", "supervisor")
 
     return g.compile(checkpointer=checkpointer, interrupt_before=interrupt_before)
 

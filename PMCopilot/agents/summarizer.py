@@ -267,3 +267,59 @@ def summarize(
         f"Digest for '{audience}' failed after {1 + MAX_RETRIES} attempts. "
         f"Last error:\n{last_error}"
     )
+
+
+# ==========================================================================
+# Slack composition (C7): exec digest -> channel post
+# ==========================================================================
+#
+# Free-prose output, deliberately NOT tool-forced: there is no structure to
+# enforce, and a schema here would be ceremony. The model's job is editorial
+# condensation — the one post-gate composition in the pipeline where judgment
+# genuinely remains (no human ratified the digest's wording; it is already
+# model-authored prose).
+
+SLACK_COMPOSE_SYSTEM = (
+    "You condense an executive stakeholder digest into a short Slack channel post.\n"
+    "Rules:\n"
+    "- Use only facts present in the digest. Do not add numbers, dates, names, "
+    "or commitments that are not in it.\n"
+    "- A few sentences at most: what happened, why it matters, then the ask.\n"
+    "- Plain text only — no markdown headers, no bullet lists, no preamble like "
+    "'Here is the post'. Output the post text and nothing else."
+)
+
+SLACK_COMPOSE_MAX_TOKENS = 600
+
+
+def compose_slack_post(digest: StakeholderDigest) -> str:
+    """Condense the exec digest's reader-facing prose into a Slack post.
+
+    key_claims is deliberately excluded from the input: it is the judge-facing
+    sidecar and carries full jargon regardless of audience tone — feeding it
+    to the composer invites jargon leakage into a channel post.
+    """
+    client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    response = client.messages.create(
+        model=config.AGENT_MODEL,
+        max_tokens=SLACK_COMPOSE_MAX_TOKENS,
+        system=SLACK_COMPOSE_SYSTEM,
+        messages=[{
+            "role": "user",
+            "content": (
+                f"HEADLINE: {digest.headline}\n\n"
+                f"BODY:\n{digest.body}\n\n"
+                f"CALL TO ACTION: {digest.call_to_action}"
+            ),
+        }],
+    )
+    if response.stop_reason == "max_tokens":
+        raise RuntimeError(
+            f"Slack post truncated at the token ceiling "
+            f"(SLACK_COMPOSE_MAX_TOKENS={SLACK_COMPOSE_MAX_TOKENS}; "
+            f"{response.usage.output_tokens} generated). Budget failure — raise the ceiling."
+        )
+    text_block = next((b for b in response.content if b.type == "text"), None)
+    if text_block is None:
+        raise RuntimeError("Model returned no text block for the Slack post.")
+    return text_block.text.strip()
