@@ -341,6 +341,6 @@ Schema property key.
 | C9 eval harness (D31–32) | **GO** — failure-mode measurement first, retrieval threshold second | Three defect modes at rates visible only across repeated runs (above). All self-heal, so this is a characterization problem, not a reliability one — which is what a harness is for. Retrieval demoted: today produced behavioral adequacy, no new distance-score evidence; the ~1.2-band problem is unchanged. |
 | Draft PR to MCP servers repo | **GO, deferred to C10** | Quality condition met: 15 tool calls, zero degrades, zero transport failures. Deferred because the ask was a quality decision, not a same-day ship. Scope it implies: init-on-import for all three stores (elevates the carried `init_db()`/`init_store()`/`init_log()` parked item — a stranger cloning hits FileNotFoundError on first write), configurable storage paths, install/config README with the Desktop JSON block, one-server-vs-three packaging decision. |
 
-Per-run records, predictions, and artifact checks: [`docs/integration_run.md`](docs/integration_run.md)
+Per-run records, predictions, and artifact checks: [`docs/integration_run.md`](../../docs/integration_run.md)
 
 ---
