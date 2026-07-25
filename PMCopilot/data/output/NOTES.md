@@ -13,6 +13,8 @@ pool) held on all three themes. The repair loop never fired across any run.
 Relevance — does the cited issue actually support the story's claim — is where
 the defects live, and it is not something provenance guarantees.
 
+---
+
 ## Per-theme findings
 
 ### authentication
@@ -50,12 +52,16 @@ the defects live, and it is not something provenance guarantees.
   attribution-granularity gap (how IDs propagate when one pain point yields
   multiple stories), not a prompt issue.
 
+---
+
 ## Zero-target metrics (all three themes)
 Success metrics split into two kinds: measurable-by-us (Pydantic warning count,
 xfail count, 100% parallel-call attribution in the test harness — deterministic,
 runnable) and world-dependent ("0 open crash reports within a release cycle" —
 depends on users filing issues, which we do not control). The latter are wishful
 as written; absence of reports is not proof of a fix.
+
+---
 
 ## Topic 3 decision: no prompt revision
 Three distinct defect CLASSES, each appearing exactly once: prose miscount
@@ -65,6 +71,8 @@ are logged here and will trigger a fix only on recurrence in future themes.
 Two of the three are not even prompt-fixable (one is code logic, one is
 borderline-promptable but premature on n=1).
 
+---
+
 ## Prediction scorecard
 - Pain-point counts: predicted 4/8 (streaming/tool_calling), actual 6/7. Both
   misses in the direction of "clustering granularity does not track title-hit
@@ -72,6 +80,8 @@ borderline-promptable but premature on n=1).
 - Repair loop: predicted "won't fire" both themes — correct, 2/2. Grounding
   design absorbed two token-dense new corpus regions without a single retry.
   
+---
+
 ## Sonnet 5 regeneration — auth theme
 
 _Baseline note: the checkpoint sections above describe the reviewed 4.6 output.
@@ -114,6 +124,8 @@ selection was arbitrary). Run 3 kept as an eval fixture WITH this repair flag:
 for raw-output-distribution characterization, a repaired sample is
 post-intervention, not raw — it must not be treated as an equivalent raw sample.
 
+---
+
 ## Sonnet 5 regeneration — tool_calling theme
 
 **Counts variable (7 / 8 / 8 across three draws) but story-mapping 1:1 every
@@ -152,6 +164,8 @@ which stayed inert across all nine draws.
 none). Selection is arbitrary (as with streaming), not principled-by-repair (as
 with auth). Canonical = run 1 by convention — the 7-point variant; the count
 difference is NOT a quality ranking.
+
+---
 
 ## C5 Stakeholder Summarizer — key_claims defect chain
 
@@ -256,6 +270,8 @@ tested for it.
   stakes-demanding tone instruction (recurrence-gated beyond exec n=2).
 - Commit-message convention drift (C4 `feat:` vs C5 `C5:`) — pick one going forward.
 
+---
+
 ## C7 MCP Server: Jira tools + orchestrator integration
 
 **Deterministic filing over model-driven (deliberate).** The post-approval Jira
@@ -284,3 +300,47 @@ or resume logic added later must account for possibly-existing artifacts.
 and `roadmap` survived by absence. Rule: on persistent threads, pass only the
 keys you mean to write. Demo script now derives a fresh thread_id per run —
 the pattern C8's Streamlit layer inherits.
+
+---
+
+## Integration Checkpoint — Full-System Runs
+
+**Result: 5/5 full success, after a blocking defect found and fixed on run 1.**
+
+Five end-to-end runs against the 200-issue langchain corpus with representative
+topic sampling (topics a working PM would plausibly bring to this corpus, not
+engineered for difficulty). Gate: approve-only on runs 2–4; revise-then-approve
+on runs 1 and 5 (dense vs. thin evidence, controlled comparison). All artifacts
+content-ground-truthed on every run — Jira body verbatim, Notion page fully
+rendered, Slack post composed and caveat-carrying. Zero degrade-path
+activations across 15 MCP tool calls.
+
+**Blocking defect (run 1).** The roadmap planner's dependency-detection tool
+built its JSON Schema with PRD theme names as property keys. Any multi-word
+theme produces a hard API 400 (property keys are charset-restricted). Every
+prior run in the project's history used a single-word topic, so the bug had
+never fired; all five of today's topics would have failed identically. Fixed by
+restructuring the tool schema so themes are values in an array, not keys —
+completeness and uniqueness checks moved from schema enforcement into the
+validator as repairable defects. Principle: free text must never be a JSON
+Schema property key.
+
+**Failure modes characterized.** All self-healed; none reached the gate.
+
+| Component | Decision | Basis |
+|---|---|---|
+| C8 Streamlit (D29–30) | **GO** | Latencies viable for the staged-status UI Day 29 specifies: ~1:00 invoke→first PRD, ~0:51/revise, ~1:00 post-approve→final. Gate protocol survived 7 transactions across 5 threads, zero misinterpretations; checkpoint-resume worked every thread. Design requirement discovered: the UI must render retry states, not only success states. |
+| C9 eval harness (D31–32) | **GO** — failure-mode measurement first, retrieval threshold second | Three defect modes at rates visible only across repeated runs (above). All self-heal, so this is a characterization problem, not a reliability one — which is what a harness is for. Retrieval demoted: today produced behavioral adequacy, no new distance-score evidence; the ~1.2-band problem is unchanged. |
+| Draft PR to MCP servers repo | **GO, deferred to C10** | Quality condition met: 15 tool calls, zero degrades, zero transport failures. Deferred because the ask was a quality decision, not a same-day ship. Scope it implies: init-on-import for all three stores (elevates the carried `init_db()` / `init_store()` / `init_log()` parked item — a stranger cloning hits FileNotFoundError on first write), configurable storage paths, install/config README with the Desktop JSON block, one-server-vs-three packaging decision. |
+
+**Go/no-go.**
+
+| Component | Decision | Basis |
+|---|---|---|
+| C8 Streamlit (D29–30) | **GO** | Latencies viable for the staged-status UI Day 29 specifies: ~1:00 invoke→first PRD, ~0:51/revise, ~1:00 post-approve→final. Gate protocol survived 7 transactions across 5 threads, zero misinterpretations; checkpoint-resume worked every thread. Design requirement discovered: the UI must render retry states, not only success states. |
+| C9 eval harness (D31–32) | **GO** — failure-mode measurement first, retrieval threshold second | Three defect modes at rates visible only across repeated runs (above). All self-heal, so this is a characterization problem, not a reliability one — which is what a harness is for. Retrieval demoted: today produced behavioral adequacy, no new distance-score evidence; the ~1.2-band problem is unchanged. |
+| Draft PR to MCP servers repo | **GO, deferred to C10** | Quality condition met: 15 tool calls, zero degrades, zero transport failures. Deferred because the ask was a quality decision, not a same-day ship. Scope it implies: init-on-import for all three stores (elevates the carried `init_db()`/`init_store()`/`init_log()` parked item — a stranger cloning hits FileNotFoundError on first write), configurable storage paths, install/config README with the Desktop JSON block, one-server-vs-three packaging decision. |
+
+Per-run records, predictions, and artifact checks: [`docs/integration_run.md`](docs/integration_run.md)
+
+---
