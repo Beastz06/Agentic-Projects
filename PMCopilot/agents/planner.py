@@ -203,25 +203,39 @@ dependency between them on the basis of shared vocabulary.
 
 
 def _build_dep_tool(themes: list[str]) -> dict:
-    """Dynamic tool schema: one NAMED slot per theme, each a list of the themes
-    it depends on. Named fixed fields (not an anonymous list-in-a-wrapper)
-    resist the output-stringification quirk. Built from the actual input themes
-    at call time."""
-    properties = {
-        theme: {
-            "type": "array",
-            "items": {"type": "string"},
-            "description": f"Themes that '{theme}' depends on (must ship first). Empty if none.",
-        }
-        for theme in themes
-    }
+    """Fixed schema: themes are VALUES, never property keys. Free text in a
+    JSON-Schema property key is a request-time 400 (key charset is
+    restricted); values are unconstrained. Completeness and uniqueness —
+    which the old named-slot schema got from `required` and key-uniqueness —
+    move into _validate_dep_output as repairable defects. Valid themes are
+    named in the description; violations route through the repair loop, not
+    schema enforcement, preserving the invalid-edges-REPAIR ruling."""
     return {
         "name": DEP_TOOL_NAME,
-        "description": "Submit, per PRD theme, the list of themes it depends on.",
+        "description": (
+            "Submit, per PRD theme, the list of themes it depends on. "
+            f"Submit exactly one entry per theme. Valid themes: {themes}."
+        ),
         "input_schema": {
             "type": "object",
-            "properties": properties,
-            "required": themes,
+            "properties": {
+                "dependencies": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "theme": {"type": "string", "description": "The PRD theme this entry is for."},
+                            "depends_on": {
+                                "type": "array",
+                                "items": {"type": "string"},
+                                "description": "Themes this one depends on (must ship first). Empty if none.",
+                            },
+                        },
+                        "required": ["theme", "depends_on"],
+                    },
+                }
+            },
+            "required": ["dependencies"],
         },
     }
 
@@ -250,18 +264,30 @@ def _build_dep_prompt(drafts: list[RoadmapItemDraft], prds: list[PRD]) -> str:
 
 
 def _validate_dep_output(raw: dict, theme_set: set[str]) -> dict[str, list[str]]:
-    """Validate the dependency call's output. Raises ValueError naming the
-    defect (invalid edge or cycle) so the repair loop can feed it back.
-    Returns {theme: [deps]} on success.
+    """Validate the dependency call's output: {"dependencies": [{theme, depends_on}]}.
+    Raises ValueError naming the defect so the repair loop can feed it back.
+    Returns {theme: [deps]} on success — caller shape unchanged.
 
-    Per prior ruling: invalid edges REPAIR, not strip. An unknown TOP-LEVEL key
-    is harmless (it cannot map to any draft) and is ignored; an invalid EDGE
-    VALUE (unknown theme, self-reference) is a defect the model must fix."""
+    Rulings carried over: unknown-theme ENTRIES are harmless (ignored);
+    invalid EDGE VALUES repair. New defect classes the array shape makes
+    possible (the old keyed schema made them inexpressible): duplicate
+    entries and missing themes — both repair."""
+    entries = raw.get("dependencies")
+    if not isinstance(entries, list):
+        raise ValueError("Output must contain a 'dependencies' array.")
+
     problems = []
     edges: dict[str, list[str]] = {}
-    for theme, deps in raw.items():
+    for entry in entries:
+        if not isinstance(entry, dict) or "theme" not in entry:
+            problems.append(f"Malformed entry (need 'theme' and 'depends_on'): {entry!r}")
+            continue
+        theme = entry["theme"]
+        deps = entry.get("depends_on", [])
         if theme not in theme_set:
-            # An unknown top-level key is harmless (ignored), not a defect.
+            continue  # unknown entry: harmless, ignored (prior ruling)
+        if theme in edges:
+            problems.append(f"'{theme}' appears more than once; submit exactly one entry per theme.")
             continue
         bad = [t for t in deps if t not in theme_set]
         if bad:
@@ -269,17 +295,20 @@ def _validate_dep_output(raw: dict, theme_set: set[str]) -> dict[str, list[str]]
                 f"'{theme}' lists dependencies on unknown themes {bad}; "
                 f"valid themes are {sorted(theme_set)}."
             )
-        self_ref = [t for t in deps if t == theme]
-        if self_ref:
+        if theme in deps:
             problems.append(f"'{theme}' lists itself as a dependency.")
         edges[theme] = [t for t in deps if t in theme_set and t != theme]
 
-    if problems:
-        raise ValueError("Invalid dependency edges:\n" + "\n".join(problems))
+    missing = theme_set - set(edges)
+    if missing:
+        problems.append(
+            f"Missing entries for themes {sorted(missing)}; submit exactly one entry per theme."
+        )
 
-    # Cycle check HERE so the repair loop can act on it (the sort in [3] stays
-    # as a safety net). graphlib detects the cycle for us. A cycle is
-    # unschedulable — reject-and-regenerate, not trust.
+    if problems:
+        raise ValueError("Invalid dependency submission:\n" + "\n".join(problems))
+
+    # Cycle check unchanged.
     sorter = graphlib.TopologicalSorter()
     for theme, deps in edges.items():
         sorter.add(theme, *deps)

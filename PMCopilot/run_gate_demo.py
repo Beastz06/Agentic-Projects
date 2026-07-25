@@ -8,6 +8,7 @@ from langgraph.types import Command
 from gate_protocol import interpret_verdict
 from orchestrator import build_graph, make_saver
 from datetime import datetime, timezone
+import argparse
 
 DB = "pmcopilot_demo.sqlite"
 THREAD_ID = f"gate-demo-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
@@ -15,8 +16,12 @@ CFG = {"configurable": {"thread_id": THREAD_ID}}
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Run the full pipeline with a live approval gate.")
+    parser.add_argument("--topic", required=True, help="Discovery topic for this run.")
+    args = parser.parse_args()
+
     g = build_graph(checkpointer=make_saver(DB))
-    g.invoke({"topic": "authentication"}, CFG)
+    g.invoke({"topic": args.topic}, CFG)
 
     while True:
         snapshot = g.get_state(CFG)
@@ -44,8 +49,6 @@ def main() -> None:
     print("jira_issue_id:", final.get("jira_issue_id"))
     print("notion_page_id:", final.get("notion_page_id"))
     print("slack_message_ts:", final.get("slack_message_ts"))
-    print("roadmap items:", len(final["roadmap"] or []))
-    print("digests:", [d.audience for d in final["digests"]])
     print("roadmap items:", len(final["roadmap"] or []))
     print("digests:", [d.audience for d in final["digests"]])
     print("errors:", final["error_messages"] if final["error_messages"] else "none")
