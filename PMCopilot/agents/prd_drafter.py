@@ -5,7 +5,8 @@ the smallest possible pen: it writes prose and cites source pain points by
 index; code maps indices to verified evidence_issue_ids. The model never sees
 or types an issue number. All validation failures — structural (Pydantic) or
 semantic (issue numbers in prose) — route through one repair loop with a
-2-retry budget; exhaustion raises.
+2-retry budget; exhaustion raises. Each retry emits a telemetry record; the
+exhaustion is the only thing that reaches graph state.
 """
 import re
 import anthropic
@@ -13,6 +14,7 @@ from pydantic import ValidationError
 import config
 from schemas.discovery import DiscoveryFinding
 from schemas.prd import PRD
+import telemetry
 
 TOOL_NAME = "submit_prd"
 MAX_RETRIES = 2
@@ -209,6 +211,7 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
             raise RuntimeError("Model returned no tool_use block despite forced tool_choice.")
 
         error_text = None
+        defect_origin = None
         prd = None
         try:
             # Stamp intrinsic identity at construction: model-emitted theme is
@@ -218,6 +221,7 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
             prd = PRD.model_validate({**tool_use.input, "theme": finding.theme})
         except ValidationError as e:
             error_text = str(e)
+            defect_origin = type(e).__name__
 
         if prd is not None:
             hits = []
@@ -231,13 +235,19 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
                         + "\n".join(hits)
                         + "\nRemove them from the prose. Change nothing else."
                 )
+                defect_origin = telemetry.DEFECT_PROSE_ID_LEAK
                 prd = None
 
         if prd is not None:
             return _attach_evidence(prd, finding)
 
         last_error = error_text
-        print(f"PRD validation failed on attempt {attempt + 1}; retrying. Error: {error_text[:200]}")
+        telemetry.repair_fire(
+            telemetry.drafter_log,
+            attempt=attempt + 1,
+            defect_origin=defect_origin,
+            detail=error_text,
+        )
         messages = messages + [
             {"role": "assistant", "content": response.content},
             {
