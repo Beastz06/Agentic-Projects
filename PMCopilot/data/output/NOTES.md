@@ -344,3 +344,34 @@ Schema property key.
 Per-run records, predictions, and artifact checks: [`docs/integration_run.md`](../../docs/integration_run.md)
 
 ---
+
+## C8 UI Runs — Day 29
+
+Two runs through the Streamlit app. Four drafter fires, one full
+revise-then-approve pipeline (zero errors, zero degrades, all artifacts
+written). Recorded because the fires exposed a dimension the integration
+checkpoint never measured.
+
+**Retry depth is a measurement gap, not a behavioral change.** Three of four
+fires consumed the full `MAX_RETRIES = 2` budget and succeeded on attempt 3 —
+one failure short of `STEP_ERROR -> END`. Day 28 banked "self-heals every
+time" but measured fire *rate* only; depth was never recorded. One fire also
+showed **partial repair** (3 validation errors -> 1), which falsifies the
+Day 20 premise that a failed repair means the model can't satisfy the
+contract.
+
+**C9 consequence:** the harness must aggregate `pmc_attempt` as a
+distribution, not a count. Fire rate alone would have shown four healthy
+self-heals and hidden three near-exhaustions. The field already carries it.
+
+**Risk-collapse now 4-for-4, trigger refined.** Fired on a dense topic — the
+model wrote a thin-evidence caveat anyway, so the trigger is the caveat, not
+evidence density. `Severity -> schemas/common.py` is the best-evidenced open
+fix in the ledger.
+
+**New specimen (n=1):** top-level `target_user` omission with no `{'prd': ...}`
+envelope — not wrapper-nesting, not in the Day 28 set. Logged, no action.
+
+Per-fire records: [`docs/ui_run.md`](../../docs/ui_run.md)
+
+---
