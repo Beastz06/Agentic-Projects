@@ -45,6 +45,8 @@ DB = "pmcopilot_demo.sqlite"
 CORPUS = "langchain-ai/langchain — 200 issues"
 SKIP_STAGES = {"supervisor", "approval_gate"}   # routing locus, writes nothing, renders as noise
 SEVERITY = {"high": "red", "medium": "orange", "low": "gray"}
+AUDIENCES = ("eng", "exec", "customer")      # display order = schema Literal order
+AUDIENCE_LABELS = {"eng": "Engineering", "exec": "Executive", "customer": "Customer"}
 
 st.set_page_config(page_title="PMCopilot", layout="wide")
 
@@ -350,6 +352,102 @@ def render_roadmap(ledger: list[dict]) -> None:
                         st.markdown(f"*Impact {item.impact.score}* — {item.impact.rationale}")
 
 
+def _digest_runs(ledger: list[dict], run_topics: dict) -> list[str]:
+    """Runs the selector can offer: produced a digest AND carry a known topic.
+
+    The intersection is the point. run_topics is written at Run press, so it
+    holds runs that errored or were abandoned at the gate — offering those
+    leads to an empty panel. The ledger alone would offer bare thread ids.
+    Ledger order, so the newest run is last.
+    """
+    out = []
+    for rec in ledger:
+        if rec["channel"] != "digests":
+            continue
+        run = rec["run"]
+        if run in out or run not in run_topics:
+            continue
+        out.append(run)
+    return out
+
+
+def _newest_complete_run(ledger: list[dict], runs: list[str]) -> str | None:
+    """Latest run holding a full audience set. Counted, not inferred.
+
+    The summarizer fans out across three supersteps, so a run sits at one and
+    two digests for ~20-30s. Advancing on the first would paint a stacked view
+    with two thirds missing — the inverse of the claim that layout exists for.
+    """
+    counts = {}
+    for rec in ledger:
+        if rec["channel"] == "digests":
+            counts[rec["run"]] = counts.get(rec["run"], 0) + 1
+    complete = [r for r in runs if counts.get(r, 0) >= len(AUDIENCES)]
+    return complete[-1] if complete else None
+
+
+def render_digests(ledger: list[dict], run_topics: dict) -> None:
+    """One topic at a time; three audiences stacked, no sub-navigation.
+
+    Stacked rather than tabbed because the claim this view exists to make is
+    "same input, three audiences, three different asks" — and a click hides two
+    thirds of it. Accepted cost is scroll length, which is why key_claims sits
+    behind a popover: it is a C9 instrument and is redundant with body by
+    construction (digest.py indexes claims already in the prose).
+
+    Rendered in AUDIENCES order, not arrival order. _remaining_audiences returns
+    sorted(), so the fan-out actually runs customer -> eng -> exec; display order
+    is a render-time choice, consistent with everything else in this file.
+    """
+    st.subheader("Stakeholder digests")
+    runs = _digest_runs(ledger, run_topics)
+    if not runs:
+        st.info("No digests yet — the summarizer runs after approval.")
+        return
+
+    # LATCH. Streamlit re-executes top to bottom with no events, so an
+    # unconditional write here would overwrite the selection on the very rerun
+    # the user's own click triggers — the older topics would be unreachable.
+    # Firing on a CHANGE against last_advanced is what makes this an event.
+    newest = _newest_complete_run(ledger, runs)
+    if newest is not None and newest != st.session_state.last_advanced:
+        st.session_state.digest_run = newest
+        st.session_state.last_advanced = newest
+    if st.session_state.digest_run not in runs:
+        st.session_state.digest_run = runs[-1]
+
+    st.selectbox("Topic", runs, format_func=lambda r: run_topics.get(r, r),
+                 key="digest_run")
+    run = st.session_state.digest_run
+
+    by_audience = {
+        d.audience: d
+        for rec in ledger
+        if rec["channel"] == "digests" and rec["run"] == run
+        for d in rec["value"]
+    }
+    st.caption(f"{len(by_audience)} of {len(AUDIENCES)} audiences · run `{run}`")
+
+    for audience in AUDIENCES:
+        digest = by_audience.get(audience)
+        st.divider()
+        st.markdown(f"#### {AUDIENCE_LABELS[audience]}")
+        if digest is None:
+            st.caption("Pending — the summarizer has not reached this audience.")
+            continue
+        st.markdown(f"**{digest.headline}**")
+        st.write(digest.body)
+        st.markdown(f"**Ask** — {digest.call_to_action}")
+        with st.popover("Key claims"):
+            # Empty is LEGAL at both layers — digest.py's prompt affirmatively
+            # licenses a qualitative digest. Absence is not a defect.
+            if not digest.key_claims:
+                st.caption("None — the model marked this digest qualitative.")
+            for claim in digest.key_claims:
+                st.markdown(f"- {claim.text}")
+                st.caption(f"grounded in: {', '.join(claim.grounded_in) or '—'}")
+
+
 # ---------------------------------------------------------------- state
 ss = st.session_state
 ss.setdefault("phase", "idle")          # idle -> streaming -> awaiting_verdict / done
@@ -359,6 +457,9 @@ ss.setdefault("topic", None)
 ss.setdefault("proposal", None)
 ss.setdefault("ledger", [])
 ss.setdefault("roadmap_artifact", None)
+ss.setdefault("run_topics", {})       # thread_id -> topic, written at Run press
+ss.setdefault("digest_run", None)     # selector widget state
+ss.setdefault("last_advanced", None)  # latch: what auto-advance last acted on
 
 graph = get_graph()
 cfg = {"configurable": {"thread_id": ss.thread_id}} if ss.thread_id else None
@@ -385,6 +486,7 @@ if ss.phase == "idle":
     if st.button("Run", type="primary", disabled=not topic):
         ss.topic = topic
         ss.thread_id = f"ui-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}"
+        ss.run_topics[ss.thread_id] = topic
         ss.events = []
         ss.phase = "streaming"
         st.rerun()
@@ -405,7 +507,7 @@ else:
         render_roadmap(ss.ledger)
 
     with tab_digests:
-        st.info("Digest viewer — next build.")
+        render_digests(ss.ledger, ss.run_topics)
 
     with tab_run:
         st.caption(f"Topic: {ss.topic}")
