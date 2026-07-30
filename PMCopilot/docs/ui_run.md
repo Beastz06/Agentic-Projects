@@ -229,3 +229,66 @@ fabrication trap.
   past four quarters).
   
 ---
+
+## C8 Part 3 — digest viewer
+
+Two approve-only runs, distinct topics: "streaming behavior and chunk handling"
+(`ui-20260730T171558Z`) and "token counting and usage metadata"
+(`ui-20260730T172159Z`). Ledger empty at session start — `session_state` does
+not survive a browser session, so the prior session's PRDs were unrecoverable
+while their checkpoints persisted. Second evidenced instance of the cold-load
+gap.
+
+### Verified
+
+| behaviour | result |
+|---|---|
+| Empty state before any digest | renders |
+| Partial-run pending caption during fan-out | renders |
+| Three sections, `AUDIENCES` order, `3 of 3` caption | correct |
+| Auto-advance on the complete audience set | fires |
+| Latch — manual selection survives subsequent reruns | holds |
+
+The latch is the only one a simulated trace could not establish. Written
+unconditionally, the auto-advance would overwrite the selection on the rerun
+the user's own click triggers, making every run but the newest unreachable.
+Streamlit has no events; "do X when E happens" must be written as "do X when
+E differs from what I last acted on."
+
+---
+
+### Audience differentiation — the claim the view exists to make
+
+Validated on both runs. Engineering names symbols (`ClearToolUsesEdit`,
+`SummarizationMiddleware`, tiktoken, langchain-openai); executive abstracts to
+cost tracking and asks for approval; customer is second-person and asks for
+reports. Three genuinely different documents from one PRD, visible without a
+click — which is why the layout is stacked rather than tabbed.
+
+---
+
+### grounded_in degeneracy, confirmed visually
+
+Every claim in both runs grounds to the single theme string. Structural, not
+incidental: `prds` is a plain channel holding one PRD, so `summarize()`
+receives a one-element theme set and membership is trivially satisfiable.
+C9's grounding dimension is near-degenerate on single-PRD scenarios.
+
+---
+
+### Claim volume tracks input theme count
+
+C5 measured eng 17/17, exec 9→11, customer 13→15 — over a **three-theme**
+input. Single-PRD runs here show roughly four to six. Single-PRD C9 scenarios
+hand the judge a materially thinner index. Counts not read exactly; popovers
+scroll.
+
+---
+
+### Schema identifier in reader-facing prose
+
+Engineering digest, token-counting run: "Depends_on is nothing, so this can
+proceed independently of other roadmap items." A raw field name addressed to
+a person.
+
+---

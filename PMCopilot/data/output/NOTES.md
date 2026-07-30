@@ -242,6 +242,47 @@ benefit, a stakes-frame) is a fabrication channel when the input lacks the
 material for that move. Audit tone blocks as fabrication surfaces, not just
 schema and explicit content rules.**
 
+### Denominator fabrication — a bare integer loses its scale across a layer (C8 Part 3)
+
+Exec digest, token-counting run: the work "is a large effort (**rated 8/10**)."
+The same digest says "Impact is rated 4/5" — **correct**. Schema:
+
+- `EffortScore.score: Literal[1, 2, 3, 5, 8, 13]` — Fibonacci, closed set, top 13.
+- `ImpactScore.score: int = Field(ge=1, le=5)`.
+
+Effort 8 is the fifth of six rungs. It is not out of 10.
+
+**The asymmetry is the finding.** `summarize()` receives `RoadmapItem` objects
+carrying bare integers; the planner's scale lives in `SCORE_SYSTEM_PROMPT`,
+which the summarizer never sees. Both denominators were invented. It guessed 5
+for impact and landed right; it guessed 10 for effort because *8/10* is the
+idiomatic phrasing in English. **The model supplied the most common denominator
+in natural language rather than the schema's, at a layer boundary where the
+scale was structurally unavailable.**
+
+**Second concrete instance of the layering blind spot above.** The eng digest's
+`key_claims` entry reads "effort estimate of 8" — no denominator, clean. The
+fabrication lives only in unindexed exec *body* prose, exactly where the C9
+judge cannot see it. The first instance was a causal claim; this one is numeric,
+which makes it the harder case: the indexed sidecar is not merely silent, it is
+*correct*, so index-vs-body agreement checking would pass.
+
+**The numbers-rule is the wrong shape to catch it.** The discipline is "no
+numbers absent from input." `8` is in the input. Only `10` is invented — the
+model imported a real number and fabricated its *frame*. A rule over numeric
+tokens cannot express a constraint on the scale a number is presented against.
+
+n=1, one exec digest. Recorded as a mechanism, not a rate — per the withdrawn
+Risk-collapse count.
+
+**Not a regression of the tone-channel fix.** That fix's redirect toward the
+PRDs' real epistemics is visible in both runs and both audiences ("evidence base
+is thin", "each backed by only a single reported case"). Distinct mechanism.
+
+PARKED: the fix direction is the summarizer's input projection, not its prompt —
+pass the scale, or pass a pre-formatted string. Same "model fills only what it
+must judge" rule, one layer further out than where it was established.
+
 ### Provenance / fill-party (bank alongside evidence_issue_ids and PRD.theme)
 grounded_in has the SAME SHAPE as C4's code-filled evidence_issue_ids (a list of
 source refs) but is MODEL-filled. **Fill-party is set by who holds the
@@ -415,5 +456,40 @@ count attempts; the ledger counts outcomes.
 
 **`st.session_state` survives a rerun, not a browser refresh.** Cold-load /
 refresh recovery is now an evidenced gap, not a hypothetical one.
+
+---
+
+## C8 Part 3 — digest viewer (C8 complete)
+
+Per-run records: [`docs/ui_run.md`](../../docs/ui_run.md)
+
+**Built.** Topic selector over the intersection of a Run-press `run -> topic`
+map and runs holding digest records; three audiences stacked with no
+sub-navigation; `key_claims` behind a popover. Ledger record schema unchanged
+at five fields — the topic is a run-level fact, not a per-record stamp.
+
+**Audience differentiation validated.** Same PRD, three genuinely different
+documents: engineering names symbols, executive abstracts and asks for
+approval, customer is second-person and asks for reports. This is the claim
+the stacked layout exists to make, and it holds on both runs.
+
+**`grounded_in` is degenerate on single-PRD runs.** `prds` is a plain channel
+holding one PRD, so `summarize()` receives a one-element theme set and the
+membership check is trivially satisfiable. C9's grounding dimension needs
+multi-theme scenarios to measure anything.
+
+**Claim volume tracks input theme count.** C5's eng 17 / exec 9-11 /
+customer 13-15 came from a three-theme input; single-PRD runs here show
+roughly four to six. Single-PRD C9 scenarios hand the judge a thinner index.
+
+**Streamlit has no events, only repeated evaluations of state.** "Do X when E
+happens" must be written as "do X when E differs from what I last acted on."
+The auto-advance is latched for this reason; unlatched, it would overwrite the
+user's selection on the rerun their own click triggers. `expanded`-at-creation
+is a special case of the same rule.
+
+C8 closes here. The 30-second screen recording specified with the views is
+deliberately deferred to the C10 demo session, where a 3-minute Loom with a
+live-run segment is already scheduled and the eval numbers will exist.
 
 ---
