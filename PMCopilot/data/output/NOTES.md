@@ -375,3 +375,45 @@ envelope — not wrapper-nesting, not in the Day 28 set. Logged, no action.
 Per-fire records: [`docs/ui_run.md`](../../docs/ui_run.md)
 
 ---
+
+## C8 Part 2 — views (PRD repository, roadmap board)
+
+Per-run records and planner scoring detail: [`docs/ui_run.md`](../../docs/ui_run.md)
+
+**Views built.** Four tabs: Run (streaming + gate), PRDs, Roadmap, Digests.
+PRD repository and roadmap board render over a session-scoped transcript ledger
+of updates-chunk payloads. Digest viewer not built — C8 continues.
+
+**Planner, first multi-item invocation (3 PRDs, one `plan()` call):**
+
+| finding | result |
+|---|---|
+| C4 scoring-differentiation | **NEGATIVE** — effort 8/8/8, one Fibonacci rung of six |
+| Quarter assignment | arithmetic on item count, not size — uniform effort + `budget=16` packs 2/quarter |
+| Impact scoring | **differentiates**, and on evidence density (5/5/4) |
+| C4 dependency positive-path | 0 detections across 3 overlapping infra PRDs — still unexercised |
+
+**Revise pass is a full redraft, not a patch.** Every field regenerated, not
+amended. Unprompted scope bookkeeping 3-for-3 (one earlier instance was a
+phrasing leak from the feedback text, corrected with a stripped-down probe).
+New: the model inverts risk POLARITY to match the new scope rather than deleting
+the risk — second-order bookkeeping.
+
+**Gate payload is 5 of 8 PRD fields.** `_prd_review_payload` omits
+`out_of_scope`, `risks`, `success_metrics` — never visible at the gate on any
+prior run. The gate now renders the full card from the ledger.
+
+**Risk-collapse count WITHDRAWN.** Absence of a repair line in a replayed
+transcript is not evidence of no-fire: `render_events` recreates stages
+collapsed, so fire and fire-hidden are indistinguishable. Prior 4-for-4 stands;
+no new data. Underlying gap: paint-on-emit does not survive replay, so retries
+are visible live and invisible at rest.
+
+**Ledger is retry-invariant** — 20 records per approve-only run at 0, 1, or 2
+retries. Repair loops run inside the node and emit no updates chunks. Events
+count attempts; the ledger counts outcomes.
+
+**`st.session_state` survives a rerun, not a browser refresh.** Cold-load /
+refresh recovery is now an evidenced gap, not a hypothetical one.
+
+---
