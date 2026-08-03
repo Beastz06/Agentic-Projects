@@ -1,0 +1,572 @@
+{
+  "authentication": {
+    "theme": "authentication",
+    "pain_points": [
+      {
+        "cluster": "Missing custom HTTP client support in langchain-anthropic blocks mTLS/cert-based authentication",
+        "evidence_issue_ids": [
+          35843,
+          35977,
+          36056
+        ],
+        "severity": "high",
+        "frequency": 3
+      },
+      {
+        "cluster": "Header/token forwarding failures for authenticated remote services (MCP server auth headers not propagated)",
+        "evidence_issue_ids": [
+          35574
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Inconsistent HTTP client handling across partner packages causing resource/config issues tied to client-level auth setup (Azure not reusing shared httpx client used for auth/connection config)",
+        "evidence_issue_ids": [
+          36259
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "SSRF protection bypass via environment-variable based authentication/allowlist checks (unauthorized hosts bypassing validation)",
+        "evidence_issue_ids": [
+          37297
+        ],
+        "severity": "high",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Provide first-class, consistent support across LangChain partner packages for injecting custom authenticated transport (mTLS, custom CA bundles, proxy headers) into model clients, and close security gaps where authentication/authorization checks (header forwarding, SSRF allowlisting) can be bypassed or are inconsistently enforced."
+  },
+  "token counting and usage metadata": {
+    "theme": "token counting and usage metadata",
+    "pain_points": [
+      {
+        "cluster": "Approximate token counting (count_tokens_approximately) systematically over-counts non-text/multimodal content blocks",
+        "evidence_issue_ids": [
+          35558,
+          38229
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Providers return corrupted/inflated usage_metadata token counts that break downstream cost tracking",
+        "evidence_issue_ids": [
+          37754
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Lack of exact/native provider token counting APIs forces reliance on inaccurate approximations",
+        "evidence_issue_ids": [
+          36661
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "No public, stable API for computing safe token-based message cutoffs for summarization/retention workflows",
+        "evidence_issue_ids": [
+          38249
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Token-count-based middleware triggers (context editing) behave incorrectly with persistent checkpointers, causing repeated re-counting/re-firing and wasted token-count calls",
+        "evidence_issue_ids": [
+          37815
+        ],
+        "severity": "high",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve the accuracy and reliability of LangChain's token accounting stack\u2014fixing content-block-specific overcounting in count_tokens_approximately, guarding against corrupted provider usage_metadata, adding native provider token-count API support, and exposing a stable public API for token-based message cutoff/retention logic\u2014so downstream cost tracking, context-window management, and summarization/eviction middleware behave correctly and efficiently even with persistent checkpointers."
+  },
+  "streaming behavior and chunk handling": {
+    "theme": "streaming behavior and chunk handling",
+    "pain_points": [
+      {
+        "cluster": "Provider-specific SSE/stream parsing incompatibilities causing zero chunks or dropped content",
+        "evidence_issue_ids": [
+          35442,
+          36809
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Streaming tool call argument fragmentation leading to premature execution with empty/invalid args",
+        "evidence_issue_ids": [
+          35514
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Duplicate/aggregated metadata fields from repeated terminal chunks during stream aggregation",
+        "evidence_issue_ids": [
+          38226
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Streaming + structured output interactions producing warnings or losing metadata (parsed field, response headers)",
+        "evidence_issue_ids": [
+          38034,
+          37421
+        ],
+        "severity": "medium",
+        "frequency": 2
+      },
+      {
+        "cluster": "disable_streaming / streaming mode toggling logic bugs causing crashes or unintended full-stream disablement",
+        "evidence_issue_ids": [
+          35436
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Agent/graph-level abstractions not properly propagating token-level streaming, breaking callbacks like on_llm_new_token",
+        "evidence_issue_ids": [
+          37869
+        ],
+        "severity": "medium",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve robustness and correctness of LangChain's streaming pipeline across providers by fixing SSE/event parsing edge cases, ensuring tool-call argument chunks are only executed once fully assembled, deduplicating/aggregating terminal stream metadata correctly, preserving structured-output metadata (parsed objects, response headers) during streaming, and making disable_streaming and agent-level streaming controls behave predictably and propagate token-level events reliably.\""
+  },
+  "retriever and vector store integrations": {
+    "theme": "retriever and vector store integrations",
+    "pain_points": [
+      {
+        "cluster": "Silent data loss on document/text count mismatches in vector stores",
+        "evidence_issue_ids": [
+          36745,
+          38203
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Retriever result fusion / deduplication issues (EnsembleRetriever RRF score inflation from duplicate chunks)",
+        "evidence_issue_ids": [
+          37046
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Lack of multimodal metadata support in embedding interface limiting vector store integrations with multimodal providers",
+        "evidence_issue_ids": [
+          38186
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Missing concurrency/throughput optimizations in embedding providers used by vector stores (OpenAI, Mistral)",
+        "evidence_issue_ids": [
+          36547,
+          36753
+        ],
+        "severity": "medium",
+        "frequency": 2
+      },
+      {
+        "cluster": "Limited configurability of vector store backend infrastructure settings (OpenSearch index creation settings)",
+        "evidence_issue_ids": [
+          38212
+        ],
+        "severity": "medium",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve the reliability and extensibility of LangChain's vector store and retriever integrations by enforcing strict validation on document/embedding count mismatches, deduplicating fused retrieval results, enabling multimodal metadata pass-through to embeddings, and exposing backend-specific configuration (e.g., OpenSearch index settings) and concurrency controls for embedding providers."
+  },
+  "document loaders and text splitters": {
+    "theme": "document loaders and text splitters",
+    "pain_points": [
+      {
+        "cluster": "HTMLSemanticPreservingSplitter extensibility limitations (no way to plug in a custom/tokenizer-based inner text splitter)",
+        "evidence_issue_ids": [
+          37358
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "HTMLSemanticPreservingSplitter processes malformed/unsafe links (empty href, javascript: pseudo-links) creating invalid or unsafe markdown output",
+        "evidence_issue_ids": [
+          37423
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "ExperimentalMarkdownSyntaxTextSplitter silently discards content when a code block is unclosed, causing silent data loss",
+        "evidence_issue_ids": [
+          36186
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "ExperimentalMarkdownSyntaxTextSplitter has O(n\u00b2) performance due to list.pop(0) usage on large markdown documents",
+        "evidence_issue_ids": [
+          36488
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "MarkdownHeaderTextSplitter lacks source line range metadata (start_line/end_line), hindering provenance/citation workflows for RAG",
+        "evidence_issue_ids": [
+          38125
+        ],
+        "severity": "low",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve the robustness, safety, and extensibility of LangChain's document splitters (HTMLSemanticPreservingSplitter and Markdown-based splitters) by fixing silent data loss and performance issues in markdown parsing, hardening HTML link handling against malformed/unsafe input, enabling pluggable tokenizer-aware sub-splitters, and adding optional source line-range metadata for provenance-aware chunking."
+  },
+  "prompt templates and output parsers": {
+    "theme": "prompt templates and output parsers",
+    "pain_points": [
+      {
+        "cluster": "Prompt template pretty-printing incorrectly renders partial variables",
+        "evidence_issue_ids": [
+          38193
+        ],
+        "severity": "low",
+        "frequency": 1
+      },
+      {
+        "cluster": "Output parsers (Pydantic/structured output) fail unpredictably when model output doesn't match expected schema shape (e.g., list vs string), producing confusing OutputParserException with no recovery guidance",
+        "evidence_issue_ids": [
+          36603,
+          38103
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Structured output serialization produces spurious PydanticSerializationUnexpectedValue warnings",
+        "evidence_issue_ids": [
+          36606
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Poor error messages in prompt template loading/construction (bare ValueError with no context)",
+        "evidence_issue_ids": [
+          35727
+        ],
+        "severity": "low",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve robustness and clarity of the prompt template and output parser stack by fixing partial-variable rendering in pretty_repr, providing clearer/documented recovery paths (e.g., with_fallbacks patterns) and error messages when structured/pydantic output parsing fails on shape mismatches, and eliminating spurious serialization warnings in structured output flows."
+  },
+  "tool calling and function calling": {
+    "theme": "tool calling and function calling",
+    "pain_points": [
+      {
+        "cluster": "Fragile/crashing parsing of malformed or fragmented tool call data",
+        "evidence_issue_ids": [
+          36679,
+          35514
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Lack of first-class API for programmatic/prefetched tool invocation without replaying full AIMessage+ToolMessage history (breaks with stricter model turn validation, e.g. Gemini 3.x)",
+        "evidence_issue_ids": [
+          35836
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Inadequate/undocumented tool error handling model - ToolException not catchable at agent/middleware level, handle_tool_error inconsistent across ToolNode vs @tool decorator",
+        "evidence_issue_ids": [
+          37195
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Tool call limiting/control middleware is reactive rather than proactive, leading to wasted tool calls and abrupt LLM behavior",
+        "evidence_issue_ids": [
+          35766
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Human-in-the-loop rejection handling ambiguity - concern that rejected tool calls could still be executed by ToolNode despite middleware intent",
+        "evidence_issue_ids": [
+          37093
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Incomplete observability/tracing metadata for tool call events (missing tool_call_id on on_tool_start, inconsistent with on_tool_error), hindering per-call attribution in streaming/parallel tool call UIs",
+        "evidence_issue_ids": [
+          37426
+        ],
+        "severity": "low",
+        "frequency": 1
+      },
+      {
+        "cluster": "Inconsistent support for structured output / function calling schemas across integrations (Pydantic schema unsupported in langchain-huggingface function calling)",
+        "evidence_issue_ids": [
+          36441
+        ],
+        "severity": "medium",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve the robustness and consistency of LangChain's tool/function-calling pipeline end-to-end\u2014covering resilient parsing of malformed or fragmented tool call payloads, a first-class API for injecting precomputed/programmatic tool results without fragile message replay, unified and documented tool error handling (ToolException across @tool, ToolNode, and middleware), proactive tool-call-limit guidance, reliable human-in-the-loop rejection enforcement, complete tool_call_id tracing across all tool lifecycle events, and consistent structured-output/function-calling schema support across model integrations."
+  },
+  "developer experience": {
+    "theme": "developer experience",
+    "pain_points": [
+      {
+        "cluster": "Rigid, high-level agent abstractions lack composability and extensibility for advanced/custom workflows",
+        "evidence_issue_ids": [
+          36310,
+          35836,
+          35842,
+          38170
+        ],
+        "severity": "high",
+        "frequency": 4
+      },
+      {
+        "cluster": "Extra dependency surface and version-drift pain from add-on packages (deepagents) required for core-feeling capabilities like Agent Skills",
+        "evidence_issue_ids": [
+          38170
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Model-internal data (raw response metadata, provider-specific fields like image 'detail') is silently dropped by core abstractions, limiting monitoring, evaluation, and correctness",
+        "evidence_issue_ids": [
+          36373,
+          36297
+        ],
+        "severity": "medium",
+        "frequency": 2
+      },
+      {
+        "cluster": "Partner/provider integrations lag behind upstream API changes (deprecated enums, deprecated tools), forcing developers to patch or work around outdated integration code",
+        "evidence_issue_ids": [
+          37701,
+          37938
+        ],
+        "severity": "medium",
+        "frequency": 2
+      },
+      {
+        "cluster": "Assigning/triaging contributor PRs is unclear or slow, with multiple contributors independently duplicating fixes while waiting for maintainer assignment",
+        "evidence_issue_ids": [
+          37701,
+          36297,
+          37938
+        ],
+        "severity": "low",
+        "frequency": 3
+      }
+    ],
+    "suggested_prd_seed": "Improve LangChain's developer experience by exposing agent-building blocks (Deep Agent middleware, Skills, steering, workflow context injection) as first-party, composable primitives rather than locked-in high-level abstractions or external-package dependencies, while ensuring core message/response conversion paths preserve full metadata and partner integrations stay current with upstream provider APIs.\""
+  },
+  "error handling and debuggability": {
+    "theme": "error handling and debuggability",
+    "pain_points": [
+      {
+        "cluster": "Tool-call error handling is inconsistent and undocumented: ToolException doesn't propagate/catch as expected in middleware, handle_tool_error works for ToolNode but not @tool decorator, and agents don't reliably route errors back to the model for recovery.",
+        "evidence_issue_ids": [
+          37195,
+          36411
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Silent failures in structured output and agent loop control flow: agents can terminate or exit without surfacing errors (missing structured_response key, return_direct exiting on tool error) leaving developers with no signal that something went wrong.",
+        "evidence_issue_ids": [
+          36349,
+          36411
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Malformed/partial tool call payloads cause silent, all-or-nothing data loss instead of per-item error isolation, making debugging extremely difficult since no exception or warning is surfaced.",
+        "evidence_issue_ids": [
+          36679,
+          35782
+        ],
+        "severity": "high",
+        "frequency": 2
+      },
+      {
+        "cluster": "Bare exceptions with no descriptive message (e.g. raise ValueError with no context) across core and partner packages make it hard to diagnose the actual failure condition.",
+        "evidence_issue_ids": [
+          35727
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Integration-specific errors surface as confusing low-level exceptions (e.g. unexpected keyword argument TypeError) rather than clear, actionable error messages when using unsupported parameter combinations.",
+        "evidence_issue_ids": [
+          36211
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Model/provider-specific validation errors (e.g. Gemini rejecting replayed tool-call message structures) are cryptic and force fragile workarounds, with no first-class API to avoid constructing invalid message histories.",
+        "evidence_issue_ids": [
+          35836
+        ],
+        "severity": "medium",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Improve LangChain's error handling contract across agents, tools, and model integrations so that failures (tool errors, malformed API payloads, missing structured output, provider-specific validation errors) are surfaced with descriptive, actionable messages and consistently routed back to the agent/model loop for recovery instead of silently dropping data or terminating execution unexpectedly."
+  },
+  "performance and latency": {
+    "theme": "performance and latency",
+    "pain_points": [
+      {
+        "cluster": "Unnecessary device/host synchronization and redundant recomputation in embedding pipelines (HuggingFaceEmbeddings + Chroma) causing multi-fold slowdowns vs calling underlying libraries directly",
+        "evidence_issue_ids": [
+          36126
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Algorithmic complexity bugs (O(n^2) list.pop(0) usage) in text splitters causing severe slowdowns on large documents",
+        "evidence_issue_ids": [
+          36488
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Unconditional/eager heavy imports (e.g. transformers) at core module import time inflating cold-start/import latency across all users regardless of whether the feature is used",
+        "evidence_issue_ids": [
+          36835
+        ],
+        "severity": "medium",
+        "frequency": 1
+      },
+      {
+        "cluster": "Cross-event-loop caching of async HTTP clients causing connection errors and reliability/latency issues under concurrent or multi-threaded async workloads",
+        "evidence_issue_ids": [
+          35783
+        ],
+        "severity": "high",
+        "frequency": 1
+      },
+      {
+        "cluster": "Lack of first-class support for safe parallel/concurrent middleware execution, forcing fully sequential middleware stacks and limiting throughput/latency optimization in production agent pipelines",
+        "evidence_issue_ids": [
+          37972
+        ],
+        "severity": "medium",
+        "frequency": 1
+      }
+    ],
+    "suggested_prd_seed": "Deliver a focused performance hardening pass across LangChain core and integrations that eliminates unnecessary synchronization/recomputation (embeddings), fixes algorithmic complexity bugs (text splitters), defers heavy/unused imports (core module load), resolves cross-event-loop resource sharing bugs (async HTTP clients), and enables safe concurrent execution paths (middleware) to reduce latency and improve reliability at scale."
+  },
+  "backward compatibility and breaking changes": {
+    "theme": "backward compatibility and breaking changes",
+    "pain_points": [
+      {
+        "cluster": "Upstream/dependency deprecations forcing breaking changes in integrations (IPEX/optimum-intel, OpenAI computer-use-preview, langchain-together version conflicts)",
+        "evidence_issue_ids": [
+          36765,
+          37938,
+          36104
+        ],
+        "severity": "medium",
+        "frequency": 3
+      },
+      {
+        "cluster": "Silent behavioral regressions after refactors/reorganization (configurable metadata dropped, legacy serialization mapping pointing to stale module paths, bool->int coercion in merge_dicts)",
+        "evidence_issue_ids": [
+          37373,
+          36230,
+          38064
+        ],
+        "severity": "high",
+        "frequency": 3
+      },
+      {
+        "cluster": "Cross-package version coordination and compatibility breakage during dependency upgrades (Pydantic main breaking BaseLLM construction, staged/coordinated releases needed across langchain-core, langchain-tests, and partner packages)",
+        "evidence_issue_ids": [
+          37835,
+          38058
+        ],
+        "severity": "high",
+        "frequency": 2
+      }
+    ],
+    "suggested_prd_seed": "Establish a formal backward-compatibility policy and regression-test suite covering: (1) upstream/partner package deprecations (e.g., optimum-intel IPEX, OpenAI computer-use-preview, langchain-together version pins), (2) silent behavior changes introduced by internal refactors (metadata handling, serialization mappings, type coercion in streaming merges), and (3) coordinated, dependency-aware release sequencing across langchain-core and integration packages to prevent breakage from upstream library changes (e.g., Pydantic) or premature releases."
+  },
+  "documentation gaps": {
+    "theme": "documentation gaps",
+    "pain_points": [],
+    "suggested_prd_seed": "The retrieved issues (#35836, #35514, #36211, #36214, #38226, #37452, #36067, #37018) are all functional bug reports or feature requests about runtime behavior (streaming, tool-call handling, provider API mismatches, vector store update logic, schema enforcement, and Hub manifest serialization) rather than reports of missing, unclear, or incorrect documentation, so no documentation-gap pain points can be substantiated from this issue set."
+  },
+  "xylophone quarterly banana": {
+    "theme": "xylophone quarterly banana",
+    "pain_points": [
+      {
+        "cluster": "Streaming/token-level output gaps across integrations (missing reasoning tokens, no token-level callbacks, broken SSE parsing)",
+        "evidence_issue_ids": [
+          36809,
+          37878,
+          35442
+        ],
+        "severity": "high",
+        "frequency": 3
+      },
+      {
+        "cluster": "Token usage/cost accounting inaccuracies (over-counting multimodal payloads, corrupted/inflated usage metadata, duplicated generation_info strings)",
+        "evidence_issue_ids": [
+          38229,
+          37754,
+          38226
+        ],
+        "severity": "high",
+        "frequency": 3
+      },
+      {
+        "cluster": "Provider/model inference and compatibility gaps (missing model prefix inference, provider-specific server errors from unconditional null params)",
+        "evidence_issue_ids": [
+          38243,
+          36889
+        ],
+        "severity": "medium",
+        "frequency": 2
+      }
+    ],
+    "suggested_prd_seed": "Improve the reliability of LangChain's chat model integration layer by fixing token-level streaming/callback propagation (including reasoning tokens and SSE edge cases), correcting token usage/cost accounting bugs (multimodal token over-counting, duplicated generation metadata, corrupted usage figures), and closing gaps in provider/model auto-inference and payload construction that cause silent failures or server errors."
+  }
+}
