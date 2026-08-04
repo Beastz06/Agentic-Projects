@@ -1,0 +1,1882 @@
+{
+  "provenance": {
+    "fixture_commit": "c19d36db9c50e76b193d39b0b0e8b1fd12af47d8",
+    "fixture_captured_at": "2026-08-03T19:13:42.879322+00:00",
+    "agent_model": "claude-sonnet-5",
+    "retrieval_k": 8,
+    "judge_model": "claude-opus-5",
+    "judged_at": "2026-08-04T04:52:41.992121+00:00",
+    "temperature_pinned": false
+  },
+  "scenarios": [
+    {
+      "topic": "authentication",
+      "band": "simple",
+      "overlap_score": 0.45,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "then the configured auth header is present on every outbound request, including retries and reconnects",
+              "prd_location": "acceptance_criteria[2]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "regardless of how the allowlist environment variable is formatted or ordered, then the request is blocked and logged as a validation failure",
+              "prd_location": "acceptance_criteria[4]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "then the request is permitted exactly once with no false negatives across repeated test runs",
+              "prd_location": "acceptance_criteria[5]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "The finding is based on a small number of pain points (three of four have frequency 1)",
+              "prd_location": "risks[1]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every theme in the PRD traces to a genuine retrieved issue: Anthropic custom httpx client (35843, 35977, 36056), MCP header forwarding failure (35574), Azure httpx client reuse (36259), and the SSRF allowlist bypass (37297). No wholly invented issue appears anywhere, and the problem statement, target user, and all four user stories are backed by source text. The only unsupported material is a handful of incidental embellishments bolted onto real issues \u2014 'including retries and reconnects' (never mentioned in 35574), 'formatted or ordered' plus 'logged as a validation failure' and 'permitted exactly once across repeated test runs' (37297 describes prefix-matching and a ValueError, not ordering or logging), and a 'frequency 1' statistic with no counterpart in the corpus. These are attached to genuinely existing issues and are not pervasive (4 of 6 source issues carry no invented detail), which matches the level-4 anchor rather than the pervasive-fabrication or invented-issue clauses at level 3."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Developers integrating LangChain with enterprise infrastructure frequently need custom authenticated transport \u2014 mTLS/client certificates, custom CA bundles, proxy headers, or externally managed HTTP clients",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1] frequency (issues reporting it): 3; pain_point[3] frequency: 1",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "other partner packages (e.g., Azure) instantiate their own HTTP clients instead of reusing a shared, pre-configured client",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3]: Inconsistent HTTP client handling across partner packages ... (Azure not reusing shared httpx client used for auth/connection config), frequency: 1",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "when authentication tokens or headers must be forwarded to remote services (such as MCP servers), forwarding silently fails, leaving requests unauthenticated or rejected",
+              "prd_location": "problem_statement",
+              "source": "pain_point[2]: Header/token forwarding failures for authenticated remote services (MCP server auth headers not propagated), frequency: 1",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "regardless of how the allowlist environment variable is formatted or ordered",
+              "prd_location": "acceptance_criteria[4]",
+              "source": "pain_point[4]: SSRF protection bypass via environment-variable based authentication/allowlist checks (unauthorized hosts bypassing validation)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD largely tracks its four source pain points faithfully \u2014 severities, the anthropic mTLS blocker, the Azure shared-client issue, and the SSRF bypass are all represented accurately, and risks[1] even discloses the low frequency counts \u2014 but several facts are loosened beyond what the source states: 'frequently need' generalizes from six issues, 'other partner packages (e.g., Azure)' pluralizes a single Azure data point, 'silently fails' adds a silence characteristic absent from the forwarding finding, and AC4 invents a specific bypass mechanism ('formatted or ordered') the source never specifies. Each remains compatible with the source (it could still be honestly cited), so these are imprecisions rather than escalations or contradictions. With 3+ imprecise facts and no unsupported escalation or contradiction, the 3 anchor applies."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "ChatAnthropic cannot accept a custom httpx client (mTLS, custom CA bundle, verify=False, cert path) \u2014 no parity with ChatOpenAI",
+                  "issue_ids": [
+                    35843,
+                    35977,
+                    36056
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "MCP remote server auth/custom headers (Authorization, Accept) not forwarded on discovery requests, causing 403",
+                  "issue_ids": [
+                    35574
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "AzureChatOpenAI does not fall back to shared default httpx clients, creating redundant connection pools",
+                  "issue_ids": [
+                    36259
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "SSRF bypass in validate_safe_url / loose startswith matching on LANGCHAIN_ENV allowlist logic",
+                  "issue_ids": [
+                    37297
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ChatOpenRouter cannot enable Anthropic automatic prompt caching (top-level cache_control rejected via model_kwargs)",
+                  "issue_ids": [
+                    35920
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No first-class way to inject precomputed/non-message workflow context or prefetched tool results into create_agent (replayed AIMessage+ToolMessage rejected by newer Gemini)",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "ChatAnthropic cannot accept a custom httpx client (mTLS, custom CA bundle, verify=False, cert path) \u2014 no parity with ChatOpenAI",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] and acceptance_criteria[1]; problem_statement ('langchain-anthropic offers no way to inject a custom HTTP client')"
+                },
+                {
+                  "theme": "MCP remote server auth/custom headers (Authorization, Accept) not forwarded on discovery requests, causing 403",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] and acceptance_criteria[2]; success_metrics[2]"
+                },
+                {
+                  "theme": "AzureChatOpenAI does not fall back to shared default httpx clients, creating redundant connection pools",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] and acceptance_criteria[3]"
+                },
+                {
+                  "theme": "SSRF bypass in validate_safe_url / loose startswith matching on LANGCHAIN_ENV allowlist logic",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4], acceptance_criteria[4]-[5], success_metrics[3]"
+                },
+                {
+                  "theme": "ChatOpenRouter cannot enable Anthropic automatic prompt caching (top-level cache_control rejected via model_kwargs)",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "No first-class way to inject precomputed/non-message workflow context or prefetched tool results into create_agent (replayed AIMessage+ToolMessage rejected by newer Gemini)",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "The single prominent theme \u2014 inability to inject a custom httpx client into ChatAnthropic for mTLS/CA-bundle/verify configuration (35843, 35977, 36056) \u2014 is fully covered by user_stories[1] and acceptance_criteria[1], and the three auth/security-adjacent minor themes (MCP header forwarding 35574, Azure shared httpx client 36259, SSRF allowlist bypass 37297) each have a dedicated user story, acceptance criterion, and success metric. Two minor themes from the retrieval are entirely absent: OpenRouter Anthropic automatic caching via top-level cache_control (35920) and first-class non-message workflow context / prefetched tool results for create_agent (35836); neither appears in any story, criterion, or even out_of_scope. Per the anchor scale, all prominent themes covered with exactly 2 minor themes missed maps to level 4 rather than 5, since Level 5 requires zero misses of any kind."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 1,
+              "ac_text": "Given a developer instantiates the Anthropic chat model, when they pass a custom HTTP client configured with client certificates and a custom CA bundle, then the model client uses that client for all requests and successfully completes an mTLS handshake without falling back to a default client",
+              "reason": "The Then welds three independent outcomes: (a) the supplied client is used for all requests, (b) an mTLS handshake completes successfully, and (c) no fallback to a default client occurs. Each requires a separate check (client-identity assertion, TLS handshake result, fallback-path assertion), so no single verification settles it."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 4,
+              "ac_text": "Given an SSRF allowlist is configured via environment variable, when a request targets a host not on the allowlist, regardless of how the allowlist environment variable is formatted or ordered, then the request is blocked and logged as a validation failure",
+              "reason": "The Then asserts two independent outcomes \u2014 the request is blocked AND a validation-failure log entry is emitted \u2014 which are separately verifiable (behavioural block vs. log inspection). Additionally the When's 'regardless of how the allowlist environment variable is formatted or ordered' leaves the concrete input variants unenumerated."
+            },
+            {
+              "type": "vague",
+              "ac_index": 5,
+              "ac_text": "Given a request targets a host on the allowlist, when the SSRF check runs, then the request is permitted exactly once with no false negatives across repeated test runs",
+              "reason": "The Then slot is unobservable as written: 'permitted exactly once' has no defined counting scope, and 'no false negatives across repeated test runs' specifies neither the number of runs nor what constitutes a false negative, so a reviewer cannot render an unambiguous pass/fail."
+            },
+            {
+              "type": "vague",
+              "ac_index": 6,
+              "ac_text": "Given a partner package does not yet support custom HTTP client injection, when a developer inspects the package's public API/documentation, then the documentation explicitly states current support status for custom transport injection",
+              "reason": "Given identifies no concrete package ('a partner package'), the When is a subjective human action ('a developer inspects'), and the Then ('explicitly states current support status') has no concrete artifact, location, or wording to assert against \u2014 none of the three slots maps to a concrete state/action/assertion."
+            }
+          ],
+          "rationale": "Four of the six acceptance criteria are defective: AC1 and AC4 each bundle multiple independent outcomes into a single Then (client usage + handshake success + no fallback; blocked + logged), and AC5 and AC6 rely on unobservable terms ('no false negatives across repeated test runs', 'a partner package', 'a developer inspects', 'explicitly states current support status') that cannot be translated into concrete states, actions, or assertions. Only AC2 and AC3 are cleanly testable. With 3+ (indeed a majority of) defective ACs, the rubric's lowest anchor applies."
+        }
+      }
+    },
+    {
+      "topic": "retriever and vector store integrations",
+      "band": "simple",
+      "overlap_score": 0.45,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "vector store backends like OpenSearch expose rich index-creation settings (analyzers, shard/replica counts, similarity algorithms) that LangChain's integration does not let developers configure",
+              "prd_location": "problem_statement",
+              "materiality": "material"
+            },
+            {
+              "claim": "I want to pass backend-specific index creation settings (analyzers, shard/replica counts, similarity algorithm) through the LangChain integration",
+              "prd_location": "user_stories[5]",
+              "materiality": "material"
+            },
+            {
+              "claim": "Given a developer supplies custom OpenSearch index settings (e.g., analyzer, shard count) at vector store creation time",
+              "prd_location": "acceptance_criteria[5]",
+              "materiality": "material"
+            },
+            {
+              "claim": "count of distinct index-setting parameters (analyzer, shards, replicas, similarity) exposed and exercised in integration tests (target: at least 4 configurable settings supported at launch)",
+              "prd_location": "success_metrics[4]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "The evidence base for this theme is thin: four of five pain points have a frequency of only 1",
+              "prd_location": "risks[1]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "rate-limit-aware backoff), forcing slow sequential embedding calls on large corpora",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "No wholly invented issue is present \u2014 all five user stories map onto real retrieved issues (36745/38203, 37046, 38186, 36547/36753, 38212). However, the OpenSearch strand carries fabricated specifics: issue 38212 asks only for index settings such as number_of_shards, number_of_replicas, refresh_interval, codec and routing, and explicitly notes that engine/space_type/ef_search are *already* exposed; 'analyzers' and 'similarity algorithms' appear nowhere in the corpus yet are asserted in the problem statement, repeated in user_stories[5], and drive acceptance_criteria[5] and success_metrics[4], so this fabrication is material rather than incidental. Additional unsupported colour includes the 'four of five pain points have a frequency of only 1' evidence-frequency statistic (no such metadata exists in the retrieved issues) and 'rate-limit-aware backoff' as a stated embedding-provider gap. This exceeds anchor 4's 'unsupported incidental details only, nothing material affected' but falls short of anchor 2's invented issue, landing at 3."
+        },
+        "grounding": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "The evidence base for this theme is thin: four of five pain points have a frequency of only 1, meaning most of this PRD rests on single reported instances rather than broad-based demand.",
+              "prd_location": "risks[1]",
+              "source": "pain_point[1] frequency (issues reporting it): 2; pain_point[4] frequency (issues reporting it): 2; pain_points 2, 3, 5 frequency: 1",
+              "rung": "contradiction"
+            },
+            {
+              "claim": "LangChain's vector store and retriever integrations have several reliability and extensibility gaps that surface only in production usage.",
+              "prd_location": "problem_statement",
+              "source": "theme: retriever and vector store integrations; five pain point clusters with severities high/medium, no statement about when or where the issues manifest",
+              "rung": "escalation"
+            },
+            {
+              "claim": "Embedding providers such as OpenAI and Mistral, which are used as the embedding layer for many vector store integrations, lack concurrency and throughput controls (batching, parallel requests, rate-limit-aware backoff), forcing slow sequential embedding calls on large corpora.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[4]: Missing concurrency/throughput optimizations in embedding providers used by vector stores (OpenAI, Mistral), severity: medium, frequency: 2",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "vector store backends like OpenSearch expose rich index-creation settings (analyzers, shard/replica counts, similarity algorithms) that LangChain's integration does not let developers configure, forcing users to bypass the abstraction and manage index creation out-of-band",
+              "prd_location": "problem_statement",
+              "source": "pain_point[5]: Limited configurability of vector store backend infrastructure settings (OpenSearch index creation settings), severity: medium, frequency: 1",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD is largely faithful in mapping each pain point cluster to a story with correct issue IDs and does not inflate severities, but risks[1] states a numeric fact the source actively negates: it claims \"four of five pain points have a frequency of only 1\" when the source records frequency 2 for pain_point[1] and pain_point[4] (three of five are frequency 1) \u2014 a contradiction of a stated source fact. Additionally, the problem statement escalates scope with the absolute framing that these gaps \"surface only in production usage,\" which no source finding could establish, and loosens pain_point[4]/[5] into broader claims (\"many vector store integrations,\" \"forcing users to bypass the abstraction\") that remain compatible but imprecise. Under the rubric's precedence, one issue containing a contradiction alongside an unsupported escalation lands at anchor 2."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Silent data loss on length mismatch in VectorStore add paths (embeddings/ids vs. texts)",
+                  "issue_ids": [
+                    36745,
+                    38203
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "EnsembleRetriever RRF score inflation from duplicate chunks (no dedup before fusion)",
+                  "issue_ids": [
+                    37046
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No standardized way to forward document metadata to Embeddings for multimodal providers",
+                  "issue_ids": [
+                    38186
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Embedding provider throughput: sequential batch calls / unenforced concurrency limits",
+                  "issue_ids": [
+                    36547,
+                    36753
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Retry logic not restricted to transient/retryable errors (Mistral retries permanent 4xx, misses 429/5xx)",
+                  "issue_ids": [
+                    36753
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "OpenSearchVectorSearch cannot pass custom index creation settings (shards, replicas, refresh_interval)",
+                  "issue_ids": [
+                    38212
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Integration package release ordering before langchain-tests tool_call_streaming standard test",
+                  "issue_ids": [
+                    38058
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Silent data loss on length mismatch in VectorStore add paths (embeddings/ids vs. texts)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1], acceptance_criteria[1], success_metrics[1]"
+                },
+                {
+                  "theme": "EnsembleRetriever RRF score inflation from duplicate chunks (no dedup before fusion)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2], acceptance_criteria[2], success_metrics[2]"
+                },
+                {
+                  "theme": "No standardized way to forward document metadata to Embeddings for multimodal providers",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3], acceptance_criteria[3]"
+                },
+                {
+                  "theme": "Embedding provider throughput: sequential batch calls / unenforced concurrency limits",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4], acceptance_criteria[4], success_metrics[3]"
+                },
+                {
+                  "theme": "Retry logic not restricted to transient/retryable errors (Mistral retries permanent 4xx, misses 429/5xx)",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "OpenSearchVectorSearch cannot pass custom index creation settings (shards, replicas, refresh_interval)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5], acceptance_criteria[5], success_metrics[4]"
+                },
+                {
+                  "theme": "Integration package release ordering before langchain-tests tool_call_streaming standard test",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "Both prominent themes are covered: the silent-truncation/data-loss cluster (36745, 38203) maps to user_stories[1]/acceptance_criteria[1], and the embedding concurrency/throughput cluster (36547, 36753) maps to user_stories[4]/acceptance_criteria[4]. Two minor themes are missed: the Mistral retry-classification defect from 36753 (retries applied to permanent errors while 429/5xx are not retried) gets only a passing 'rate-limit-aware backoff' phrase in the problem statement with no user story, AC, or metric, and the release-ordering/profile-data coordination problem in 38058 is absent entirely. That count (0 prominent misses, 2 minor misses) matches anchor level 4 rather than 5, which requires zero missed themes of any kind."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 4,
+              "ac_text": "Given a developer sets a concurrency/batch-size parameter on the OpenAI or Mistral embedding provider, when a batch of documents is embedded, then requests are issued according to the configured concurrency setting and total embedding time decreases relative to default sequential behavior",
+              "reason": "The Then welds two independent outcomes: (a) request issuance matches the configured concurrency, and (b) total wall-clock embedding time decreases versus sequential default. These require separate checks (request-level instrumentation vs. timing benchmark), and the timing clause additionally has no threshold, so a reviewer cannot settle it with a single pass/fail assertion."
+            },
+            {
+              "type": "vague",
+              "ac_index": 6,
+              "ac_text": "Given no document/embedding mismatch occurs and no custom configuration is supplied, when existing vector store and retriever workflows run, then behavior is unchanged from current default behavior, confirming no regression",
+              "reason": "All three slots are unobservable: the Given/When names no concrete state or action (\"existing vector store and retriever workflows\" is an unbounded set with no named store, retriever, or call), and the Then asserts \"behavior is unchanged from current default behavior\" with no specified outputs, ordering, or comparison baseline that could be checked."
+            }
+          ],
+          "rationale": "AC1 and AC5 are clean and directly testable (explicit exception on count mismatch; created index settings verifiable via the OpenSearch settings API), and AC2/AC3 are borderline but each still reduce to essentially one checkable outcome (duplicate appears exactly once; metadata reaches the provider intact). However, AC4 fuses two independently verifiable outcomes (concurrency-conformant request issuance and a wall-clock time reduction with no threshold), and AC6 is a blanket \"no regression\" statement whose Given, When, and Then all lack concrete state, action, and assertion. With exactly 2 defective ACs and no redundant pairs, the rubric's 2-level clause (\"exactly 2 defective ACs\") applies."
+        }
+      }
+    },
+    {
+      "topic": "token counting and usage metadata",
+      "band": "simple",
+      "overlap_score": 0.36,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "implausible (e.g., far exceeds the maximum context window or is negative)",
+              "prd_location": "acceptance_criteria[2]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "then the API signature remains backward compatible per the documented stability guarantee",
+              "prd_location": "acceptance_criteria[6]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "Number of major providers integrated behind a native/exact token-counting API path in LangChain (target: at least 2 providers supported at initial release)",
+              "prd_location": "success_metrics[3]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "discrepancy reduced to within 5% of provider-reported exact counts for at least 2 known overcounting cases identified in the finding",
+              "prd_location": "success_metrics[1]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue and theme in the PRD traces to a retrieved issue: multimodal/tool_use over-counting (35558, 38229), corrupted Fireworks usage_metadata (37754), native OpenAI token-count API (36661), public cutoff API (38249), and checkpointer re-firing of ClearToolUsesEdit (37815) \u2014 no wholly invented issue appears anywhere, and no invented issue drives the problem statement. The unsupported material is limited to incidental embellishments hung on genuinely sourced issues: 'or is negative' usage values (source only reports massive inflation), a 'documented stability guarantee' for minor versions (38249 only asks for a public rather than private helper), and quantified targets (5% discrepancy, 2 providers) that the corpus never states. Claims like 'images' being over-counted or 'some providers' generalizing from one Fireworks model are overstatements of real sources and therefore fall under Grounding rather than here. This matches anchor 4: a small set of unsupported incidental details attached to real issues, with nothing material built on fiction."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "LangChain's token accounting stack is unreliable across several distinct failure modes that together undermine any workflow depending on accurate token counts.",
+              "prd_location": "problem_statement",
+              "source": "5 pain points with frequencies of 2, 1, 1, 1, 1 reported issues; suggested_prd_seed: \"Improve the accuracy and reliability of LangChain's token accounting stack...\"",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Collectively these issues make token counts an untrustworthy foundation for cost tracking, context-window management, and summarization/eviction middleware.",
+              "prd_location": "problem_statement",
+              "source": "suggested_prd_seed: \"...so downstream cost tracking, context-window management, and summarization/eviction middleware behave correctly and efficiently even with persistent checkpointers.\"",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "Nearly every substantive claim maps tightly to a source pain point: the multimodal overcounting language ('systematically over-counts non-text/multimodal content blocks'), the corrupted usage_metadata issue, the missing native/exact counting API, the absent public cutoff API, and the checkpointer re-firing behavior are all reproduced without inflating scope, and the success metrics explicitly acknowledge the true counts ('the 1 documented corrupted-metadata pattern', 'at least 2 known overcounting cases'). The risks section even self-reports that four pain points each rest on a single issue, avoiding frequency inflation. Two blanket generalizations in the problem statement ('undermine any workflow depending on accurate token counts'; 'make token counts an untrustworthy foundation') loosen the source's per-cluster framing but remain compatible with the seed's own characterization, so they are imprecision only \u2014 no unsupported escalation or contradiction, matching the 4 anchor."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 2,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "count_tokens_approximately over-counts non-text/multimodal content blocks (tool_use/tool_result repr inflation; base64 audio/video/file char-counting)",
+                  "issue_ids": [
+                    35558,
+                    38229
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Corrupted/inflated provider usage_metadata propagates unvalidated into cost tracking",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No provider-native exact token-count API integration (OpenAI input_tokens.count, mirroring Anthropic)",
+                  "issue_ids": [
+                    36661
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No public/stable API for safe token-based message retention cutoff",
+                  "issue_ids": [
+                    38249
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Context-editing middleware re-fires every turn with a persistent checkpointer because edits/flags never persist past the deepcopy",
+                  "issue_ids": [
+                    37815
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Embeddings interface cannot receive document metadata, blocking multimodal embedding providers",
+                  "issue_ids": [
+                    38186
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "`configurable` data no longer included in run metadata since langchain-core 1.3.0 (regression)",
+                  "issue_ids": [
+                    37373
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "count_tokens_approximately over-counts non-text/multimodal content blocks (tool_use/tool_result repr inflation; base64 audio/video/file char-counting)",
+                  "status": "addressed",
+                  "prd_element": "problem_statement; user_stories[1] (cites 35558, 38229); acceptance_criteria[1]; success_metrics[1]"
+                },
+                {
+                  "theme": "Corrupted/inflated provider usage_metadata propagates unvalidated into cost tracking",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] (cites 37754); acceptance_criteria[2]; success_metrics[2]"
+                },
+                {
+                  "theme": "No provider-native exact token-count API integration (OpenAI input_tokens.count, mirroring Anthropic)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] (cites 36661); acceptance_criteria[3]; success_metrics[3]"
+                },
+                {
+                  "theme": "No public/stable API for safe token-based message retention cutoff",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] (cites 38249); acceptance_criteria[4] and [6]"
+                },
+                {
+                  "theme": "Context-editing middleware re-fires every turn with a persistent checkpointer because edits/flags never persist past the deepcopy",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] (cites 37815); acceptance_criteria[5]; success_metrics[4]; risks[5]"
+                },
+                {
+                  "theme": "Embeddings interface cannot receive document metadata, blocking multimodal embedding providers",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "`configurable` data no longer included in run metadata since langchain-core 1.3.0 (regression)",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "The single prominent theme (approximate-counter over-counting of non-text blocks, reported by 35558 and 38229) is fully covered by user_stories[1], acceptance_criteria[1], and success_metrics[1], and all four token-accounting minor themes (37754, 36661, 38249, 37815) each have a dedicated user story, acceptance criterion, and success metric. Two minor themes from the retrieval are absent entirely: the Embeddings metadata forwarding request (38186) and the `configurable`-in-metadata regression (37373) receive no mention in the problem statement, stories, ACs, or even out_of_scope. That matches anchor 4 exactly: all prominent themes covered with 1-2 minor themes missed, and falls short of 5 which requires zero omissions."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a message containing one or more non-text content blocks (e.g., an image or file block), when count_tokens_approximately is called on that message, then the returned token count does not systematically exceed the token count of an equivalent text-only baseline by more than a documented, bounded margin",
+              "reason": "The Then slot is unobservable: 'does not systematically exceed', 'an equivalent text-only baseline', and 'a documented, bounded margin' supply no numeric threshold or defined comparison artifact, so no concrete assertion can be written and a reviewer cannot say pass/fail."
+            },
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given a provider response contains a usage_metadata token count that is implausible (e.g., far exceeds the maximum context window or is negative), when LangChain processes that response, then the corrupted value is flagged or rejected rather than passed through silently into aggregated cost-tracking totals",
+              "reason": "Given slot is undefined ('implausible', 'far exceeds' \u2014 no threshold), and the Then slot is a disjunction of two unspecified behaviours ('flagged or rejected') with no observable artifact (exception? warning? field?), so the assertion is not a single determinate check."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 5,
+              "ac_text": "Given a persistent checkpointer restores an agent run that already had its token count computed and a context-editing trigger already fired, when the run resumes from the checkpoint, then the middleware does not recompute the token count and re-fire the same trigger for already-processed content",
+              "reason": "The Then welds two independent outcomes \u2014 (a) no recomputation of the token count and (b) no re-firing of the trigger \u2014 each requiring its own separate check; also 'already-processed content' is left undefined."
+            },
+            {
+              "type": "vague",
+              "ac_index": 6,
+              "ac_text": "Given the public token-cutoff API is released, when a new minor version of LangChain is published, then the API signature remains backward compatible per the documented stability guarantee",
+              "reason": "The Then defers the assertion to an unnamed 'documented stability guarantee' and never states the signature or what constitutes compatibility; the When ('a new minor version is published') is not an action a test can perform, so no executable check exists."
+            }
+          ],
+          "rationale": "Four of six acceptance criteria are defective: AC1, AC2 and AC6 fail the Given/When/Then translation test because their assertions rest on undefined thresholds ('bounded margin', 'implausible', 'far exceeds') or externalized, unnamed guarantees, and AC6's When is not an action a test can execute; AC5 is non-atomic, asserting both non-recomputation and non-re-firing in one criterion. Only AC3 and AC4 are clean, single-outcome, checkable criteria. No redundant pairs were found, but with a majority (4 of 6) of ACs defective the rubric's 3+/majority clause applies, forcing the lowest anchor."
+        }
+      }
+    },
+    {
+      "topic": "streaming behavior and chunk handling",
+      "band": "simple",
+      "overlap_score": 0.27,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every pain point in the problem statement traces to a retrieved issue: provider SSE parsing yielding zero chunks / dropped content (35442, 36809), premature tool execution from fragmented streamed args (35514), duplicated/doubled metadata from repeated terminal chunks (38226), streaming + structured output warnings and lost parsed object / response headers (38034, 37421), disable_streaming crash and unintended full disabling (35436), and agent-level on_llm_new_token not firing (37869). All cited issue IDs in the user stories exist in the corpus and are attached to the correct symptoms, and the success-metric counts (2, 1, 2, 1) match the actual number of retrieved issues in each bucket rather than invented figures. Remaining looseness (e.g., AC5 enumerating True/False alongside 'tool_calling', AC1 generalizing to 'any officially supported provider') is generalization/overstatement of real sources, which the rubric assigns to Grounding, not hallucination; no wholly invented issue, user count, constraint, or cause appears anywhere."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Combining streaming with structured output produces warnings and loses important metadata such as the parsed object and response headers.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[4]: Streaming + structured output interactions producing warnings or losing metadata (parsed field, response headers)",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Stream aggregation logic can duplicate or incorrectly merge metadata fields when terminal chunks are repeated, corrupting the final aggregated message.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3]: Duplicate/aggregated metadata fields from repeated terminal chunks during stream aggregation (severity: medium, frequency: 1)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD tracks the source findings closely: every user story cites the correct issue IDs, the success metrics quote the exact per-cluster issue counts (2, 1, 2, 1), and risks[1] explicitly flags that each pain point rests on only 1-2 reports, preventing frequency inflation. Two mild loosenings remain: the source's disjunctive 'warnings OR losing metadata' is stated conjunctively as always producing both, and the medium-severity duplicate-metadata cluster is described as 'corrupting the final aggregated message' \u2014 both claims could still honestly cite their sources. No superlatives, product-wide generalizations from single data points, or statements contradicting the sources appear, which matches the 4 anchor (1-2 imprecise facts only, no escalation or contradiction)."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Provider stream parsing yields zero/empty chunks or silently drops content (Bedrock SSE missing event: field; vLLM reasoning_content unparsed)",
+                  "issue_ids": [
+                    35442,
+                    36809
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Streamed tool-call argument fragmentation causes tool execution with empty/invalid args",
+                  "issue_ids": [
+                    35514
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Stream aggregation duplicates/concatenates metadata when terminal finish chunks repeat",
+                  "issue_ids": [
+                    38226
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Streaming + structured output loses metadata and emits warnings (Pydantic 'parsed' serializer warning; dropped response headers/x-request-id)",
+                  "issue_ids": [
+                    38034,
+                    37421
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' crashes (AsyncStream.model_dump) and over-disables streaming for all turns",
+                  "issue_ids": [
+                    35436
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Agent/graph layers use non-streaming invoke so token-level streaming and on_llm_new_token never propagate",
+                  "issue_ids": [
+                    37869
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Provider stream parsing yields zero/empty chunks or silently drops content (Bedrock SSE missing event: field; vLLM reasoning_content unparsed)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] (cites 35442, 36809); acceptance_criteria[1] 'emits at least one non-empty chunk and no content present in the raw response is dropped'; success_metrics[1]"
+                },
+                {
+                  "theme": "Streamed tool-call argument fragmentation causes tool execution with empty/invalid args",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] (cites 35514); acceptance_criteria[2]; success_metrics[2]"
+                },
+                {
+                  "theme": "Stream aggregation duplicates/concatenates metadata when terminal finish chunks repeat",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] (cites 38226); acceptance_criteria[3]"
+                },
+                {
+                  "theme": "Streaming + structured output loses metadata and emits warnings (Pydantic 'parsed' serializer warning; dropped response headers/x-request-id)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] (cites 38034, 37421); acceptance_criteria[4] 'parsed structured object and response headers with no warnings logged'; success_metrics[3]"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' crashes (AsyncStream.model_dump) and over-disables streaming for all turns",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] (cites 35436); acceptance_criteria[5] covering True/False/'tool_calling' with no exception and documented behavior"
+                },
+                {
+                  "theme": "Agent/graph layers use non-streaming invoke so token-level streaming and on_llm_new_token never propagate",
+                  "status": "addressed",
+                  "prd_element": "user_stories[6] (cites 37869); acceptance_criteria[6]; success_metrics[4]"
+                }
+              ]
+            }
+          ],
+          "rationale": "All eight retrieved issues map onto six distinct themes, and each theme has an explicit user story plus a matching acceptance criterion in the PRD, with the correct issue IDs cited. The two prominent themes (cross-provider stream parsing/content loss from 35442+36809, and streaming-with-structured-output metadata loss from 38034+37421) are each covered by a dedicated story and AC, including the 'no content dropped' clause that captures the silently dropped vLLM reasoning tokens. The minor themes \u2014 tool-arg fragmentation (35514), duplicated terminal-chunk metadata (38226), disable_streaming logic bugs including both the crash and the over-disabling behavior (35436), and agent/graph token-callback propagation (37869) \u2014 are all likewise represented. Zero prominent and zero minor themes are missed, matching anchor level 5."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 1,
+              "ac_text": "Given a streaming call is made to any officially supported provider, when the provider returns a valid SSE/streaming response, then the client emits at least one non-empty chunk and no content present in the raw response is dropped",
+              "reason": "The Then welds two independent outcomes: (a) at least one non-empty chunk is emitted, and (b) no raw-response content is dropped. Each requires a separate check (chunk count/emptiness vs. content-completeness diff against the raw payload), so a single assertion cannot settle it."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 2,
+              "ac_text": "Given a model streams a tool call whose arguments arrive across multiple chunks, when the argument stream has not yet terminated, then the tool is not invoked, and it is only invoked once with the fully assembled, valid argument object after the stream completes",
+              "reason": "Three separate outcomes in one Then: no invocation before stream termination, exactly-one invocation after completion, and argument payload fully assembled/valid. Also mixes two different When states (stream not terminated / stream completed) in a single criterion."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 4,
+              "ac_text": "Given structured output is requested with streaming enabled, when the stream completes, then the final result includes the parsed structured object and response headers with no warnings logged",
+              "reason": "The Then asserts three independent outcomes: presence of the parsed object, presence of response headers, and absence of logged warnings. These are three distinct checks rather than one verifiable outcome."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 5,
+              "ac_text": "Given disable_streaming is set to a specific value (True, False, or 'tool_calling'), when a request is made using that configuration, then streaming behavior matches the documented setting exactly and no exception is raised",
+              "reason": "Combines a behavioral-conformance assertion with a separate no-exception assertion; additionally the first assertion's slot ('streaming behavior matches the documented setting exactly') is unobservable as written \u2014 it defers the expected observable state to unspecified documentation for three different config values."
+            }
+          ],
+          "rationale": "Four of the six acceptance criteria (1, 2, 4, 5) fuse multiple independent outcomes into a single Then \u2014 e.g. AC4 asserts parsed object presence, headers presence, and zero warnings simultaneously; AC2 asserts non-invocation before termination, exactly-one invocation, and validity of assembled arguments \u2014 so no single check settles pass/fail. AC5 additionally leans on the unobservable phrase 'matches the documented setting exactly.' Only AC3 and AC6 read as clean, single-assertion test specifications, and no redundant pairs were found. With 3+ (indeed a majority of) defective ACs, the rubric's level-1 anchor applies."
+        }
+      }
+    },
+    {
+      "topic": "prompt templates and output parsers",
+      "band": "simple",
+      "overlap_score": 0.18,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "so that I can quickly identify and fix the mismatch instead of guessing at an opaque exception ... forcing developers to dig through internals or abandon structured parsing altogether",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "Evidence for this theme is thin overall (four pain points, three with frequency of only 1)",
+              "prd_location": "risks[1]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "structured output serialization can emit spurious PydanticSerializationUnexpectedValue warnings even when the output is functionally usable",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue referenced in the PRD maps to a retrieved source: the shape-mismatch OutputParserException (36603), the with_fallbacks recovery documentation request (38103), the PydanticSerializationUnexpectedValue warning (36606), pretty_repr partials handling (38193), and bare ValueError in prompt loading/construction (35727). No wholly invented issue appears, and no acceptance criterion is built on fiction. The only unsupported material is incidental embellishment attached to real issues \u2014 the claim that developers 'abandon structured parsing altogether,' the assertion that the serialization warning fires on 'functionally usable' output, and the invented frequency figures ('four pain points, three with frequency of only 1') that appear nowhere in the retrieved corpus \u2014 matching the level-4 anchor of unsupported incidental details on genuinely existing issues."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Developers building applications on top of prompt templates and output parsers encounter a set of usability and robustness gaps that make debugging painful and slow adoption of structured output features.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[2]: Output parsers (Pydantic/structured output) fail unpredictably when model output doesn't match expected schema shape ... frequency (issues reporting it): 2; pain_point[3] frequency 1; pain_point[1] frequency 1; pain_point[4] frequency 1",
+              "rung": "escalation"
+            },
+            {
+              "claim": "forcing developers to dig through internals or abandon structured parsing altogether",
+              "prd_location": "problem_statement",
+              "source": "pain_point[2]: ... producing confusing OutputParserException with no recovery guidance",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "structured output serialization can emit spurious PydanticSerializationUnexpectedValue warnings even when the output is functionally usable, creating noise that erodes trust in the system's correctness signals",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3]: Structured output serialization produces spurious PydanticSerializationUnexpectedValue warnings (severity: medium, frequency: 1)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD is largely faithful to the four source pain points \u2014 issue IDs are correctly mapped per user story, severities are not inflated, and risks[1] explicitly and accurately acknowledges the thin evidence base (four pain points, three at frequency 1). However, the problem statement contains one unsupported escalation: no source finding establishes that these gaps 'slow adoption of structured output features,' a product-level adoption claim that four low-frequency issues could not prove. Two further claims ('abandon structured parsing altogether', 'erodes trust in the system's correctness signals') loosen the source into narrative impact language while remaining broadly compatible with it, i.e. imprecision. Exactly one escalation plus multiple imprecisions places this at the level-3 anchor."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Opaque OutputParserException on schema/shape mismatch (e.g. list returned where str expected)",
+                  "issue_ids": [
+                    36603
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No documented local recovery pattern (with_fallbacks) for strict parser failures",
+                  "issue_ids": [
+                    38103
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Spurious PydanticSerializationUnexpectedValue warning on structured output",
+                  "issue_ids": [
+                    36606
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "pretty_repr() exposes/mishandles partial variables in prompt templates",
+                  "issue_ids": [
+                    38193
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Bare raise ValueError with no context in prompt loading/few-shot template construction",
+                  "issue_ids": [
+                    35727
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Opaque OutputParserException on schema/shape mismatch (e.g. list returned where str expected)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] + acceptance_criteria[1] + success_metrics[1]"
+                },
+                {
+                  "theme": "No documented local recovery pattern (with_fallbacks) for strict parser failures",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] + acceptance_criteria[2]"
+                },
+                {
+                  "theme": "Spurious PydanticSerializationUnexpectedValue warning on structured output",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] + acceptance_criteria[3] + success_metrics[2]"
+                },
+                {
+                  "theme": "pretty_repr() exposes/mishandles partial variables in prompt templates",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] + acceptance_criteria[4] + success_metrics[3]"
+                },
+                {
+                  "theme": "Bare raise ValueError with no context in prompt loading/few-shot template construction",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] + acceptance_criteria[5]"
+                }
+              ]
+            }
+          ],
+          "rationale": "Five distinct on-theme problems appear in the retrieval (36603 shape-mismatch parser exception, 38103 with_fallbacks recovery documentation, 36606 spurious serialization warning, 38193 pretty_repr partials, 35727 bare ValueError in prompt loading/few-shot templates), each reported by exactly one issue and therefore all minor. Every one is explicitly mapped to a user story and a matching acceptance criterion (AC1-AC5), with success metrics reinforcing three of them. The remaining retrieved issues (37358 HTML text splitter factory methods, 38209 multi-agent synthesis node, 38159 HITL middleware pattern matching) belong to other product areas outside the stated 'prompt templates and output parsers' theme and are not scoped omissions here. Zero prominent and zero minor themes missed, matching anchor 5."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 1,
+              "ac_text": "Given a Pydantic/structured output parser receives model output whose shape does not match the expected schema (e.g., a string where a list is expected), when parsing fails, then the raised exception includes the expected shape, the actual shape received, and a link or reference to a documented recovery pattern",
+              "reason": "The Then welds three independently verifiable outcomes into one criterion (message contains expected shape; message contains actual shape; message contains a recovery-pattern link/reference). Each can pass or fail separately, so no single check settles the AC."
+            },
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given a developer wants to handle structured output parsing failures gracefully, when they consult the documentation, then a documented with_fallbacks example for output parsers is available and runnable as-is",
+              "reason": "Given slot is an unobservable intent ('a developer wants to handle ... gracefully') and the When slot ('when they consult the documentation') is not a concrete, instrumentable action \u2014 no specific doc page, location, or entry point is named. 'Runnable as-is' also lacks a defined execution harness or success condition, so a reviewer cannot deterministically settle pass/fail."
+            }
+          ],
+          "rationale": "AC3, AC4, AC5 and AC6 each translate cleanly into a concrete state, action, and single assertion (no warning emitted; partial values rendered in place; message names the invalid field; existing suites pass), and no two ACs reduce to the same check, so there are zero redundant pairs. However, AC1 bundles three independently failing message-content outcomes into one Then (non-atomic), and AC2 fills its Given and When slots with unobservable developer intent and an untestable 'consult the documentation' action plus an unspecified 'runnable as-is' condition (vague). That is exactly 2 defective ACs, which matches the level-2 anchor ('exactly 2 defective ACs')."
+        }
+      }
+    },
+    {
+      "topic": "tool calling and function calling",
+      "band": "ambiguous",
+      "overlap_score": 0.82,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Fixing structured-output schema support per integration (e.g., langchain-huggingface) may require coordination with third-party or community-maintained integration packages outside core maintainers' control",
+              "prd_location": "risks[4]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "the run succeeds under strict turn validation such as Gemini 3.x",
+              "prd_location": "acceptance_criteria[2]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every user story, acceptance criterion, success metric baseline, and problem-statement element traces to a specific retrieved issue: parsing crashes (36679, 35514), prefetched tool-result injection (35836), ToolException/handle_tool_error inconsistency (37195), proactive ToolCallLimitMiddleware (35766), HITL rejection executed by ToolNode (37093), missing tool_call_id on on_tool_start with on_tool_end also named in comments (37426), and langchain-huggingface Pydantic schema (36441); the counts in success_metrics[1] (2 parsing issues) and [3] (1 issue) also match the corpus. No wholly invented issue appears anywhere, and nothing material rests on fiction. Two incidental details lack basis: the characterization of langchain-huggingface as a third-party/community-maintained package outside core maintainers' control (the source comment points to libs/partners/huggingface inside the repo), and the framing of strict turn validation as a general 'Gemini 3.x' property when the source only documents 3.1-flash-lite-preview. Both are attached to genuinely sourced issues and non-load-bearing, matching the level-4 anchor."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Human-in-the-loop rejection of a tool call is ambiguous in enforcement: middleware may intend to block a call, but ToolNode can still execute it.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[5]: Human-in-the-loop rejection handling ambiguity - concern that rejected tool calls could still be executed by ToolNode despite middleware intent",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "so that my human-in-the-loop safeguard is actually enforced instead of only advisory",
+              "prd_location": "user_stories[5]",
+              "source": "pain_point[5]: ... concern that rejected tool calls could still be executed by ToolNode despite middleware intent",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "Nearly every PRD claim maps tightly to its source finding: frequencies are preserved (metric 1 cites 2 parsing issues matching pain_point[1] frequency 2; metric 3 cites 1 issue matching pain_point[3]), the Gemini 3.x turn-validation detail, the on_tool_start vs on_tool_error tool_call_id asymmetry, and the langchain-huggingface Pydantic gap are all reproduced without inflation, and risks[1] explicitly flags that pain points 2-7 rest on single issues. The only departures are the two places where pain_point[5]'s framing as a 'concern' that rejected calls 'could' still execute is hardened into a stated enforcement gap ('ToolNode can still execute it', 'only advisory') \u2014 facts loosened but still compatible with the source, i.e. imprecision. No superlatives, no product-wide scope from single data points, and no claim contradicted by a source statement, which matches the 4 anchor (1-2 imprecise facts only)."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Malformed/fragmented tool call payloads break parsing (crash on bad function dicts; empty-args execution from SSE fragmentation)",
+                  "issue_ids": [
+                    36679,
+                    35514
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/prefetched tool results without replaying AIMessage+ToolMessage (breaks under stricter Gemini turn validation)",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ToolException not catchable at agent/middleware level; handle_tool_error inconsistent between ToolNode and @tool decorator (plus docs gap)",
+                  "issue_ids": [
+                    37195
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ToolCallLimitMiddleware is reactive rather than proactive, wasting a tool call and abruptly surprising the model",
+                  "issue_ids": [
+                    35766
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Human-in-the-loop rejected tool call can still be executed by ToolNode (rejection not enforced)",
+                  "issue_ids": [
+                    37093
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "tool_call_id missing from on_tool_start (and on_tool_end) stream events, breaking per-call attribution in streaming/parallel UIs",
+                  "issue_ids": [
+                    37426
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Pydantic schema unsupported for function calling / structured output in langchain-huggingface",
+                  "issue_ids": [
+                    36441
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Malformed/fragmented tool call payloads break parsing (crash on bad function dicts; empty-args execution from SSE fragmentation)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] (cites 36679, 35514) + acceptance_criteria[1] + success_metrics[1]"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/prefetched tool results without replaying AIMessage+ToolMessage (breaks under stricter Gemini turn validation)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] + acceptance_criteria[2] + success_metrics[2] + risks[3]"
+                },
+                {
+                  "theme": "ToolException not catchable at agent/middleware level; handle_tool_error inconsistent between ToolNode and @tool decorator (plus docs gap)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] + acceptance_criteria[3] (\"identical across all three paths and is documented\") + success_metrics[3]"
+                },
+                {
+                  "theme": "ToolCallLimitMiddleware is reactive rather than proactive, wasting a tool call and abruptly surprising the model",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] + acceptance_criteria[4]"
+                },
+                {
+                  "theme": "Human-in-the-loop rejected tool call can still be executed by ToolNode (rejection not enforced)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] + acceptance_criteria[5] + risks[2]"
+                },
+                {
+                  "theme": "tool_call_id missing from on_tool_start (and on_tool_end) stream events, breaking per-call attribution in streaming/parallel UIs",
+                  "status": "addressed",
+                  "prd_element": "user_stories[6] + acceptance_criteria[6] + success_metrics[4] (covers on_tool_end too)"
+                },
+                {
+                  "theme": "Pydantic schema unsupported for function calling / structured output in langchain-huggingface",
+                  "status": "addressed",
+                  "prd_element": "user_stories[7] + acceptance_criteria[7] + risks[4]"
+                }
+              ]
+            }
+          ],
+          "rationale": "All seven distinct problems enumerated from the retrieved issues map to a dedicated user story and acceptance criterion, including correct merging of 36679 and 35514 into the single prominent parsing-robustness theme cited in user_stories[1]. Secondary details within issues are also picked up (e.g., the on_tool_end tool_call_id gap raised in a 37426 comment appears in success_metrics[4], and the documentation gap in 37195 appears in acceptance_criteria[3]). Some framings are slightly imprecise (e.g., acceptance_criteria[4] emphasizes blocking calls rather than informing the model of remaining calls, and acceptance_criteria[1] frames the fragmentation bug as a crash), but these are grounding/AC-quality concerns, not omissions. With zero prominent and zero minor themes missed, this matches anchor level 5."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a model returns a malformed or fragmented tool call payload, when LangChain parses the response, then parsing does not raise an unhandled exception and instead returns a well-defined error or partial result",
+              "reason": "Then slot is unobservable: \"a well-defined error or partial result\" names no concrete error type, field, or content, and the Given (\"malformed or fragmented\") specifies no concrete payload state. A reviewer cannot say pass/fail on what counts as 'well-defined' or which of the two alternative outcomes is required."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 2,
+              "ac_text": "Given a developer has a precomputed tool result, when they use the new programmatic tool-invocation API, then the result is injected into the agent run without constructing a full synthetic AIMessage+ToolMessage pair, and the run succeeds under strict turn validation such as Gemini 3.x",
+              "reason": "Then welds two independent outcomes: (a) injection occurs without a synthetic AIMessage+ToolMessage pair, and (b) the run passes strict turn validation on a specific provider. Each requires a separate check; one assertion cannot settle both."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 3,
+              "ac_text": "Given a tool raises a ToolException, when the exception propagates through ToolNode, the @tool decorator, or middleware, then handle_tool_error behavior is identical across all three paths and is documented",
+              "reason": "Then asserts both behavioral parity across three separate code paths and the existence of documentation \u2014 documentation cannot be verified by the same check as runtime behavior. The When also disjoins three distinct trigger paths rather than one action."
+            },
+            {
+              "type": "vague",
+              "ac_index": 4,
+              "ac_text": "Given tool-call-limiting middleware is configured with a max call count, when the agent approaches the limit, then the middleware prevents the next call from being issued rather than allowing it and reacting afterward",
+              "reason": "When slot \"approaches the limit\" is not a concrete state/trigger (at N-1? at N? within some margin?), and \"rather than allowing it and reacting afterward\" describes an implementation contrast rather than an observable assertion, so the pass/fail boundary is undefined."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 5,
+              "ac_text": "Given a human reviewer rejects a proposed tool call via human-in-the-loop middleware, when ToolNode subsequently processes that call, then the tool is not executed and the rejection is reflected in the resulting message",
+              "reason": "Two independent outcomes in the Then: non-execution of the tool, and the rejection being surfaced in the resulting message (whose expected content/shape is also unspecified). Each needs its own check."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 7,
+              "ac_text": "Given a developer defines a tool schema using Pydantic, when they use it for function calling with the langchain-huggingface integration, then the schema is accepted and produces a valid function-calling request",
+              "reason": "Then asserts both schema acceptance (no error) and that the emitted request is 'valid' \u2014 two separate verifications, and 'valid function-calling request' provides no concrete assertion target."
+            }
+          ],
+          "rationale": "Six of the seven acceptance criteria are defective: AC1 and AC4 fail the vagueness test (unobservable outcome 'well-defined error or partial result'; untranslatable trigger 'approaches the limit'), while AC2, AC3, AC5, and AC7 each weld two independent outcomes into a single Then (injection + provider turn-validation success; parity + documentation; non-execution + message reflection; acceptance + valid request). Only AC6 states a single, concretely checkable assertion (both events carry the same tool_call_id). No redundant pairs exist, but with a clear majority of ACs defective the rubric's lowest anchor applies."
+        }
+      }
+    },
+    {
+      "topic": "performance and latency",
+      "band": "ambiguous",
+      "overlap_score": 0.82,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "then the transformers package (and other heavy optional dependencies) is not imported",
+              "prd_location": "acceptance_criteria[3]",
+              "materiality": "material"
+            },
+            {
+              "claim": "unconditional, eager imports of heavy optional dependencies such as transformers at import time",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "avoid paying the import cost of heavy optional dependencies like transformers unless I actually use that feature",
+              "prd_location": "user_stories[3]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "causes connection errors and unpredictable latency/reliability failures",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "so that I stop seeing connection errors and latency spikes under concurrency",
+              "prd_location": "user_stories[4]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "so that large-document ingestion no longer stalls or times out",
+              "prd_location": "user_stories[2]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "forcing developers into fully sequential middleware stacks that cap throughput",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "target: reduced by at least 50% versus current baseline",
+              "prd_location": "success_metrics[3]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "All five issues the PRD describes (36126, 36488, 36835, 35783, 37972) exist in the retrieved corpus, so there are no wholly invented issues \u2014 that rules out anchors 1 and 2. However, invented incidental detail is attached to most of the real issues: the transformers issue is broadened to a category of 'other heavy optional dependencies' that the source never mentions (and this broadening is written into AC3), the event-loop client bug is given a latency dimension (the source reports only RuntimeError/APIConnectionError, never latency spikes), the splitter issue gains 'stalls or times out' language absent from the source (which reports 'several seconds'), and the middleware request gains an unsourced throughput-cap framing. With fabricated detail spread across four of five issues plus an invented 50% import-time target, this matches anchor 3's 'incidental fabrication is pervasive (most real issues carry some invented detail)' clause rather than anchor 4's '1-2 unsupported incidental details only'."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Together these issues mean that developers hit avoidable slowdowns and reliability failures at nearly every layer of the stack: import time, embedding/indexing, document processing, async networking, and pipeline execution.",
+              "prd_location": "problem_statement",
+              "source": "Five pain points, each with frequency (issues reporting it): 1 \u2014 embeddings sync, text splitter O(n^2), eager imports, cross-event-loop async client caching, sequential middleware",
+              "rung": "escalation"
+            },
+            {
+              "claim": "LangChain's core library and its integrations carry a set of distinct but compounding performance defects that inflate latency and reduce reliability across common usage patterns.",
+              "prd_location": "problem_statement",
+              "source": "Five independent single-issue pain points across embeddings, splitters, imports, async clients, and middleware; no source claim about compounding effects or usage frequency",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "so that large-document ingestion no longer stalls or times out",
+              "prd_location": "user_stories[2]",
+              "source": "Algorithmic complexity bugs (O(n^2) list.pop(0) usage) in text splitters causing severe slowdowns on large documents",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Given a text splitter processes a large document (tens of thousands of lines or more)",
+              "prd_location": "acceptance_criteria[2]",
+              "source": "Algorithmic complexity bugs (O(n^2) list.pop(0) usage) in text splitters causing severe slowdowns on large documents",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD maps each user story, AC, and success metric one-to-one onto the five source pain points and is unusually disciplined about evidence volume (risks[1] and risks[4] explicitly state each pain point has a frequency of exactly one issue, and severity language matches \u2014 'multi-fold slowdowns', 'severe slowdowns', high-severity async client bug). The main departure is the problem statement's closing generalization that developers hit failures 'at nearly every layer of the stack', which asserts product-wide pervasiveness that five single-report issues could never establish \u2014 one unsupported escalation. Alongside it are a few looser restatements ('compounding' defects, 'across common usage patterns', 'stalls or times out', 'tens of thousands of lines') that remain compatible with the source. Per the anchor scale, exactly one escalation plus several imprecisions lands at 3."
+        },
+        "completeness": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Embedding pipeline overhead (per-batch device\u2192CPU syncs + re-embedding per Chroma storage batch)",
+                  "issue_ids": [
+                    36126
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Text splitter O(n^2) behavior from list.pop(0)",
+                  "issue_ids": [
+                    36488
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Unconditional eager import of transformers inflating import/cold-start time",
+                  "issue_ids": [
+                    36835
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "lru_cache-ed async httpx client shared across event loops causing APIConnectionError",
+                  "issue_ids": [
+                    35783
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Middleware orchestration gap: priority ordering, conditional activation, and safe parallel execution",
+                  "issue_ids": [
+                    37972
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/non-message workflow context (prefetched tool results) into create_agent; replayed AIMessage+ToolMessage rejected by newer Gemini models",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Inflated/corrupted token usage reporting for Fireworks qwen3p6-plus breaking cost accounting",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Release sequencing/tracking of integration packages before langchain-tests tool_call_streaming release",
+                  "issue_ids": [
+                    38058
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Embedding pipeline overhead (per-batch device\u2192CPU syncs + re-embedding per Chroma storage batch)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1], acceptance_criteria[1], success_metrics[1]"
+                },
+                {
+                  "theme": "Text splitter O(n^2) behavior from list.pop(0)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2], acceptance_criteria[2], success_metrics[2]"
+                },
+                {
+                  "theme": "Unconditional eager import of transformers inflating import/cold-start time",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3], acceptance_criteria[3], success_metrics[3]"
+                },
+                {
+                  "theme": "lru_cache-ed async httpx client shared across event loops causing APIConnectionError",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4], acceptance_criteria[4], success_metrics[4]"
+                },
+                {
+                  "theme": "Middleware orchestration gap: priority ordering, conditional activation, and safe parallel execution",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5], acceptance_criteria[5], success_metrics[5] (parallel-execution aspect only; priority/conditional activation left uncovered and DAG scheduling explicitly out_of_scope[3])"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/non-message workflow context (prefetched tool results) into create_agent; replayed AIMessage+ToolMessage rejected by newer Gemini models",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "Inflated/corrupted token usage reporting for Fireworks qwen3p6-plus breaking cost accounting",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "Release sequencing/tracking of integration packages before langchain-tests tool_call_streaming release",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "Every enumerated theme is reported by exactly one issue, so no prominent themes exist and none can be missed. The PRD cleanly covers five of the eight enumerated problems (36126, 36488, 36835, 35783, and the parallel-execution slice of 37972) with matching user stories, acceptance criteria, and metrics, but it is silent on three other retrieved findings: the create_agent prefetched-tool-context API gap (35836), the Fireworks inflated token-usage bug (37754), and the integration release-ordering work (38058). Three minor themes missed with all (zero) prominent themes covered matches the level-3 anchor clause 'all prominent themes covered but 3+ minor themes missed'; the partial treatment of 37972 (priority and conditional activation omitted) reinforces rather than changes that placement."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a HuggingFaceEmbeddings instance backed by Chroma is used to embed a batch of documents, when the embedding call is profiled against calling the underlying embedding library directly, then no unnecessary device/host synchronization calls or redundant recomputation are observed in the profile",
+              "reason": "The Then slot asserts absence of 'unnecessary' sync calls and 'redundant' recomputation \u2014 both require a subjective judgement of what counts as unnecessary/redundant, with no count, threshold, or named call to check. A reviewer cannot unambiguously mark pass/fail from a profile. It also welds two separate absence assertions together."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 2,
+              "ac_text": "Given a text splitter processes a large document (tens of thousands of lines or more), when the splitter runs to completion, then execution time scales linearly with input size rather than quadratically, with no list.pop(0)-style O(n^2) operations in the code path",
+              "reason": "Two independent outcomes: (a) a runtime scaling measurement across multiple input sizes, and (b) a static code-inspection assertion that no list.pop(0)-style operations exist. One check cannot settle both; also 'scales linearly' carries no tolerance and the Given ('tens of thousands of lines or more') is an open-ended range rather than a concrete state."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 3,
+              "ac_text": "Given an application imports langchain core without using any transformers-dependent feature, when the import statement executes, then the transformers package (and other heavy optional dependencies) is not imported, and import time is measurably reduced versus the current eager-import behavior",
+              "reason": "Two outcomes joined by 'and': module-absence in sys.modules, plus an import-time reduction. Additionally 'other heavy optional dependencies' is an unenumerated set and 'measurably reduced' has no threshold, so the second assertion is not independently testable."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 4,
+              "ac_text": "Given multiple concurrent async event loops each make requests through the async HTTP client, when requests are issued simultaneously from different event loops, then no cross-event-loop connection errors occur and each loop uses its own correctly scoped client instance",
+              "reason": "Two independent verifiable outcomes: zero cross-loop connection errors (observable behaviour) and per-loop client instance identity (internal state). A single check cannot settle both; 'correctly scoped' is also left undefined."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 5,
+              "ac_text": "Given a middleware stack contains steps with no data dependency between them, when the pipeline is configured to run those steps concurrently, then the steps execute in parallel and total pipeline latency is lower than running them sequentially, with correct, unmodified output",
+              "reason": "Three separate assertions in one Then: parallel execution occurred, latency is lower than sequential, and output is unchanged. Each requires a distinct check, and 'lower than sequentially' has no magnitude threshold in the AC itself."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 6,
+              "ac_text": "Given the performance hardening pass is complete, when each of the five identified defects (embeddings sync, splitter complexity, eager imports, event-loop client caching, sequential middleware) is retested, then each defect no longer reproduces under its original repro conditions",
+              "reason": "Explicitly bundles five distinct outcomes across five unrelated subsystems into one criterion; no single check settles it. The Given ('the performance hardening pass is complete') and the referenced 'original repro conditions' are also unspecified states, so the test steps cannot be derived."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                1,
+                6
+              ],
+              "reason": "Both reduce to the same check: confirm the HuggingFaceEmbeddings/Chroma sync-and-recomputation defect no longer reproduces when embedding a batch."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                2,
+                6
+              ],
+              "reason": "Both reduce to re-running the large-document split and confirming the O(n^2) splitter defect no longer reproduces."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                3,
+                6
+              ],
+              "reason": "Both reduce to importing langchain core and confirming the eager heavy-import defect no longer reproduces."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                4,
+                6
+              ],
+              "reason": "Both reduce to driving requests from multiple event loops and confirming the cross-loop client-caching failure no longer reproduces."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                5,
+                6
+              ],
+              "reason": "Both reduce to running an independent-step middleware stack and confirming the forced-sequential-execution limitation no longer reproduces."
+            }
+          ],
+          "rationale": "Every one of the six ACs is defective: AC1 is vague (absence of 'unnecessary'/'redundant' work is not an observable assertion), and ACs 2-6 each weld two or more independent outcomes into a single Then (runtime scaling plus static code inspection; module-absence plus import-time reduction; error-count plus client-instance identity; parallelism plus latency plus output equality; and AC6's explicit five-defect bundle). AC6 additionally duplicates the checks in ACs 1-5, producing five redundant pairs on top of the per-AC defects. This is well past the 3+/majority-defective threshold and past the 3+ redundant-pair clause, so the lowest anchor applies."
+        }
+      }
+    },
+    {
+      "topic": "developer experience",
+      "band": "ambiguous",
+      "overlap_score": 0.55,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "the process for triaging and assigning contributor pull requests is unclear and slow enough that multiple contributors have independently duplicated the same fix while waiting for a maintainer to assign or acknowledge their work",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "then it receives a triage label or assignment status within 5 business days",
+              "prd_location": "acceptance_criteria[6]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "then the deprecated enum/tool is removed or replaced within one release cycle of the upstream deprecation being reported",
+              "prd_location": "acceptance_criteria[5]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every substantive issue in the PRD traces to a retrieved source: rigid/high-level agent abstractions (36310, 35836, 35842), first-party Skills vs. the deepagents dependency and its version drift (38170, including the commenter's 0.4.x->0.5.x breakage), dropped raw response metadata (36373) and the image 'detail' field (36297), and deprecated partner enums/tools (37701 exa neural/keyword, 37938 computer-use-preview). No wholly invented issue exists. The PR-triage/duplicate-work theme is inferable from real comment threads in 37701, 36297 and 37938 where several contributors each announce a ready fix and request assignment, but the characterisation of the process as 'unclear and slow' and the concrete SLA thresholds ('within 5 business days', 'within one release cycle') are specifics the corpus never states; they are attached to genuinely-present evidence rather than fabricating an issue, so this sits at the level of unsupported incidental detail (anchor 4) rather than invented issues (anchor 3 or 2)."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "user_stories[2]: As a developer who wants Agent Skills, I want to use Skills as a first-party feature of the core package... cited issue ids: [36310, 35836, 35842, 38170]",
+              "prd_location": "user_stories[2].cited_issue_ids",
+              "source": "pain_point[2]: Extra dependency surface and version-drift pain from add-on packages (deepagents) required for core-feeling capabilities like Agent Skills \u2014 frequency: 1, evidence issue ids: [38170]",
+              "rung": "escalation"
+            },
+            {
+              "claim": "core message/response conversion paths silently drop model-internal data ... which breaks monitoring, evaluation, and correctness checks that depend on that data being preserved end-to-end",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3]: Model-internal data ... is silently dropped by core abstractions, limiting monitoring, evaluation, and correctness (severity: medium)",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "forcing developers to fork or route around them (the most repeated complaint, cited across four separate reports)",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1]: Rigid, high-level agent abstractions lack composability and extensibility for advanced/custom workflows \u2014 severity: high, frequency: 4",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD is mostly well-anchored \u2014 frequencies (4 reports for abstraction rigidity, 2 known metadata cases, 3 PR-triage reports) and the risks section's explicit acknowledgment of thin evidence (frequency 1 and 2) track the source findings closely. However, user_stories[2] attributes the deepagents dependency-drift pain to four issue ids ([36310, 35836, 35842, 38170]) when the source evidences it with a single issue (38170), a frequency/scope claim the source could not establish under any reading \u2014 one unsupported escalation. Two additional imprecisions (severity language 'breaks' for the source's 'limiting'; the unqualified superlative 'the most repeated complaint') loosen but remain compatible with the source. Per the anchor scale, exactly one unsupported escalation places this at 3."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 2,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Rigid high-level agent abstraction; want composable primitives",
+                  "issue_ids": [
+                    36310,
+                    35836,
+                    35842
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "First-class workflow-context / prefetched tool-result injection",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Mid-execution agent steering in create_agent",
+                  "issue_ids": [
+                    35842
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Agent Skills requires external deepagents dependency",
+                  "issue_ids": [
+                    38170
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Conversion paths silently drop model/provider metadata",
+                  "issue_ids": [
+                    36373,
+                    36297
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Missing test coverage for dropped-metadata path",
+                  "issue_ids": [
+                    36297
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Partner integrations lag upstream API (deprecated enums/tools)",
+                  "issue_ids": [
+                    37701,
+                    37938
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Unclear/slow PR triage causing duplicated contributor fixes",
+                  "issue_ids": [
+                    37701,
+                    36297,
+                    37938
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Docs/reference example for composing middleware into custom graph",
+                  "issue_ids": [
+                    36310
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Exa integration attribution header for provider usage analytics",
+                  "issue_ids": [
+                    37701
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "OpenAI computer_call not surfaced as executable tool call for create_agent",
+                  "issue_ids": [
+                    37938
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Rigid high-level agent abstraction; want composable primitives",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1]; acceptance_criteria[1]"
+                },
+                {
+                  "theme": "First-class workflow-context / prefetched tool-result injection",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('workflow context injection'); acceptance_criteria[1]"
+                },
+                {
+                  "theme": "Mid-execution agent steering in create_agent",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('steering'); acceptance_criteria[1]"
+                },
+                {
+                  "theme": "Agent Skills requires external deepagents dependency",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2]; acceptance_criteria[2]; acceptance_criteria[3]; success_metrics[1]"
+                },
+                {
+                  "theme": "Conversion paths silently drop model/provider metadata",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3]; acceptance_criteria[4]"
+                },
+                {
+                  "theme": "Missing test coverage for dropped-metadata path",
+                  "status": "addressed",
+                  "prd_element": "success_metrics[2]"
+                },
+                {
+                  "theme": "Partner integrations lag upstream API (deprecated enums/tools)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4]; acceptance_criteria[5]; success_metrics[3]"
+                },
+                {
+                  "theme": "Unclear/slow PR triage causing duplicated contributor fixes",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5]; acceptance_criteria[6]; acceptance_criteria[7]; success_metrics[4]; success_metrics[5]"
+                },
+                {
+                  "theme": "Docs/reference example for composing middleware into custom graph",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[1] ('documented composable primitives')"
+                },
+                {
+                  "theme": "Exa integration attribution header for provider usage analytics",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "OpenAI computer_call not surfaced as executable tool call for create_agent",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "All four prominent themes are covered: abstraction rigidity via user_stories[1]/acceptance_criteria[1], silent metadata loss via user_stories[3]/acceptance_criteria[4], integration lag via user_stories[4]/acceptance_criteria[5], and slow PR triage with duplicate fixes via user_stories[5]/acceptance_criteria[6-7]. Two minor themes are silently omitted: issue 37701's request for an x-exa-integration attribution header for usage analytics, and issue 37938's core ask that OpenAI Responses computer_call items be surfaced as executable LangChain tool calls runnable by create_agent (the PRD reduces 37938 solely to removing deprecated tools). That matches the level 4 anchor: all prominent themes covered with 1-2 minor themes missed."
+        },
+        "ac_quality": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a developer needs custom control flow not supported by the high-level agent abstraction, when they use the documented composable primitives (middleware, steering, workflow context injection), then they can assemble the desired workflow without subclassing or forking core agent classes",
+              "reason": "Given slot ('needs custom control flow not supported by the high-level agent abstraction') names no concrete state, and the Then ('they can assemble the desired workflow') asserts an unobservable, undefined outcome -- there is no specified workflow, no concrete artifact, and no pass/fail condition a reviewer could check."
+            },
+            {
+              "type": "redundant_pair",
+              "ac_indices": [
+                2,
+                3
+              ],
+              "reason": "Both reduce to the same check: Skills functionality is usable from the core package alone with no dependency on the deepagents add-on. AC3's 'no separate add-on package version pin is required to keep Skills working' after a core upgrade is verified by exactly the same test as AC2's 'Skills functionality is available without installing the deepagents add-on package'."
+            }
+          ],
+          "rationale": "AC1 is the only per-AC defect: its Given and Then slots ('needs custom control flow', 'assemble the desired workflow') cannot be translated into a concrete state or assertion, so no engineer could derive a pass/fail test from it. ACs 2, 4, 5, 6, 7 are each single-outcome and concretely checkable (import without deepagents; metadata retrievable from converted message; deprecated enum removed within one release cycle; triage label within 5 business days; duplicate closed with reference within 5 business days). At the set level, ACs 2 and 3 form one redundant pair, both reducing to 'Skills works without the add-on package'. One defective AC maps to the level-3 clause, and one redundant pair alone would map to 4; applying the lower-score precedence yields 3."
+        }
+      }
+    },
+    {
+      "topic": "documentation gaps",
+      "band": "adversarial",
+      "overlap_score": 0.82,
+      "completeness_exempt": true,
+      "dimensions": {
+        "hallucination": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every substantive factual claim in the PRD traces directly to the retrieved issues: the enumerated topics \u2014 streaming (35514, 36214, 38226), tool-call handling (35836, 35514), provider API mismatches (36211), vector store update logic (37452 Chroma update_document), schema enforcement (36067 OpenRouter json_schema), and Hub manifest serialization (37018) \u2014 each map onto a real retrieved issue with no invented items added. No user counts, constraints, personas, or causes are conjured; the target_user field explicitly labels itself 'Unknown ... a guess, not a finding' rather than asserting an unsupported persona, and the acceptance criteria and success metric are process statements about the evidence gap rather than claims about the corpus. Any debate about whether issue 37018's request for 'documented mapping rules' contradicts the 'no documentation complaints' assertion is a question of interpretation/overstatement of a real source, which the rubric assigns to Grounding, not Hallucination. This matches the level 5 anchor: zero unsupported claims of any kind."
+        },
+        "grounding": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every substantive claim in the PRD traces directly to the source seed: the enumeration of issue topics (streaming, tool-call handling, provider API mismatches, vector store update logic, schema enforcement, Hub manifest serialization) matches the seed verbatim, and the central assertion that no documentation pain points could be substantiated matches 'no pain points -- discovery substantiated none'. The PRD does not inflate scope or severity \u2014 it explicitly labels the target user as 'Unknown ... a guess, not a finding' and hedges the retrieval-mismatch inference with 'appears to have', keeping it compatible with the source. The minor addition of 'outdated' to the source's 'missing, unclear, or incorrect documentation' list remains fully entailed by the source's blanket statement that no documentation-gap pain points exist in this issue set, so it is not a loosening of fact. Zero imprecision, escalation, or contradiction, matching anchor 5."
+        },
+        "completeness": {
+          "score": null,
+          "exempt": true,
+          "reason": "correct refusal -- no enumerable themes to cover"
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given the current retrieved issue set (functional bug/feature reports, not doc complaints), when this PRD is reviewed, then no documentation-gap feature work is greenlit on the basis of this finding alone",
+              "reason": "All three slots are unobservable. The When ('when this PRD is reviewed') names no actor, artifact state, or trigger event that can be instrumented. The Then ('no documentation-gap feature work is greenlit on the basis of this finding alone') is an open-ended negative about an organizational decision with an unverifiable causal qualifier ('on the basis of this finding alone') \u2014 no reviewer could run a single check and declare pass/fail."
+            },
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given no documentation pain points were identified, when the team wants to pursue the 'documentation gaps' theme, then a new, targeted discovery pass (e.g., searching issues/PRs tagged 'docs' or scanning support channels for doc complaints) must be run before writing a substantive PRD",
+              "reason": "The When slot ('when the team wants to pursue the theme') is an internal intention, not an observable action or state change, so the trigger cannot be detected. The Then is further softened by undefined terms \u2014 'targeted', 'e.g.' (illustrative, not required), and 'substantive PRD' \u2014 leaving no concrete assertion of what artifact must exist for the criterion to pass."
+            }
+          ],
+          "rationale": "Two of the three acceptance criteria (AC1 and AC2) fail the Given/When/Then translation test: neither has an observable trigger nor a single concrete assertion, resting instead on process intentions ('when the team wants to pursue', 'when this PRD is reviewed') and unfalsifiable negative outcomes ('no ... feature work is greenlit on the basis of this finding alone'). Only AC3 ('it is clearly marked as unsubstantiated / evidence-gap') approaches a checkable artifact-level assertion. No redundant pair was found \u2014 the three ACs address a gating decision, a discovery-pass prerequisite, and a metadata label respectively. Two defective ACs satisfies the level-2 clause, but two out of three is also a majority of the set, which triggers the level-1 clause; per the precedence rule the lower score applies."
+        }
+      }
+    },
+    {
+      "topic": "xylophone quarterly banana",
+      "band": "adversarial",
+      "overlap_score": null,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "then the reported token count matches the provider's actual billed token count within documented tolerance, with no duplicate counting",
+              "prd_location": "acceptance_criteria[3]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "no usage figures are corrupted or nonsensical (e.g., negative or absurdly large values)",
+              "prd_location": "acceptance_criteria[4]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue and pain-point cluster in the PRD traces to a retrieved issue: dropped reasoning tokens (36809), missing token-level callbacks (37878), SSE parsing failure (35442), multimodal token over-counting (38229), corrupted/inflated usage metadata (37754), duplicated generation_info (38226), model-prefix inference failure (38243), and unconditional null parameters rejected by a provider (36889). No wholly invented issue exists, and the success-metric counts (3/3/2) match the actual clusters, so nothing at the 3-or-below rungs applies. Two incidental embellishments attached to genuine issues appear in acceptance criteria \u2014 a 'documented tolerance' against provider-billed counts (no such tolerance or billing comparison exists in 38229/37754) and 'negative' usage values (37754 reports only absurdly inflated values) \u2014 which places this at the 4 anchor rather than 5. Misattributed issue-ID citations (e.g. 38226 cited for multimodal token counting) are distortion of real sources and fall under Grounding, not counted here."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Developers integrating chat models through LangChain's integration layer encounter three compounding reliability problems.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1] Streaming/token-level output gaps...; pain_point[2] Token usage/cost accounting inaccuracies...; pain_point[3] Provider/model inference and compatibility gaps...",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Together these issues mean developers cannot trust streaming completeness, usage numbers, or cross-provider request construction, undermining confidence in building production applications on top of the integration layer.",
+              "prd_location": "problem_statement",
+              "source": "Three clusters with frequencies of 3, 3, and 2 issues respectively (severities high, high, medium)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD maps each of the three source clusters accurately, preserves the exact evidence issue IDs per story, and reports frequencies faithfully in success metrics (3 / 3 / 2 known cases), even flagging the thin evidence base in risks[1] \u2014 so there is no unsupported escalation (no superlatives, no 'most reported' or product-wide claims from single data points) and no contradiction of any stated source fact. Two claims loosen the source slightly: framing the three clusters as 'compounding' (a relationship the findings never assert) and the blanket 'developers cannot trust...' generalization derived from 8 issues, both of which remain compatible with the source and could still honestly cite it. That matches the 4 anchor: 1-2 imprecise facts only, no escalation, no contradiction."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Reasoning/thinking tokens silently dropped in streamed chunks",
+                  "issue_ids": [
+                    36809
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Token-level callbacks (on_llm_new_token) never fire during agent execution",
+                  "issue_ids": [
+                    37878
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "SSE stream parsing fails on non-standard event shapes, yielding zero chunks",
+                  "issue_ids": [
+                    35442
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Approximate token counting over-counts multimodal (audio/video/file/image) base64 payloads",
+                  "issue_ids": [
+                    38229
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Corrupted/massively inflated usage metadata token counts from provider payloads",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "generation_info written twice on duplicate finish chunks, producing doubled string values",
+                  "issue_ids": [
+                    38226
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Model provider inference fails for unlisted model prefixes (o4 family)",
+                  "issue_ids": [
+                    38243
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Unconditionally sending null optional parameters causes provider server errors",
+                  "issue_ids": [
+                    36889
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Reasoning/thinking tokens silently dropped in streamed chunks",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] / acceptance_criteria[1]"
+                },
+                {
+                  "theme": "Token-level callbacks (on_llm_new_token) never fire during agent execution",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('via reliable callbacks') / acceptance_criteria[1] ('delivered through token-level callbacks')"
+                },
+                {
+                  "theme": "SSE stream parsing fails on non-standard event shapes, yielding zero chunks",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] / acceptance_criteria[2]"
+                },
+                {
+                  "theme": "Approximate token counting over-counts multimodal (audio/video/file/image) base64 payloads",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] / acceptance_criteria[3]"
+                },
+                {
+                  "theme": "Corrupted/massively inflated usage metadata token counts from provider payloads",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] / acceptance_criteria[4] ('no usage figures are corrupted or nonsensical')"
+                },
+                {
+                  "theme": "generation_info written twice on duplicate finish chunks, producing doubled string values",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] / acceptance_criteria[4] ('no fields are duplicated')"
+                },
+                {
+                  "theme": "Model provider inference fails for unlisted model prefixes (o4 family)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] / acceptance_criteria[5]"
+                },
+                {
+                  "theme": "Unconditionally sending null optional parameters causes provider server errors",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] / acceptance_criteria[6]"
+                }
+              ]
+            }
+          ],
+          "rationale": "Eight distinct problems are reported across the eight retrieved issues, and the PRD maps every one of them: streaming reasoning tokens (36809) and token-level callbacks (37878) via user_stories[1]/AC1, SSE parse failure (35442) via user_stories[2]/AC2, multimodal over-counting (38229) via AC3, corrupted/inflated usage (37754) and duplicated generation_info (38226) via user_stories[4]/AC4, provider prefix inference (38243) via AC5, and null-parameter rejection (36889) via AC6. The success_metrics also cluster all three problem groups, and no enumerated theme is left without a corresponding story or acceptance criterion. With zero prominent and zero minor themes missed, this matches the level 5 anchor."
+        },
+        "ac_quality": {
+          "score": 1,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 1,
+              "ac_text": "Given a chat model configured to stream and capable of emitting reasoning tokens, when a streaming request is made, then reasoning tokens are included in the streamed output and delivered through token-level callbacks without gaps",
+              "reason": "The Then welds two independent outcomes: (a) reasoning tokens appear in the streamed output, and (b) they are delivered through token-level callbacks. These require separate checks (stream content vs. callback invocation), and 'without gaps' adds a third, unquantified assertion."
+            },
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given an SSE response contains an edge-case chunk format previously known to break parsing, when the client parses the stream, then parsing completes without error and no output chunk is dropped",
+              "reason": "The Given slot cannot be translated into a concrete state: 'an edge-case chunk format previously known to break parsing' names no specific payload shape, so a tester cannot construct the fixture. The Then also bundles two assertions (no error raised, no chunk dropped)."
+            },
+            {
+              "type": "vague",
+              "ac_index": 3,
+              "ac_text": "Given a request includes both text and a multimodal payload (image or audio), when usage metadata is calculated after the call completes, then the reported token count matches the provider's actual billed token count within documented tolerance, with no duplicate counting",
+              "reason": "The assertion depends on 'documented tolerance', which is never specified, so pass/fail is undecidable; it also appends a second outcome ('no duplicate counting') that requires its own check."
+            },
+            {
+              "type": "vague",
+              "ac_index": 4,
+              "ac_text": "Given a completed generation response, when generation_info and usage metadata are attached to the result, then no fields are duplicated and no usage figures are corrupted or nonsensical (e.g., negative or absurdly large values)",
+              "reason": "'corrupted or nonsensical' and 'absurdly large values' are unobservable terms with no threshold, so a reviewer cannot unambiguously judge; the Then also asserts two distinct outcomes (no duplicated fields AND no corrupted figures)."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 6,
+              "ac_text": "Given a provider that rejects null parameters in its API schema, when a request is constructed with unset optional parameters, then those parameters are omitted from the payload rather than sent as null, and no provider server error occurs",
+              "reason": "Two independent outcomes are combined: payload-construction inspection (parameters omitted) and end-to-end provider response behaviour (no server error). Each requires a separate check at a different layer."
+            }
+          ],
+          "rationale": "Five of the six acceptance criteria carry defects: ACs 1 and 6 weld two independently verifiable outcomes into one Then, while ACs 2, 3, and 4 rely on unobservable or unspecified slots ('edge-case chunk format previously known to break parsing', 'within documented tolerance', 'corrupted or nonsensical... absurdly large') that a reviewer could not settle pass/fail on, and each additionally bundles a second assertion. Only AC 5 is testable as written. No redundant pairs exist, but with a clear majority (5/6) of ACs defective, the rubric's level-1 anchor ('3+ or a majority of defective ACs') applies."
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "hallucination": {
+      "n": 10,
+      "mean": 4.0,
+      "min": 3,
+      "max": 5,
+      "scores": [
+        4,
+        3,
+        4,
+        5,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "target": "all score 5 (mean 5.0, zero below 5)",
+      "meets_target": false,
+      "n_below_target": 8
+    },
+    "grounding": {
+      "n": 10,
+      "mean": 3.5,
+      "min": 2,
+      "max": 5,
+      "scores": [
+        3,
+        2,
+        4,
+        4,
+        3,
+        4,
+        3,
+        3,
+        5,
+        4
+      ],
+      "target": "all score 5 (mean 5.0, zero below 5)",
+      "meets_target": false,
+      "n_below_target": 9
+    },
+    "completeness": {
+      "n": 9,
+      "mean": 4.33,
+      "min": 3,
+      "max": 5,
+      "scores": [
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        3,
+        4,
+        5
+      ],
+      "target": "mean >= 4.0",
+      "meets_target": true,
+      "n_below_target": 1
+    },
+    "ac_quality": {
+      "n": 10,
+      "mean": 1.4,
+      "min": 1,
+      "max": 3,
+      "scores": [
+        1,
+        2,
+        1,
+        1,
+        2,
+        1,
+        1,
+        3,
+        1,
+        1
+      ],
+      "target": "mean >= 4.5",
+      "meets_target": false,
+      "n_below_target": 10
+    }
+  }
+}
