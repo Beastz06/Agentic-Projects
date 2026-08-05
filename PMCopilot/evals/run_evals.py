@@ -12,9 +12,34 @@ import json
 from datetime import datetime, timezone
 from evals.judge import judge, JUDGE_MODEL
 from evals.rubrics import DIMENSIONS
+import argparse
+import os
+import logging
+import telemetry
 
 FIXTURE = "evals/fixture_v1.json"
-OUT = "evals/results_v1.json"
+DEFAULT_OUT = "evals/results_v1.json"
+
+parser = argparse.ArgumentParser(description="Score the frozen fixture.")
+parser.add_argument("--out", default=DEFAULT_OUT,
+                    help="where to write scores; must not already exist")
+parser.add_argument("--label", default="baseline",
+                    help="why this run happened: baseline, variance-2, v2-fixes")
+parser.add_argument("--limit", type=int, default=None,
+                    help="score only the first N scenarios; for plumbing checks")
+args = parser.parse_args()
+OUT = args.out
+
+# Check the path before any API spend. A scored run is a record -- "what
+# happened then" -- so overwriting one is never correct. Failing here costs
+# nothing; failing after the first scenario costs four Opus calls. Exclusive
+# create would defeat a race this script cannot have, and would leave an
+# empty file behind on every early failure.
+if os.path.exists(OUT):
+    raise SystemExit(
+        f"{OUT} already exists. Scored runs are records, not outputs -- "
+        f"pass --out with a new path (e.g. evals/results_v1_var2.json)."
+    )
 
 # From PRD.md. Held here as data so the summary reports against the committed
 # claim rather than against whatever the numbers happen to be.
@@ -24,6 +49,10 @@ TARGETS = {
     "completeness": {"mean": 4.0, "floor": None, "text": "mean >= 4.0"},
     "ac_quality": {"mean": 4.5, "floor": None, "text": "mean >= 4.5"},
 }
+
+events: list[dict] = []
+logging.getLogger(telemetry.ROOT).addHandler(telemetry.TelemetryHandler(events))
+logging.getLogger(telemetry.ROOT).setLevel(logging.INFO)
 
 
 def write(results: dict) -> None:
@@ -47,14 +76,17 @@ results = {
         # that model. Recorded so a cross-model re-judge has a baseline.
         "judge_model": JUDGE_MODEL,
         "judged_at": datetime.now(timezone.utc).isoformat(),
+        "run_label": args.label,
         "temperature_pinned": False,  # Opus 5 rejects the parameter
     },
     "scenarios": [],
     "errors": [],
+    "telemetry": events,
 }
 
-for sc in fixture["scenarios"]:
+for sc in fixture["scenarios"][: args.limit]:
     topic = sc["topic"]
+    telemetry.stage_marker(events, topic)
     print(f"--- {topic} [{sc['band']}]")
     scored = {
         "topic": topic,
@@ -103,6 +135,7 @@ for sc in fixture["scenarios"]:
         flag = "" if attempts == 1 else f"  (repaired x{attempts - 1})"
         print(f"    {dim:<14} {result.score}{flag}")
 
+    telemetry.stage_marker(events, topic, end=True)
     results["scenarios"].append(scored)
     write(results)
 

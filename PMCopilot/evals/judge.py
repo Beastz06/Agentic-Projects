@@ -25,6 +25,8 @@ from evals.rubrics import (
     EVIDENCE_RETRIEVED_ISSUES,
     EVIDENCE_SOURCE_FINDINGS,
 )
+import time
+import telemetry
 
 MAX_RETRIES = 1
 MAX_TOKENS = 4096
@@ -261,10 +263,20 @@ def judge(
     last_error = None
 
     for attempt in range(1 + MAX_RETRIES):
+        started = time.perf_counter()
         response = _client.messages.create(
             model=JUDGE_MODEL,
             max_tokens=MAX_TOKENS,
             messages=messages,
+        )
+        telemetry.model_call(
+            telemetry.judge_log,
+            model=response.model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            attempt=attempt + 1,
+            subject=dimension,
         )
         raw = "".join(b.text for b in response.content if b.type == "text")
 
