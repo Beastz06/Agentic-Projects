@@ -17,10 +17,11 @@ import os
 import logging
 import telemetry
 
-FIXTURE = "evals/fixture_v1.json"
 DEFAULT_OUT = "evals/results_v1.json"
 
 parser = argparse.ArgumentParser(description="Score the frozen fixture.")
+parser.add_argument("--fixture", required=True,
+                    help="path to the fixture to score, e.g. evals/fixture_v2.json")
 parser.add_argument("--out", default=DEFAULT_OUT,
                     help="where to write scores; must not already exist")
 parser.add_argument("--label", default="baseline",
@@ -29,6 +30,7 @@ parser.add_argument("--limit", type=int, default=None,
                     help="score only the first N scenarios; for plumbing checks")
 args = parser.parse_args()
 OUT = args.out
+FIXTURE = args.fixture
 
 # Check the path before any API spend. A scored run is a record -- "what
 # happened then" -- so overwriting one is never correct. Failing here costs
