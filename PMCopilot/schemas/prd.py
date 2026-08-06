@@ -32,10 +32,18 @@ class UserStory(BaseModel):
 
 class AcceptanceCriterion(BaseModel):
     # Given/When/Then is enforced by structure: three required fields. The shape
-    # IS the constraint — no separate validator needed.
+    # IS the constraint — no separate validator needed. Atomicity is not
+    # enforceable the same way: whether a `then` asserts one outcome or three is
+    # a property of prose, not of shape. The description below is guidance the
+    # model reads at fill time — it cannot be violated, only ignored.
     given: str
     when: str
-    then: str
+    then: str = Field(
+        description=(
+            "State one outcome. Where a criterion would need to assert a "
+            "second, independent result, write a second criterion instead."
+        )
+    )
 
 
 class SuccessMetric(BaseModel):

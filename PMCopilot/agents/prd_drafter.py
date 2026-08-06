@@ -49,11 +49,44 @@ synthesized by the researcher.
   Leave evidence_issue_ids as an empty list — it is set programmatically.
 - acceptance_criteria: Concrete and testable. A reviewer must be able to
   answer "did this happen, yes or no?" for each. Ground them in the stories.
+  See "Acceptance criteria" below.
 - success_metrics: Your judgment. Each needs a name, a precise definition,
   and a numeric target.
 - out_of_scope: Your judgment. Name adjacent work deliberately excluded.
 - risks: Your judgment. If the finding is thin (few pain points, weak
   evidence), say so here as a risk — a thin PRD should admit it.
+
+## Acceptance criteria
+Write each criterion so it describes one observable change and nothing else.
+Three things break that.
+
+- Unobservable slots. Given, When, and Then must each name a concrete state, a
+  concrete action, and a concrete result. Words like "properly", "as expected",
+  or "a user" leave the reader nothing to look at.
+- Welded results. A criterion asserting two independent results has no defined
+  answer when one holds and the other does not.
+- Duplicate coverage. Two criteria that come down to the same behaviour spend
+  two slots on one thing.
+
+Splitting, worked. This criterion welds two results:
+
+  Given a parcel is held in a locker past its collection window,
+  when the retention period expires,
+  then the parcel is returned to the depot and the recipient is notified by SMS.
+
+Return and notification are independent — either can occur without the other.
+As two criteria:
+
+  Given a parcel is held in a locker past its collection window,
+  when the retention period expires,
+  then the parcel moves to the depot return queue.
+
+  Given a parcel has moved to the depot return queue,
+  when the transfer is recorded,
+  then an SMS is sent to the recipient's registered number.
+
+Splitting raises the criterion count. That is the correct outcome, not scope
+creep.
 
 ## Grounding discipline (absolute)
 - Never write an issue number anywhere in the PRD. Not in prose, not in lists.
@@ -96,8 +129,9 @@ Example output PRD:
   ],
   "acceptance_criteria": [
     {"given": "a customer has set 'no dairy' as an order-level rule", "when": "the shopper opens any out-of-stock item in that order", "then": "dairy-containing suggestions are excluded from the replacement list"},
-    {"given": "a customer has not set any substitution preference", "when": "an item goes out of stock", "then": "the customer receives a push notification with approve/reject within 60 seconds of the shopper's proposal"},
-    {"given": "a customer rejects a proposed substitution", "when": "the shopper confirms the rejection", "then": "the item is refunded in the same transaction and marked 'do not substitute' for future orders"}
+    {"given": "a customer has not set any substitution preference", "when": "the shopper proposes a replacement for an out-of-stock item", "then": "a push notification carrying approve and reject actions reaches the customer within 60 seconds of that proposal"},
+    {"given": "a customer rejects a proposed substitution", "when": "the shopper confirms the rejection", "then": "the item is refunded in the same transaction"},
+    {"given": "a rejected substitution has been refunded", "when": "the order is closed", "then": "the item is marked 'do not substitute' on the customer's profile"}
   ],
   "success_metrics": [
     {"name": "substitution complaints", "definition": "count of substitution-related refunds plus support tickets per week", "target": "under 20 per week within two release cycles"},
