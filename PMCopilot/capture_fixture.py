@@ -9,17 +9,31 @@ against the ID sets recorded by the overlap probe. A fixture built on
 unverified retrieval would contaminate every score in the suite.
 """
 import json
+import logging
 import os
 import subprocess
 from datetime import datetime, timezone
 import config
+import telemetry
+import argparse
 from rag.retriever import query
 from schemas.discovery import DiscoveryFinding
 from agents.prd_drafter import draft_prd
 
 K = 8
 FINDINGS_IN = "evals/candidate_findings.json"
-OUT = "evals/fixture_v1.json"
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--out", required=True,
+                    help="path to write the fixture (e.g. evals/fixture_v2.json)")
+args = parser.parse_args()
+OUT = args.out
+
+if os.path.exists(OUT):
+    raise SystemExit(
+        f"{OUT} already exists. A fixture is the frozen subject of every score "
+        f"that cites it; overwriting one in place makes those scores "
+        f"unreproducible. Choose a new path or move the existing file."
+    )
 
 # topic -> (band, overlap_score, expected retrieved ids from the overlap probe)
 SCENARIOS = {
@@ -74,6 +88,12 @@ dirty = bool(subprocess.run(
 
 scenarios, failures = [], []
 
+events: list[dict] = []
+handler = telemetry.TelemetryHandler(events)
+root_log = logging.getLogger(telemetry.ROOT)
+root_log.addHandler(handler)
+root_log.setLevel(logging.INFO)
+
 for topic, (band, overlap, expected) in SCENARIOS.items():
     print(f"--- {topic}")
 
@@ -122,6 +142,7 @@ fixture = {
         "captured_at": datetime.now(timezone.utc).isoformat(),
     },
     "scenarios": scenarios,
+    "telemetry": events,
 }
 
 os.makedirs("evals", exist_ok=True)
@@ -130,6 +151,28 @@ with open(OUT, "w", encoding="utf-8") as f:
 
 print("\n" + "=" * 70)
 print(f"captured {len(scenarios)}/{len(SCENARIOS)} scenarios -> {OUT}")
+
+first_attempts = [
+    e for e in events
+    if e.get("pmc_event") == telemetry.EVENT_MODEL_CALL and e.get("pmc_attempt") == 1
+]
+expected = len(SCENARIOS) - len(failures)
+
+if len(first_attempts) != expected:
+    by_logger: dict[str, int] = {}
+    for e in first_attempts:
+        by_logger[e["logger"]] = by_logger.get(e["logger"], 0) + 1
+    raise SystemExit(
+        f"TELEMETRY RECONCILIATION FAILED: expected {expected} first-attempt "
+        f"model calls, collected {len(first_attempts)}.\n"
+        f"  by logger: {by_logger or '(none)'}\n"
+        f"Capture is written to {OUT}; its telemetry is incomplete and any "
+        f"cost figure derived from it would understate the run."
+    )
+
+print(f"telemetry: {len(first_attempts)} first-attempt calls, "
+      f"{len(events)} records total")
+
 if failures:
     print("FAILURES:")
     for topic, err in failures:
