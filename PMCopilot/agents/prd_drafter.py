@@ -61,9 +61,12 @@ synthesized by the researcher.
 Write each criterion so it describes one observable change and nothing else.
 Three things break that.
 
-- Unobservable slots. Given, When, and Then must each name a concrete state, a
-  concrete action, and a concrete result. Words like "properly", "as expected",
-  or "a user" leave the reader nothing to look at.
+- Unobservable slots. Every slot must name something a reader can point at: a
+  concrete state, a concrete action, a concrete result. Terms like "properly",
+  "as expected", "not corrupted", or "the current behavior" name no artifact.
+  Nor do wishes — "when a developer wants X" or "when they need Y" describe an
+  internal state, not an action anyone can perform. A user story holds the
+  motivation; a criterion holds only what happens.
 - Welded results. A criterion asserting two independent results has no defined
   answer when one holds and the other does not.
 - Duplicate coverage. Two criteria that come down to the same behaviour spend
@@ -88,6 +91,23 @@ As two criteria:
 
 Splitting raises the criterion count. That is the correct outcome, not scope
 creep.
+  
+Naming the artifact, worked. This criterion asserts an umbrella term:
+
+  Given a locker's temperature sensor reports a reading outside the safe range,
+  when the monitoring service polls the locker,
+  then the locker enters its standard fault handling behavior.
+
+"Standard fault handling behavior" names nothing a reader can inspect. What
+does the system actually do — and where would someone look to see it? Named:
+
+  Given a locker's temperature sensor reports a reading outside the safe range,
+  when the monitoring service polls the locker,
+  then the locker's status field is set to "out_of_service" in the fleet
+  registry.
+
+The repair is not more words. It is replacing a term that summarizes an
+outcome with the artifact the outcome leaves behind.
 
 ## Grounding discipline (absolute)
 - Never write an issue number anywhere in the PRD. Not in prose, not in lists.
