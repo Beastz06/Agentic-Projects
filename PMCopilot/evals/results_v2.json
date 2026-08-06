@@ -1,0 +1,2201 @@
+{
+  "provenance": {
+    "fixture_commit": "f11d5bd035780e42dc7aca38aced9ae103c4d3c2",
+    "fixture_captured_at": "2026-08-06T06:23:18.638523+00:00",
+    "agent_model": "claude-sonnet-5",
+    "retrieval_k": 8,
+    "judge_model": "claude-opus-5",
+    "judged_at": "2026-08-06T17:20:26.689432+00:00",
+    "run_label": "v2a",
+    "temperature_pinned": false
+  },
+  "scenarios": [
+    {
+      "topic": "authentication",
+      "band": "simple",
+      "overlap_score": 0.45,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "construct their own HTTP clients instead of reusing a shared, already-configured httpx client, leading to duplicated or inconsistent auth/connection configuration",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "Given the Azure partner package is instantiated with a shared httpx client already configured by the caller, when the Azure client makes an outbound request, then the shared httpx client instance is used rather than a newly constructed one",
+              "prd_location": "acceptance_criteria[4]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "auth headers and tokens set by the caller are not reliably propagated to outbound requests",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue the PRD builds on traces to a retrieved source: the langchain-anthropic custom HTTP client / mTLS gap (35843, 35977, 36056), MCP header forwarding failure (35574), AzureChatOpenAI httpx client reuse (36259), and the LANGCHAIN_ENV-based SSRF allowlist bypass (37297). No wholly invented issue appears anywhere, and no fabricated user counts, causes, or constraints drive the direction. The only unsupported specifics are small colouring details layered onto real issues -- the 'auth configuration' framing and 'caller-configured shared httpx client' angle on 36259 (which is about falling back to package-level default clients for connection pooling, not caller-supplied auth config) and the mention of 'tokens' alongside the Authorization/Accept headers in 35574 -- which matches the anchor for 1-2 unsupported incidental details attached to genuinely existing issues."
+        },
+        "grounding": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every substantive claim in the PRD maps cleanly onto a source pain point without loosening or inflating it: the anthropic custom-HTTP-client gap 'blocks mTLS/cert-based authentication' (pain_point[1], 3 issues), MCP auth headers 'not propagated' (pain_point[2]), Azure not reusing the shared httpx client (pain_point[3], whose cluster text itself frames the issue as 'across partner packages', making the PRD's 'Other partner packages, such as the Azure integration' compatible), and the env-var SSRF allowlist bypass (pain_point[4]). No superlatives, comparatives, product-wide extrapolation from a single data point, or frequency claims are asserted; the PRD makes no numeric prevalence statements at all. Notably, risks[1] explicitly discloses that three of four pain points rest on a single issue each, which is calibrated to rather than in excess of the evidence, so no imprecision, escalation, or contradiction is present."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "ChatAnthropic cannot accept a custom httpx client (mTLS, custom CA, verify=False)",
+                  "issue_ids": [
+                    35843,
+                    35977,
+                    36056
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Auth headers not forwarded on MCP remote server discovery/tool requests",
+                  "issue_ids": [
+                    35574
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "AzureChatOpenAI does not fall back to shared default httpx clients (no connection pooling/reuse)",
+                  "issue_ids": [
+                    36259
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "SSRF protection bypass via LANGCHAIN_ENV env-var handling / loose allowlist matching",
+                  "issue_ids": [
+                    37297
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ChatOpenRouter cannot enable Anthropic automatic prompt caching (cache_control rejected)",
+                  "issue_ids": [
+                    35920
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/prefetched tool context into create_agent (replayed AIMessage+ToolMessage rejected by newer Gemini models)",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "ChatAnthropic cannot accept a custom httpx client (mTLS, custom CA, verify=False)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1]; acceptance_criteria[1] and [2]"
+                },
+                {
+                  "theme": "Auth headers not forwarded on MCP remote server discovery/tool requests",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2]; acceptance_criteria[3]"
+                },
+                {
+                  "theme": "AzureChatOpenAI does not fall back to shared default httpx clients (no connection pooling/reuse)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3]; acceptance_criteria[4]"
+                },
+                {
+                  "theme": "SSRF protection bypass via LANGCHAIN_ENV env-var handling / loose allowlist matching",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4]; acceptance_criteria[5] and [6]"
+                },
+                {
+                  "theme": "ChatOpenRouter cannot enable Anthropic automatic prompt caching (cache_control rejected)",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/prefetched tool context into create_agent (replayed AIMessage+ToolMessage rejected by newer Gemini models)",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "The only prominent theme in the retrieval \u2014 the missing custom httpx client injection point on ChatAnthropic (35843, 35977, 36056) \u2014 is fully covered by user_stories[1] and acceptance_criteria[1]-[2], and three of the four minor themes (MCP header forwarding 35574, Azure shared httpx client reuse 36259, SSRF allowlist bypass 37297) each have a dedicated story and acceptance criterion. Two minor themes are silently omitted: the OpenRouter Anthropic automatic-caching request (35920) and the create_agent prefetched-tool-context/Gemini replay problem (35836) receive no mention anywhere in the PRD, not even in out_of_scope. That matches the level-4 anchor: all prominent themes covered with 1-2 minor themes missed."
+        },
+        "ac_quality": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given a custom HTTP client was not supplied to langchain-anthropic, when the client is instantiated, then the package falls back to its current default client behavior",
+              "reason": "The Then slot asserts 'falls back to its current default client behavior' \u2014 'current default client behavior' is an undefined, unobservable umbrella term rather than a concrete assertion (e.g. 'the SDK's default httpx client instance is constructed and used for outbound requests'). A reviewer cannot unambiguously settle pass/fail without an external definition of what that behavior is."
+            }
+          ],
+          "rationale": "ACs 1, 3, 4, 5 and 6 each pin a concrete precondition, a single action, and one checkable assertion (custom client used instead of default; auth headers present on the outbound request; shared httpx instance used rather than a new one; blocked host still rejected under env-var manipulation; non-allowlisted host rejected before send), so they are clean and atomic. AC5 and AC6 are not a redundant pair: AC5's distinguishing setup is a runtime env-var bypass attempt, while AC6 checks baseline allowlist enforcement, so they do not reduce to the same check. The single defect is AC2, whose Then rests on the unobservable phrase 'its current default client behavior', matching the anchor for exactly one defective AC."
+        }
+      }
+    },
+    {
+      "topic": "retriever and vector store integrations",
+      "band": "simple",
+      "overlap_score": 0.45,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "preventing developers from tuning backend-specific infrastructure (shard count, analyzers, etc.)",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "producing data loss that is only discovered later when retrieval quality degrades",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "so that I can tune embedding jobs to run efficiently without hitting provider rate limits or wasting time on unnecessary serialization",
+              "prd_location": "user_stories[4]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "All five pain points trace to real retrieved issues: embedding/id count mismatch silent data loss (36745, 38203), EnsembleRetriever RRF duplicate inflation (37046), multimodal metadata pass-through on the Embeddings interface (38186), OpenAI/Mistral embedding concurrency and throughput (36547, 36753), and OpenSearch custom index creation settings (38212). No wholly invented issue appears, and every acceptance criterion maps back to a sourced issue, so the 3/2/1 anchors (invented issues) do not apply. The only unsupported items are small descriptive embellishments attached to genuinely sourced issues -- 'analyzers' is not among the OpenSearch settings the source lists (shards, replicas, refresh_interval, codec, routing), and the downstream-consequence framing about retrieval quality degradation and 'unnecessary serialization' wording is inferred rather than stated -- which matches the level-4 anchor of 1-2 unsupported incidental details with nothing material affected."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "which blocks integrations with multimodal embedding providers and vector stores that want to index non-text content",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3]: Lack of multimodal metadata support in embedding interface limiting vector store integrations with multimodal providers (severity: medium, frequency: 1)",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "four of five pain points have a frequency of only 1-2 reported issues",
+              "prd_location": "risks[1]",
+              "source": "All five pain points have frequency 2, 1, 1, 2, 1 respectively -- i.e., five of five are in the 1-2 range",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD's five problem areas map one-to-one onto the five source pain points, cite the correct issue IDs, preserve the relative severity ordering (data-loss issue framed as the lead reliability problem, consistent with its 'high' severity), and explicitly acknowledge the thin 1-2 issue evidence base rather than inflating it. Two loosened facts appear: 'blocks integrations' slightly hardens the source's 'limiting vector store integrations', and risks[1] says 'four of five' pain points have 1-2 reports when in fact all five do. Neither claim asserts scope the source could not support (no superlatives, no product-wide generalizations from single data points) and none contradicts a stated source fact, which matches the level-4 anchor of 1-2 imprecise facts with no escalation or contradiction."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Silent data loss on length mismatch in vector store add paths (docs/embeddings/ids)",
+                  "issue_ids": [
+                    36745,
+                    38203
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "EnsembleRetriever RRF score inflation from within-retriever duplicate chunks",
+                  "issue_ids": [
+                    37046
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No standardized way to forward document metadata to embeddings (blocks multimodal providers)",
+                  "issue_ids": [
+                    38186
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Embedding concurrency/throughput controls (sequential OpenAI batches; unenforced max_concurrent_requests in Mistral)",
+                  "issue_ids": [
+                    36547,
+                    36753
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Mistral retry logic does not filter retryable vs permanent errors (429/5xx not retried, 4xx retried)",
+                  "issue_ids": [
+                    36753
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "OpenSearchVectorSearch cannot pass custom index creation settings (shards, replicas, refresh_interval)",
+                  "issue_ids": [
+                    38212
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Integration release ordering/bundling before langchain-tests tool_call_streaming release",
+                  "issue_ids": [
+                    38058
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Silent data loss on length mismatch in vector store add paths (docs/embeddings/ids)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] (cites 36745, 38203); acceptance_criteria[1], acceptance_criteria[2]; success_metrics[1]"
+                },
+                {
+                  "theme": "EnsembleRetriever RRF score inflation from within-retriever duplicate chunks",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2]; acceptance_criteria[3]; success_metrics[2]"
+                },
+                {
+                  "theme": "No standardized way to forward document metadata to embeddings (blocks multimodal providers)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3]; acceptance_criteria[4]"
+                },
+                {
+                  "theme": "Embedding concurrency/throughput controls (sequential OpenAI batches; unenforced max_concurrent_requests in Mistral)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4]; acceptance_criteria[5]"
+                },
+                {
+                  "theme": "Mistral retry logic does not filter retryable vs permanent errors (429/5xx not retried, 4xx retried)",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "OpenSearchVectorSearch cannot pass custom index creation settings (shards, replicas, refresh_interval)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5]; acceptance_criteria[6]"
+                },
+                {
+                  "theme": "Integration release ordering/bundling before langchain-tests tool_call_streaming release",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "Both prominent themes are covered: the silent length-mismatch data loss (36745, 38203) via user_stories[1] and acceptance_criteria[1]-[2], and embedding concurrency controls (36547, 36753) via user_stories[4] and acceptance_criteria[5]; the three single-issue themes on RRF duplicate inflation, multimodal metadata pass-through, and OpenSearch index settings each have a dedicated story and AC. Two minor themes are silently omitted: issue 36753's second defect \u2014 retry logic not filtering retryable (429/5xx) from permanent errors \u2014 appears nowhere in the problem statement, stories, or ACs, and issue 38058's integration release-ordering concern is unrepresented. A partial gap also exists inside the covered prominent theme (38203's ids-vs-texts mismatch is cited but the ACs only test embedding-count mismatch), which is noted but not scored as a separate miss. All prominent themes covered with 2 minor misses matches anchor level 4."
+        },
+        "ac_quality": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every AC fills Given/When/Then with concrete, observable state, action, and assertion: AC1 and AC2 pin the trigger to a count mismatch/match on add_documents with an error-raised vs. all-written assertion (the 'instead of writing partial data' clause is a contrastive restatement of the same single outcome, not a second independent one); AC3 asserts one checkable outcome (duplicates collapsed to a single entry prior to RRF scoring); AC4 asserts the metadata appears in the outbound request payload; AC5 asserts a measurable in-flight concurrency ceiling; AC6 asserts index creation uses supplied rather than default settings. No unobservable terms like 'works properly' appear, and no pair reduces to the same check \u2014 AC1 and AC2 cover inverse branches (mismatch vs. match) rather than duplicating a behaviour. This matches the anchor for all ACs clean with zero redundant pairs."
+        }
+      }
+    },
+    {
+      "topic": "token counting and usage metadata",
+      "band": "simple",
+      "overlap_score": 0.36,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "when a developer configures the chat model to use native token counting, then token count requests are routed to the provider's native API instead of count_tokens_approximately",
+              "prd_location": "acceptance_criteria[3]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "a usage_metadata token count that exceeds a configured plausibility threshold relative to the input content size ... the implausible count is flagged and excluded from aggregated cost-tracking totals",
+              "prd_location": "acceptance_criteria[2]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "target: reduce mean overcount to within 10% of provider exact counts, down from current systematic overcounting on all multimodal test cases",
+              "prd_location": "success_metrics[1]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every user story and problem-statement strand traces to a retrieved issue: multimodal/tool_use overcounting (35558, 38229), corrupted Fireworks usage_metadata (37754), native token-count API support (36661), a public safe-cutoff API (38249), and repeated token counting/trigger re-firing under a persistent checkpointer (37815, including the comment noting recurring per-turn count calls with token_count_method='model'). No invented issue appears anywhere, and the risks section even accurately reflects the thin evidence base (only overcounting appears twice). The only unsupported material is incidental solution detail the sources never state \u2014 a 'configured plausibility threshold' for guarding usage_metadata, a per-model configuration switch for native counting, and a numeric 10% accuracy target \u2014 none of which introduce a fabricated problem, matching the level-4 anchor (1-2 unsupported incidental details attached to genuinely sourced issues)."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "so every summarization/retention workflow reimplements ad hoc truncation logic against private internals that can change without notice",
+              "prd_location": "problem_statement",
+              "source": "pain_point[4]: No public, stable API for computing safe token-based message cutoffs for summarization/retention workflows (frequency: 1, evidence issue 38249)",
+              "rung": "escalation"
+            },
+            {
+              "claim": "leading to inflated token estimates whenever a conversation contains mixed content",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1]: Approximate token counting (count_tokens_approximately) systematically over-counts non-text/multimodal content blocks (frequency: 2)",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "down from current systematic overcounting on all multimodal test cases",
+              "prd_location": "success_metrics[1]",
+              "source": "pain_point[1]: ... systematically over-counts non-text/multimodal content blocks; severity high; frequency 2 (issues 35558, 38229)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD maps its five user stories, ACs, and metrics closely onto the five source pain points with correct issue-ID attribution, and risks[1] even honestly discloses that most pain points have frequency 1 \u2014 strong grounding overall. However, the problem statement escalates a single report (issue 38249, frequency 1) about the absence of a public cutoff API into a universal claim that 'every summarization/retention workflow reimplements ad hoc truncation logic against private internals,' a scope no single-issue source could establish. Two further loosenings ('whenever a conversation contains mixed content', 'on all multimodal test cases') remain compatible with 'systematically over-counts' but stretch it. Per the anchor, exactly one unsupported escalation plus minor imprecision places this at 3."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "count_tokens_approximately over-counts non-text content blocks (tool_use/tool_result repr inflation; audio/video/file base64 char-counting)",
+                  "issue_ids": [
+                    35558,
+                    38229
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Provider returns corrupted/inflated usage_metadata token counts that break downstream cost tracking (Fireworks qwen3p6-plus)",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No support for a provider's native/exact token-count API (OpenAI input_tokens.count, Anthropic-style pattern)",
+                  "issue_ids": [
+                    36661
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No public API for computing a safe message retention/summarization cutoff index (logic is private in SummarizationMiddleware)",
+                  "issue_ids": [
+                    38249
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Token-count-based context-editing middleware trigger is degenerate with a persistent checkpointer \u2014 edits never persist, eviction re-fires and re-counts every turn",
+                  "issue_ids": [
+                    37815
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Embeddings interface cannot receive document metadata, blocking multimodal embedding providers",
+                  "issue_ids": [
+                    38186
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "`configurable` data no longer included in run metadata since langchain-core 1.3.0 (regression)",
+                  "issue_ids": [
+                    37373
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "count_tokens_approximately over-counts non-text content blocks (tool_use/tool_result repr inflation; audio/video/file base64 char-counting)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] (cites 35558, 38229) + acceptance_criteria[1] + success_metrics[1]"
+                },
+                {
+                  "theme": "Provider returns corrupted/inflated usage_metadata token counts that break downstream cost tracking (Fireworks qwen3p6-plus)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] + acceptance_criteria[2] + success_metrics[2]"
+                },
+                {
+                  "theme": "No support for a provider's native/exact token-count API (OpenAI input_tokens.count, Anthropic-style pattern)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] + acceptance_criteria[3] + out_of_scope[1]"
+                },
+                {
+                  "theme": "No public API for computing a safe message retention/summarization cutoff index (logic is private in SummarizationMiddleware)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] + acceptance_criteria[4] and [5] + risks[3]"
+                },
+                {
+                  "theme": "Token-count-based context-editing middleware trigger is degenerate with a persistent checkpointer \u2014 edits never persist, eviction re-fires and re-counts every turn",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] + acceptance_criteria[6] and [7] + success_metrics[3]"
+                },
+                {
+                  "theme": "Embeddings interface cannot receive document metadata, blocking multimodal embedding providers",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "`configurable` data no longer included in run metadata since langchain-core 1.3.0 (regression)",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "The single prominent theme in the retrieval \u2014 approximate token counting over-counting non-text/multimodal content blocks (35558 tool_use repr inflation, 38229 audio/video/file base64 char-counting) \u2014 is fully covered by user_stories[1], acceptance_criteria[1] and success_metrics[1], and all four token-related minor themes (37754 corrupted usage_metadata, 36661 native token-count API, 38249 public cutoff API, 37815 checkpointer/middleware re-firing) each map to a dedicated user story and acceptance criteria. Two minor themes present in the retrieved set are silently omitted: 38186 (forwarding document metadata to embedding implementations for multimodal providers) and 37373 (`configurable` data dropped from run metadata since core 1.3.0); neither appears anywhere in the PRD, including out_of_scope. That yields zero prominent misses and exactly two minor misses, which matches the Level 4 anchor rather than Level 5's zero-miss bar."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a message list containing a mix of text and non-text content blocks (e.g. an image block), when count_tokens_approximately is called on that message list, then the non-text content blocks are counted using block-type-specific logic rather than being counted as if they were equivalent-length text",
+              "reason": "The Then slot asserts an internal implementation property ('counted using block-type-specific logic') rather than an observable output. No expected count, tolerance, or comparison value is given (contrast success_metrics[1]'s 'within 10%'), so a reviewer cannot unambiguously declare pass/fail from the returned integer alone."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 2,
+              "ac_text": "Given a provider API response containing a usage_metadata token count that exceeds a configured plausibility threshold relative to the input content size, when the response is processed by LangChain's usage metadata handling, then the implausible count is flagged and excluded from aggregated cost-tracking totals",
+              "reason": "The Then welds two independent outcomes: (a) the count is flagged (a signal/warning surfaced) and (b) the count is excluded from aggregated cost-tracking totals. Each requires a separate check \u2014 an implementation could flag without excluding, or exclude without flagging \u2014 so a single check cannot settle it."
+            }
+          ],
+          "rationale": "AC3, AC4, AC6 and AC7 are clean: each has a concrete state, a concrete action, and a single observable assertion (routing to native API, returned index satisfying the budget, no recomputation, no second trigger fire), and AC5 is acceptable as a boundary case with a checkable non-exception return. However, AC1 fails the vagueness test because its Then asserts unobservable internal logic with no expected value or tolerance, and AC2 fails atomicity by asserting both flagging and exclusion from aggregated totals in one criterion. No pair of ACs reduces to the same check \u2014 AC6 (recomputation of counts) and AC7 (trigger firing) target distinct behaviours \u2014 so there are no redundant pairs. Exactly two defective ACs maps to the anchor-2 clause."
+        }
+      }
+    },
+    {
+      "topic": "streaming behavior and chunk handling",
+      "band": "simple",
+      "overlap_score": 0.27,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Given disable_streaming is explicitly set to False on a model that supports streaming, when a call is made to that model, then the response is streamed and no exception is raised",
+              "prd_location": "acceptance_criteria[7]",
+              "materiality": "incidental",
+              "note": "Issue 35436 concerns disable_streaming=\"tool_calling\" crashing and over-disabling streaming; the specific configuration value False is never discussed in any retrieved issue."
+            },
+            {
+              "claim": "number of agent/graph abstraction types (e.g., AgentExecutor, LangGraph nodes) verified by regression test",
+              "prd_location": "success_metrics[4]",
+              "materiality": "incidental",
+              "note": "Issue 37869 references langchain/agents/factory.py _execute_model_async and LangGraph use_astream; AgentExecutor is never mentioned in the retrieved corpus."
+            },
+            {
+              "claim": "target: 0 open high-severity reports at release, down from 2 currently known",
+              "prd_location": "success_metrics[1]",
+              "materiality": "incidental",
+              "note": "No severity classification exists in the source issues; the 'high-severity' framing and the severity tagging scheme are invented, though the count of 2 roughly maps to 35442 and 36809."
+            }
+          ],
+          "rationale": "Every theme in the problem statement and all six user stories map cleanly onto retrieved issues: SSE zero-chunk/dropped-content (35442, 36809), streaming tool-call empty args (35514), duplicated terminal-chunk metadata (38226), structured-output warning and lost headers (38034, 37421), disable_streaming crash/over-disable (35436), and agent-level on_llm_new_token non-propagation (37869). No wholly invented issue appears anywhere in the PRD, so levels 3 and below do not apply. The only unsupported items are small non-load-bearing embellishments attached to genuinely existing issues \u2014 the disable_streaming=False variant in AC7, the AgentExecutor example in a metric, and the 'high-severity' tagging framing \u2014 which matches the level-4 anchor of incidental unsupported details with nothing material built on fiction."
+        },
+        "grounding": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every substantive claim in the PRD maps cleanly onto a source pain point with matching scope and hedging: 'some providers ... zero chunks or silently drop content' (pain_point[1], 2 issues), 'argument fragments are sometimes executed before all fragments have been assembled' (pain_point[2]), 'repeated terminal chunks can be aggregated incorrectly' (pain_point[3]), 'parsed output fields and response headers are sometimes lost or accompanied by warnings' (pain_point[4]), the disable_streaming crash/unintended-disablement wording (pain_point[5], near-verbatim), and 'do not consistently propagate token-level streaming events' (pain_point[6]). Frequency claims are accurate rather than inflated -- success_metrics[1] cites 'down from 2 currently known' matching pain_point[1]'s frequency of 2, and risks[1] explicitly names the frequency-of-1 evidence base for four clusters, demonstrating calibration rather than escalation. The closing synthesis that streaming is 'unreliable ... for production' is supported by three high-severity clusters and does not exceed what the source could establish; no superlatives, comparatives, or contradicted facts appear anywhere. This matches the anchor for 5: zero imprecision, escalation, or contradiction."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Provider SSE/event format mismatch yields zero chunks (Bedrock proxy + Anthropic SDK)",
+                  "issue_ids": [
+                    35442
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Reasoning/thinking content silently dropped from streamed chunks for OpenAI-compatible providers (vLLM)",
+                  "issue_ids": [
+                    36809
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Streaming tool call executed with empty/invalid args due to fragmented argument chunks",
+                  "issue_ids": [
+                    35514
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Repeated terminal/finish chunks aggregated twice, duplicating generation_info / response_metadata string values",
+                  "issue_ids": [
+                    38226
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Structured output + streaming emits Pydantic serializer warning / mishandles the typed `parsed` field",
+                  "issue_ids": [
+                    38034
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Structured output streaming drops response headers (x-request-id) from response_metadata",
+                  "issue_ids": [
+                    37421
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' crashes in streaming mode (AsyncStream passed to non-streaming result path)",
+                  "issue_ids": [
+                    35436
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' unintentionally disables streaming for all turns when tools are bound",
+                  "issue_ids": [
+                    35436
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Agent/graph layer uses ainvoke instead of astream, so token-level callbacks (on_llm_new_token) never fire",
+                  "issue_ids": [
+                    37869
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Provider SSE/event format mismatch yields zero chunks (Bedrock proxy + Anthropic SDK)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] + acceptance_criteria[1]; problem_statement ('Provider-specific SSE/event parsing differences cause some providers to yield zero chunks')"
+                },
+                {
+                  "theme": "Reasoning/thinking content silently dropped from streamed chunks for OpenAI-compatible providers (vLLM)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] (cites 36809, 'does not silently lose content'); acceptance_criteria[1]"
+                },
+                {
+                  "theme": "Streaming tool call executed with empty/invalid args due to fragmented argument chunks",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2]; acceptance_criteria[2], acceptance_criteria[3]"
+                },
+                {
+                  "theme": "Repeated terminal/finish chunks aggregated twice, duplicating generation_info / response_metadata string values",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3]; acceptance_criteria[4]"
+                },
+                {
+                  "theme": "Structured output + streaming emits Pydantic serializer warning / mishandles the typed `parsed` field",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4]; acceptance_criteria[5], acceptance_criteria[6]"
+                },
+                {
+                  "theme": "Structured output streaming drops response headers (x-request-id) from response_metadata",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] (cites 37421); acceptance_criteria[6]"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' crashes in streaming mode (AsyncStream passed to non-streaming result path)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5]; acceptance_criteria[7]; problem_statement ('logic bugs that can crash a run')"
+                },
+                {
+                  "theme": "disable_streaming='tool_calling' unintentionally disables streaming for all turns when tools are bound",
+                  "status": "addressed",
+                  "prd_element": "problem_statement ('unintentionally disable streaming entirely even when the caller asked for it'); user_stories[5]"
+                },
+                {
+                  "theme": "Agent/graph layer uses ainvoke instead of astream, so token-level callbacks (on_llm_new_token) never fire",
+                  "status": "addressed",
+                  "prd_element": "user_stories[6]; acceptance_criteria[8]; success_metrics[4]"
+                }
+              ]
+            }
+          ],
+          "rationale": "Enumerating across the eight retrieved issues yields nine distinct problems (35436 contributes two: the AsyncStream crash and the over-broad streaming disablement), and every one maps to a PRD element: zero-chunk/dropped-content parsing (user_stories[1], AC1), tool-argument fragmentation (user_stories[2], AC2-3), duplicated terminal-chunk metadata (user_stories[3], AC4), structured-output parsed field and dropped response headers (user_stories[4], AC5-6), disable_streaming crash plus unintended disabling (problem_statement + user_stories[5], AC7), and agent/graph token-callback propagation (user_stories[6], AC8). No prominent or minor theme is silently omitted; even the narrower vLLM reasoning-token loss is folded into the 'silently lose content' story that explicitly cites 36809. Zero prominent and zero minor misses matches the level 5 anchor."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 6,
+              "ac_text": "Given a streaming call requests structured output, when the stream completes, then the final message includes the response headers with no streaming-related warning emitted",
+              "reason": "The Then welds two independent outcomes: (a) response headers are present on the final message, and (b) no streaming-related warning is emitted. These are separately falsifiable (headers could be intact while a warning still fires), so no single check settles the criterion."
+            },
+            {
+              "type": "non_atomic",
+              "ac_index": 7,
+              "ac_text": "Given disable_streaming is explicitly set to False on a model that supports streaming, when a call is made to that model, then the response is streamed and no exception is raised",
+              "reason": "The Then asserts two distinct outcomes drawn from two distinct bugs: streaming actually occurring (not silently disabled) and the absence of a crash/exception. A run could stream and still raise, or raise without streaming, so two separate assertions are required."
+            }
+          ],
+          "rationale": "ACs 1-5 and 8 are well-formed: each fills Given/When/Then with observable state, a concrete action, and a single assertion (e.g. AC2's \"the tool is not invoked\", AC4's \"each metadata field appears exactly once\", AC8's \"the callback fires once per token\"). However, AC6 and AC7 each fuse two independently verifiable outcomes into one Then clause (headers present + no warning; response streamed + no exception), each of which would need two separate checks to settle. No redundant pairs exist \u2014 AC5 and AC6 share the same Given/When but assert different fields, and AC2/AC3 assert opposite branches. Two defective ACs matches the anchor for a score of 2."
+        }
+      }
+    },
+    {
+      "topic": "prompt templates and output parsers",
+      "band": "simple",
+      "overlap_score": 0.18,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "the parser raises an OutputParserException that gives no indication of what mismatched or how to recover, forcing developers to dig into library internals",
+              "prd_location": "problem_statement",
+              "materiality": "material"
+            },
+            {
+              "claim": "structured output flows emit spurious PydanticSerializationUnexpectedValue warnings even when serialization ultimately succeeds",
+              "prd_location": "problem_statement",
+              "materiality": "material"
+            },
+            {
+              "claim": "Given a structured output call using a Pydantic model completes serialization successfully, when the result is returned to the caller, then no PydanticSerializationUnexpectedValue warning is emitted",
+              "prd_location": "acceptance_criteria[3]",
+              "materiality": "material"
+            },
+            {
+              "claim": "Given a prompt template fails to construct due to a missing or malformed variable ... then the error message includes the name of the offending template or variable",
+              "prd_location": "acceptance_criteria[4]",
+              "materiality": "material"
+            },
+            {
+              "claim": "Prompt template construction and loading raise bare ValueErrors without context about which template, variable, or file caused the failure",
+              "prd_location": "problem_statement",
+              "materiality": "material"
+            },
+            {
+              "claim": "four pain points, three with frequency of only 1",
+              "prd_location": "risks[1]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "Adding more context to error messages risks leaking sensitive data (e.g., raw model output containing user input) into logs",
+              "prd_location": "risks[3]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "No wholly invented issue appears \u2014 all five user stories map to real retrieved issues (36603, 38103, 36606, 35727, 38193) and the theme is squarely the retrieved surface. However, unsupported detail is pervasive: three of the five sourced issues carry invented particulars \u2014 36603 is described as giving 'no indication of what mismatched' and 'forcing developers to dig into library internals' (the source exception in fact names the field, type, and a troubleshooting link, and no source text mentions internals-digging); 36606 is extended with the unstated premise that 'serialization ultimately succeeds' (which drives AC3); and 35727's bare-ValueError sites (missing examples/example_selector, unsupported template file format) are recast as 'a missing or malformed variable' with variable-name reporting in AC4. The risks section also asserts a frequency figure ('three with frequency of only 1') and a sensitive-data-leak concern that appear nowhere in the corpus. This matches the level-3 clause 'incidental fabrication is pervasive (most real issues carry some invented detail)', with no invented issue to push it to 2."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "the parser raises an OutputParserException that gives no indication of what mismatched or how to recover, forcing developers to dig into library internals",
+              "prd_location": "problem_statement",
+              "source": "pain_point[2]: Output parsers (Pydantic/structured output) fail unpredictably when model output doesn't match expected schema shape (e.g., list vs string), producing confusing OutputParserException with no recovery guidance",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Prompt template construction and loading raise bare ValueErrors without context about which template, variable, or file caused the failure.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[4]: Poor error messages in prompt template loading/construction (bare ValueError with no context)",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD tracks the four source pain points closely, cites the correct issue IDs per user story, and even self-reports the thin evidence base accurately (\"four pain points, three with frequency of only 1\"), so there are no frequency, severity, or scope escalations and no contradictions of stated source facts. Two claims loosen the source slightly: the source's \"confusing OutputParserException with no recovery guidance\" is embellished into developers \"forcing developers to dig into library internals,\" and \"bare ValueError with no context\" is specified into naming \"which template, variable, or file\" \u2014 both remain compatible with the source and could still honestly cite it. That matches the 4 anchor: 1-2 imprecise facts only, with no escalation or contradiction."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 2,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "OutputParserException on Pydantic schema shape mismatch gives no actionable detail",
+                  "issue_ids": [
+                    36603,
+                    38103
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "No documented local recovery pattern (with_fallbacks) for strict parser failures",
+                  "issue_ids": [
+                    38103
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Spurious PydanticSerializationUnexpectedValue warning on successful structured output",
+                  "issue_ids": [
+                    36606
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Bare raise ValueError in prompt template construction/loading lacks debugging context",
+                  "issue_ids": [
+                    35727
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "pretty_repr() mishandles partial variables in prompt/message templates",
+                  "issue_ids": [
+                    38193
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "OutputParserException on Pydantic schema shape mismatch gives no actionable detail",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] + acceptance_criteria[1]"
+                },
+                {
+                  "theme": "No documented local recovery pattern (with_fallbacks) for strict parser failures",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] + acceptance_criteria[2]"
+                },
+                {
+                  "theme": "Spurious PydanticSerializationUnexpectedValue warning on successful structured output",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] + acceptance_criteria[3] + success_metrics[2]"
+                },
+                {
+                  "theme": "Bare raise ValueError in prompt template construction/loading lacks debugging context",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] + acceptance_criteria[4] and [5] + success_metrics[3]"
+                },
+                {
+                  "theme": "pretty_repr() mishandles partial variables in prompt/message templates",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] + acceptance_criteria[6]"
+                }
+              ]
+            }
+          ],
+          "rationale": "Five distinct themes are enumerable from the retrieved issues that fall within the PRD's stated theme (prompt templates and output parsers): the uninformative OutputParserException (prominent, 36603 + 38103), the with_fallbacks recovery documentation request (38103), the spurious Pydantic serialization warning (36606), bare ValueErrors in prompt template construction/loading (35727), and pretty_repr partial-variable rendering (38193). Each maps to a dedicated user story and at least one acceptance criterion, with the ValueError theme covered at both the construction and file-loading call sites named in 35727. The remaining retrieved issues (37358 text splitters, 38209 multi-agent synthesis node, 38159 HITL middleware patterns) belong to unrelated themes outside this PRD's scope and are not counted as misses. With zero prominent and zero minor misses within the theme, this meets the Level 5 anchor."
+        },
+        "ac_quality": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given an OutputParserException is raised due to a schema shape mismatch, when a developer reads the exception message or linked documentation, then a documented recovery pattern using with_fallbacks is referenced",
+              "reason": "Both the When and Then slots are unobservable/ambiguous: 'when a developer reads the exception message or linked documentation' is a human reading action, not a concrete system action that can be executed in a test, and the Then's disjunction ('message OR linked documentation') leaves it undetermined where the with_fallbacks reference must appear or what counts as 'referenced' (link, prose mention, code sample). A reviewer cannot unambiguously settle pass/fail with a single check."
+            }
+          ],
+          "rationale": "Five of the six ACs are clean test specifications: AC1 (exception message names the mismatching field and expected type), AC3 (no PydanticSerializationUnexpectedValue warning on a successful structured-output call), AC4 (ValueError message contains template/variable name), AC5 (ValueError message contains the file path), and AC6 (pretty_repr output shows partial variables' assigned values) each have a concrete state, an executable action, and a single checkable assertion. AC2 is the sole defective criterion, failing the VAGUE test in both its When ('a developer reads the exception message or linked documentation') and its Then (a with_fallbacks pattern being 'referenced' in either location, with no observable artifact specified). No pair of ACs reduces to the same check \u2014 AC4 and AC5 differ in both trigger (construction vs. file load) and asserted content \u2014 so there are zero redundant pairs. Exactly 1 defective AC maps to the level-3 anchor."
+        }
+      }
+    },
+    {
+      "topic": "tool calling and function calling",
+      "band": "ambiguous",
+      "overlap_score": 0.82,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every issue referenced in the PRD maps to a retrieved issue: malformed/fragmented tool-call parsing (36679, 35514), programmatic tool-result injection under strict Gemini turn validation (35836), ToolException/handle_tool_error divergence between ToolNode and @tool (37195), reactive ToolCallLimitMiddleware (35766), HITL rejected calls executed by ToolNode (37093), missing tool_call_id on on_tool_start while present on on_tool_error (37426), and langchain-huggingface Pydantic schema rejection (36441). Specific figures also trace to source: the 'current count of 1' open issue on error-handling divergence, and the on_tool_end tool_call_id gap noted in a 37426 comment. The only arguable stretches \u2014 generalizing 'gemini-3.1-flash-lite-preview' to 'Gemini 3.x' and framing ToolException as raised 'inside a tool' rather than inside @wrap_tool_call middleware \u2014 are distortions of real source content, which this dimension explicitly excludes; no wholly invented issue, user count, constraint, or cause appears anywhere in the PRD."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "proportion of tool lifecycle callback types (on_tool_start, on_tool_error, on_tool_end) that include tool_call_id, measured by integration test coverage (target: all 3 lifecycle callback types include tool_call_id)",
+              "prd_location": "success_metrics[4]",
+              "source": "pain_point[6]: Incomplete observability/tracing metadata for tool call events (missing tool_call_id on on_tool_start, inconsistent with on_tool_error), hindering per-call attribution in streaming/parallel tool call UIs",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "structured-output and function-calling schema support is inconsistent across model integrations, with some (e.g., langchain-huggingface) failing to support Pydantic schemas that work elsewhere",
+              "prd_location": "problem_statement",
+              "source": "pain_point[7]: Inconsistent support for structured output / function calling schemas across integrations (Pydantic schema unsupported in langchain-huggingface function calling), frequency 1, evidence [36441]",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD tracks the source findings closely: each user story cites the exact evidence issue ids, severities are not inflated (the low-severity tool_call_id gap is described as unreliable attribution, matching the source), frequency-1 evidence is explicitly acknowledged in risks[1], and success_metrics[3] correctly states the current count as 1. Two loosenings appear: success_metrics[4] widens the callback scope to include on_tool_end, which the source never discusses, and the problem statement generalizes a single langchain-huggingface data point to 'some' integrations failing where Pydantic 'works elsewhere' \u2014 both remain compatible with the source's own 'inconsistent across integrations' framing and could still honestly cite it. There is no unsupported escalation (no superlatives, no product-wide claims from single reports) and no contradiction, matching the anchor for 1-2 imprecise facts only."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Tool-call parser crashes / drops valid calls on malformed function payloads",
+                  "issue_ids": [
+                    36679
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Streaming SSE fragmentation of tool call arguments leads to bad/partial args being parsed and executed",
+                  "issue_ids": [
+                    35514
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/programmatic tool results without replaying AIMessage+ToolMessage (breaks on strict Gemini turn validation)",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ToolException not catchable at agent/middleware level; handle_tool_error inconsistent between ToolNode and @tool decorator",
+                  "issue_ids": [
+                    37195
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "ToolCallLimitMiddleware is reactive; should proactively inform the model of remaining tool calls",
+                  "issue_ids": [
+                    35766
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "HITL-rejected tool calls can still be executed by ToolNode",
+                  "issue_ids": [
+                    37093
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "tool_call_id missing from on_tool_start (and on_tool_end) callback/stream event data, breaking per-call attribution",
+                  "issue_ids": [
+                    37426
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "langchain-huggingface rejects Pydantic schema for function-calling structured output",
+                  "issue_ids": [
+                    36441
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Tool-call parser crashes / drops valid calls on malformed function payloads",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] + acceptance_criteria[1] + success_metrics[1]"
+                },
+                {
+                  "theme": "Streaming SSE fragmentation of tool call arguments leads to bad/partial args being parsed and executed",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('malformed or fragmented tool call payloads', cites 35514) + acceptance_criteria[1]"
+                },
+                {
+                  "theme": "No first-class API to inject precomputed/programmatic tool results without replaying AIMessage+ToolMessage (breaks on strict Gemini turn validation)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] + acceptance_criteria[2] + acceptance_criteria[3] + success_metrics[2]"
+                },
+                {
+                  "theme": "ToolException not catchable at agent/middleware level; handle_tool_error inconsistent between ToolNode and @tool decorator",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3] + acceptance_criteria[4] + success_metrics[3]"
+                },
+                {
+                  "theme": "ToolCallLimitMiddleware is reactive; should proactively inform the model of remaining tool calls",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4] + acceptance_criteria[5]"
+                },
+                {
+                  "theme": "HITL-rejected tool calls can still be executed by ToolNode",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5] + acceptance_criteria[6]"
+                },
+                {
+                  "theme": "tool_call_id missing from on_tool_start (and on_tool_end) callback/stream event data, breaking per-call attribution",
+                  "status": "addressed",
+                  "prd_element": "user_stories[6] + acceptance_criteria[7] + success_metrics[4] (covers on_tool_end too)"
+                },
+                {
+                  "theme": "langchain-huggingface rejects Pydantic schema for function-calling structured output",
+                  "status": "addressed",
+                  "prd_element": "user_stories[7] + acceptance_criteria[8]"
+                }
+              ]
+            }
+          ],
+          "rationale": "Every one of the eight distinct problems enumerated across the seven retrieved issues maps to at least one user story and acceptance criterion in the PRD, including the sub-theme from 37426's comment thread that on_tool_end also needs tool_call_id (captured in success_metrics[4]). The streaming-fragmentation issue (35514) is merged with the malformed-parser issue but is explicitly named ('fragmented tool call payloads') in user_stories[1] and acceptance_criteria[1], so the theme is represented rather than silently dropped \u2014 the imprecision of the prescribed remedy is an AC-quality concern, not a coverage gap. With zero prominent and zero minor themes missed, this matches the level 5 anchor."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 4,
+              "ac_text": "Given a tool decorated with @tool raises ToolException during execution inside ToolNode, when the exception propagates up, then it is caught at the agent/middleware level using the same handle_tool_error configuration regardless of whether ToolNode or the @tool decorator invoked the tool",
+              "reason": "The Then welds two independent outcomes into one criterion: catchability when ToolNode invokes the tool AND catchability when the @tool decorator invokes it \u2014 two distinct scenarios that contradict the single Given (\"inside ToolNode\"). It also asserts two catch locations (\"agent/middleware level\"), so no single check settles pass/fail."
+            },
+            {
+              "type": "vague",
+              "ac_index": 5,
+              "ac_text": "Given a tool-call-limit middleware is configured with a maximum call count, when the number of calls made approaches that maximum, then the middleware injects guidance into the model context before the limit is reached",
+              "reason": "The When slot (\"approaches that maximum\") is not a concrete, triggerable state \u2014 no threshold (e.g., limit minus one) is specified, so a tester cannot know when to assert. The Then (\"injects guidance\") also names no observable artifact (message type, content, or field) to check."
+            }
+          ],
+          "rationale": "Six of the eight ACs (1, 2, 3, 6, 7, 8) fill Given/When/Then with concrete states, actions, and single assertions an engineer could translate directly into a test (e.g., AC6's \"ToolNode does not execute the rejected tool call\"). However, AC4 is non-atomic \u2014 its Then asserts catch behavior across both the ToolNode and @tool invocation paths plus two catch layers, while its Given fixes only one path \u2014 and AC5 is vague, since \"approaches that maximum\" gives no triggerable threshold and \"injects guidance\" names no observable payload. No redundant pairs exist: AC2 and AC3 both concern the new tool-result API but assert different checks (history insertion vs. provider turn acceptance). Exactly 2 defective ACs maps to the anchor-2 clause."
+        }
+      }
+    },
+    {
+      "topic": "performance and latency",
+      "band": "ambiguous",
+      "overlap_score": 0.82,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Async HTTP clients are cached across event loops, producing connection errors and latency/reliability failures under concurrent or multi-threaded async workloads.",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "so that I stop hitting connection errors and latency spikes caused by cross-event-loop resource sharing",
+              "prd_location": "user_stories[4]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue referenced in the PRD traces to a retrieved source: 36126 (HuggingFaceEmbeddings device sync + Chroma re-embedding), 36488 (ExperimentalMarkdownSyntaxTextSplitter O(n^2) via list.pop(0)), 36835 (unconditional transformers import inflating startup), 35783 (@lru_cache'd async httpx client across event loops), and 37972 (middleware orchestration with safe parallel execution) \u2014 no wholly invented issue appears anywhere, and the ACs and out-of-scope items all map to those five. The only unsupported additions are incidental: issue 35783 documents RuntimeError/APIConnectionError failures but never reports 'latency spikes' or latency degradation, which the PRD attaches to it in the problem statement and user story 4; this detail is not load-bearing since AC5 and success_metric[4] measure connection-error counts, not latency. Numeric targets (20% overhead, 2.2x scaling ratio, 1.5x throughput, 50% import reduction) are PM-set goals rather than claims about the source, so they are not counted as fabrications. This matches anchor 4: 1\u20132 unsupported incidental details on genuinely existing issues, with nothing material affected."
+        },
+        "grounding": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Together these issues mean users pay avoidable latency and reliability costs across common, everyday usage paths, not just edge cases.",
+              "prd_location": "problem_statement",
+              "source": "All five pain points carry frequency = 1 issue each, with severity medium (four of them) and high (one); the findings make no claim about how commonly the affected paths are exercised.",
+              "rung": "escalation"
+            },
+            {
+              "claim": "Several independent parts of the LangChain stack exhibit latency and reliability problems that compound at scale.",
+              "prd_location": "problem_statement",
+              "source": "Five distinct pain points, each reported by exactly one issue; no source statement asserts the problems compound with one another.",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The individual pain-point descriptions track the source findings closely and faithfully (multi-fold embedding slowdowns, O(n^2) list.pop(0), eager transformers import, cross-event-loop client caching, sequential middleware), and risks[1] even explicitly discloses the single-report frequency, which is strong grounding hygiene. However, the problem statement's closing assertion that these costs are incurred 'across common, everyday usage paths, not just edge cases' is a frequency/prevalence claim that a corpus of five single-report issues could not establish under any reading \u2014 an unsupported escalation. Combined with the milder imprecision of asserting the issues 'compound at scale' (never stated in the findings), this matches the anchor for exactly one claim with unsupported escalation."
+        },
+        "completeness": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Embedding wrapper overhead (device\u2192CPU syncs, re-embedding per storage batch)",
+                  "issue_ids": [
+                    36126
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Markdown text splitter O(n^2) behavior from list.pop(0)",
+                  "issue_ids": [
+                    36488
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Unconditional heavy transformers import inflating cold-start",
+                  "issue_ids": [
+                    36835
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "lru_cache-ed async httpx client shared across event loops causing APIConnectionError",
+                  "issue_ids": [
+                    35783
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Middleware orchestration gaps: priority ordering, conditional activation, safe parallel execution",
+                  "issue_ids": [
+                    37972
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "First-class non-message workflow context / prefetched tool results for create_agent (Gemini rejects replayed AIMessage+ToolMessage)",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Inflated/corrupted token usage reporting for Fireworks reasoning model",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Release sequencing/tracking for tool_call_streaming standard test and integration profile data",
+                  "issue_ids": [
+                    38058
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Embedding wrapper overhead (device\u2192CPU syncs, re-embedding per storage batch)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1], acceptance_criteria[1], success_metrics[1]"
+                },
+                {
+                  "theme": "Markdown text splitter O(n^2) behavior from list.pop(0)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2], acceptance_criteria[2], success_metrics[2]"
+                },
+                {
+                  "theme": "Unconditional heavy transformers import inflating cold-start",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3], acceptance_criteria[3], success_metrics[3]"
+                },
+                {
+                  "theme": "lru_cache-ed async httpx client shared across event loops causing APIConnectionError",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4], acceptance_criteria[4]-[5], success_metrics[4]"
+                },
+                {
+                  "theme": "Middleware orchestration gaps: priority ordering, conditional activation, safe parallel execution",
+                  "status": "addressed",
+                  "prd_element": "user_stories[5], acceptance_criteria[6]-[7] (parallel-execution facet only; priority/conditional facets untouched)"
+                },
+                {
+                  "theme": "First-class non-message workflow context / prefetched tool results for create_agent (Gemini rejects replayed AIMessage+ToolMessage)",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "Inflated/corrupted token usage reporting for Fireworks reasoning model",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "Release sequencing/tracking for tool_call_streaming standard test and integration profile data",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "Every enumerated theme is minor (each backed by exactly one retrieved issue), so there are no prominent misses. The PRD cleanly covers five of the eight enumerated problems (36126, 36488, 36835, 35783, and the parallel-execution facet of 37972) through matching user stories, acceptance criteria, and metrics, but it entirely omits three others: the create_agent prefetched-tool-context gap (35836), the corrupted Fireworks token-usage reporting (37754), and the tool_call_streaming release-sequencing coordination problem (38058) \u2014 the last two are also explicitly excluded by out_of_scope only for unnamed integrations, not addressed. With all prominent themes covered but 3 minor themes missed, the rubric's level-3 clause applies."
+        },
+        "ac_quality": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given a text splitter processes a document with a large number of chunks, when the input size is doubled, then the measured processing time scales linearly rather than quadratically",
+              "reason": "Both the Given and the Then are unobservable as written: 'a document with a large number of chunks' names no concrete input size/state, and 'scales linearly rather than quadratically' supplies no threshold or ratio, so a reviewer cannot settle pass/fail from a single doubling measurement (the concrete 2.2x bound exists only in success_metrics[2], not in the AC)."
+            }
+          ],
+          "rationale": "Six of the seven ACs fill Given/When/Then with concrete states, actions and single checkable assertions \u2014 e.g. AC3 ('transformers package is not loaded into memory' after a fresh import) and AC4 ('a new client scoped to the second event loop is created') are directly instrumentable, AC1 embeds a numeric 20% bound, and AC6/AC7 assert exactly one outcome each under complementary (not duplicated) preconditions, so they are not a redundant pair; likewise AC4 (client-instance scoping) and AC5 (absence of connection errors under multi-thread concurrency) reduce to different checks. The sole defect is AC2, whose vague preconditions and threshold-free 'linearly rather than quadratically' assertion cannot be turned into an unambiguous pass/fail test. That matches the level-3 anchor: exactly one defective AC and zero redundant pairs."
+        }
+      }
+    },
+    {
+      "topic": "developer experience",
+      "band": "ambiguous",
+      "overlap_score": 0.55,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "PR assignment/triage is unclear or slow enough that multiple contributors have independently duplicated the same fix while waiting to find out who was working on it",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "when 48 hours pass without maintainer action, then the PR shows a visible triage status (e.g., assigned, needs-review, or blocked) in the repository",
+              "prd_location": "acceptance_criteria[6]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every substantive issue in the PRD traces to a retrieved source: composable primitives/steering/workflow-context/Skills to 36310, 35842, 35836 and 38170 (including the deepagents dependency-surface and version-drift concerns stated in 38170's body and comment); lossy response metadata to 36373 and the dropped image 'detail' field to 36297; deprecated partner integration enums/tools to 37701 (neural/keyword) and 37938 (computer-use-preview). The contribution-workflow theme is not wholly invented \u2014 36297's comment thread shows two contributors preparing the same fix and 37701/37938 show repeated 'please assign me' requests \u2014 but the framing of triage as 'slow' and the 48-hour latency threshold are characterizations/thresholds the corpus never states, making them unsupported incidental colouring on real material. No wholly invented issue, no conjured user counts or causes, so this sits at the '1-2 unsupported incidental details attached to issues that genuinely exist' rung rather than the invented-issue rungs below it."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "Partner and provider integrations also regularly lag behind upstream API changes (deprecated enums, deprecated tools), leaving developers to patch or work around stale integration code rather than getting fixes from the library itself.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[4]: Partner/provider integrations lag behind upstream API changes (deprecated enums, deprecated tools), forcing developers to patch or work around outdated integration code \u2014 severity: medium, frequency: 2",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "Advanced or custom workflows (custom control flow, steering, injecting workflow-specific context, composing multiple middleware behaviors) cannot be built without either forking internals or reaching for capabilities that only exist in separate add-on packages such as deepagents.",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1]: Rigid, high-level agent abstractions lack composability and extensibility for advanced/custom workflows \u2014 severity: high, frequency: 4",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD tracks the source findings closely: pain point clusters, evidence issue IDs per user story, and even the frequency caveat in risks[1] (\"Pain points 2, 3, and 4 each have low frequency (1-2 reported issues)\") match the findings exactly, with no superlatives, comparatives, or product-wide generalizations from single data points. Two facts are loosened rather than escalated \u2014 \"regularly lag behind\" adds a frequency flavor the 2-issue cluster does not state, and \"cannot be built without forking internals\" hardens the source's \"lack composability and extensibility\" into an absolute; in both cases the source could still be honestly cited as support. No claim contradicts a stated source fact, matching the level-4 anchor of 1-2 imprecise facts with no escalation or contradiction."
+        },
+        "completeness": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Expose deep-agent harness as composable low-level primitives (avoid high-level abstraction lock-in)",
+                  "issue_ids": [
+                    36310
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "First-party Agent Skills in langchain without depending on deepagents",
+                  "issue_ids": [
+                    38170
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "First-class injection of non-message workflow context / precomputed tool results into create_agent",
+                  "issue_ids": [
+                    35836
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Mid-run agent steering support in create_agent",
+                  "issue_ids": [
+                    35842
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Raw model response metadata filtered out by _create_chat_result (blocks monitoring/eval)",
+                  "issue_ids": [
+                    36373
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Image `detail` field silently dropped in OpenAI block converters",
+                  "issue_ids": [
+                    36297
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Partner/provider integrations lag upstream API deprecations (deprecated Exa search enums, deprecated OpenAI computer-use-preview)",
+                  "issue_ids": [
+                    37701,
+                    37938
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Unclear/slow PR assignment & triage causing duplicated contributor fixes",
+                  "issue_ids": [
+                    37701,
+                    36297,
+                    36310,
+                    37938
+                  ],
+                  "prominence": "prominent"
+                },
+                {
+                  "theme": "Add Exa integration identification header for usage analytics/attribution",
+                  "issue_ids": [
+                    37701
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "OpenAI computer_call not surfaced as an executable tool call, so create_agent's standard agent loop can't run computer actions (provider-agnostic computer use)",
+                  "issue_ids": [
+                    37938
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Expose deep-agent harness as composable low-level primitives (avoid high-level abstraction lock-in)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1]; acceptance_criteria[2]; problem_statement"
+                },
+                {
+                  "theme": "First-party Agent Skills in langchain without depending on deepagents",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[1]; success_metrics[1]"
+                },
+                {
+                  "theme": "First-class injection of non-message workflow context / precomputed tool results into create_agent",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('workflow context injection'); acceptance_criteria[2]"
+                },
+                {
+                  "theme": "Mid-run agent steering support in create_agent",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1] ('steering'); acceptance_criteria[2]"
+                },
+                {
+                  "theme": "Raw model response metadata filtered out by _create_chat_result (blocks monitoring/eval)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2]; acceptance_criteria[4]; success_metrics[2]"
+                },
+                {
+                  "theme": "Image `detail` field silently dropped in OpenAI block converters",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[3]; user_stories[2]"
+                },
+                {
+                  "theme": "Partner/provider integrations lag upstream API deprecations (deprecated Exa search enums, deprecated OpenAI computer-use-preview)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[3]; acceptance_criteria[5]; success_metrics[3]"
+                },
+                {
+                  "theme": "Unclear/slow PR assignment & triage causing duplicated contributor fixes",
+                  "status": "addressed",
+                  "prd_element": "user_stories[4]; acceptance_criteria[6], acceptance_criteria[7]; success_metrics[4], success_metrics[5]"
+                },
+                {
+                  "theme": "Add Exa integration identification header for usage analytics/attribution",
+                  "status": "missed",
+                  "prd_element": null
+                },
+                {
+                  "theme": "OpenAI computer_call not surfaced as an executable tool call, so create_agent's standard agent loop can't run computer actions (provider-agnostic computer use)",
+                  "status": "missed",
+                  "prd_element": null
+                }
+              ]
+            }
+          ],
+          "rationale": "Both prominent themes are covered: integration lag on deprecated upstream APIs (37701 search enums, 37938 computer-use-preview) is handled by user_stories[3]/acceptance_criteria[5]/success_metrics[3], and the PR assignment/duplicate-fix friction visible across 37701, 36297, 36310 and 37938 comments is handled by user_stories[4] and acceptance_criteria[6]-[7]. Every advanced-workflow ask (composable primitives 36310, Skills 38170, workflow context 35836, steering 35842) and both lossy-conversion asks (36373 raw metadata, 36297 image detail) are explicitly mapped. Two minor themes are silently omitted: the Exa integration-analytics header request (37701) and 37938's core ask that OpenAI `computer_call` items be surfaced as executable tool calls runnable by create_agent's standard loop for provider-agnostic computer use \u2014 the PRD reduces 37938 to a generic 'deprecated enum/tool' update. All prominent themes covered with 1-2 minor misses matches anchor level 4."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 1,
+              "ac_text": "Given a developer is building a custom agent workflow using only core LangChain packages, when they need Agent Skills-style behavior, then they can enable it using a first-party primitive without installing the deepagents package",
+              "reason": "Both the When and Then slots are unobservable: 'when they need Agent Skills-style behavior' is an internal desire rather than a concrete action, and 'they can enable it using a first-party primitive' names no specific API, call, or observable output state. Only the 'without installing deepagents' clause is checkable; a reviewer cannot say pass/fail on whether 'Agent Skills-style behavior' was enabled."
+            },
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given a developer wants to inject custom workflow context or steering into an agent run, when they compose the relevant middleware primitives in core LangChain, then the agent run reflects the injected context without requiring changes to internal/private APIs",
+              "reason": "Given slot is a wish ('wants to inject'), not a state; When slot ('compose the relevant middleware primitives') does not identify which primitives or what composition is performed; Then slot ('the agent run reflects the injected context') specifies no concrete assertion \u2014 there is no observable artifact (prompt content, state field, trace entry) a test could inspect."
+            }
+          ],
+          "rationale": "Five of the seven criteria (3, 4, 5, 6, 7) fill Given/When/Then with concrete states, actions and inspectable assertions \u2014 e.g. AC3's named provider field on the resulting message object, AC6's 48-hour window and enumerated triage labels \u2014 and no pair of ACs reduces to the same check (AC3 asserts provider-specific field survival, AC4 asserts raw metadata retrievability, which are distinct assertions). However, AC1 and AC2 are each independently vague: neither has a Then that translates into a single observable assertion ('enable it using a first-party primitive', 'the agent run reflects the injected context'), and their When slots describe developer intent rather than a concrete action. Exactly two defective ACs matches the anchor for level 2."
+        }
+      }
+    },
+    {
+      "topic": "documentation gaps",
+      "band": "adversarial",
+      "overlap_score": 0.82,
+      "completeness_exempt": true,
+      "dimensions": {
+        "hallucination": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "Every factual assertion in the PRD traces directly to the retrieved issues: the enumerated subject areas ('streaming behavior, tool-call handling, provider API mismatches, vector store update logic, schema enforcement, and Hub manifest serialization') map one-to-one onto issues 36214/35514, 35836, 36211/36067, 37452, 36067, and 37018 respectively. The central claim -- that none of the retrieved items is a documentation-gap report -- is verifiable against the corpus, which contains only functional bug reports and one feature request. No invented issues, no conjured user counts, constraints, or causes appear anywhere; the acceptance criteria and success metric are process gates on a future re-run rather than assertions about source content, and the medium risk about a possibly misconfigured retrieval query is explicitly framed as a hypothesis, not a fact. This matches the anchor for 5: zero unsupported claims of any kind."
+        },
+        "grounding": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [],
+          "rationale": "The PRD's problem statement reproduces the source's null finding accurately, listing exactly the same functional areas (streaming, tool-call handling, provider API mismatches, vector store update logic, schema enforcement, Hub manifest serialization) and the same conclusion that no documentation-gap pain points can be substantiated. No claim inflates scope, severity, or frequency; acceptance criterion 1 states 'zero issues are classified as documentation gaps,' matching the source exactly, and out_of_scope[1] mirrors the source's characterization of the retrieved issues. The forward-looking items (re-run discovery target of 3 pain points, risk about a possibly misconfigured query) are hedged process proposals rather than assertions about what the source contains, so they neither loosen nor contradict it. Zero departures of any rung, matching anchor 5."
+        },
+        "completeness": {
+          "score": null,
+          "exempt": true,
+          "reason": "correct refusal -- no enumerable themes to cover"
+        },
+        "ac_quality": {
+          "score": 3,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "vague",
+              "ac_index": 2,
+              "ac_text": "Given no documentation-gap pain points have been substantiated, when a new discovery pass is run with a query targeted at documentation feedback, then the pass produces at least one issue explicitly describing missing, unclear, or incorrect documentation before any documentation PRD work begins",
+              "reason": "The When slot is unobservable/underspecified -- 'a query targeted at documentation feedback' names no concrete query, corpus, or retrieval configuration, so no engineer could reproduce the action. The Then also welds a content assertion ('produces at least one issue explicitly describing...') to a process/ordering condition ('before any documentation PRD work begins'), and 'explicitly describing missing, unclear, or incorrect documentation' relies on reviewer judgement with no stated classification rule, so pass/fail is not settled by a single deterministic check."
+            }
+          ],
+          "rationale": "AC1 is testable: the Given fixes a concrete artifact (the current retrieved issue set for the theme), and the Then asserts a single countable outcome (zero issues classified as documentation gaps) against the classification wording given in the problem statement. AC3 likewise reduces to one binary check -- the user_stories section is empty -- which a reviewer can settle unambiguously. AC2 is the sole defective criterion: its When names no reproducible query and its Then mixes an unquantified, judgement-based content assertion with a sequencing condition. No pair of the three ACs reduces to the same check, so there are zero redundant pairs. Exactly one defective AC places this at anchor level 3."
+        }
+      }
+    },
+    {
+      "topic": "xylophone quarterly banana",
+      "band": "adversarial",
+      "overlap_score": null,
+      "completeness_exempt": false,
+      "dimensions": {
+        "hallucination": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "multimodal payloads (e.g., images plus text) are over-counted",
+              "prd_location": "problem_statement",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "I want to get accurate, non-duplicated token usage counts for text and image inputs",
+              "prd_location": "user_stories[2]",
+              "materiality": "incidental"
+            },
+            {
+              "claim": "then the reported token count matches the provider's actual billed token count for that request",
+              "prd_location": "acceptance_criteria[3]",
+              "materiality": "incidental"
+            }
+          ],
+          "rationale": "Every issue referenced in the PRD traces to a retrieved issue: reasoning-token drop (36809), missing on_llm_new_token callbacks (37878), Bedrock SSE parse failure (35442), multimodal token over-count (38229), inflated Fireworks usage metadata (37754), duplicated generation_info (38226), o4 provider inference (38243), and null-parameter Ollama server errors (36889); the success-metric counts (3/3/2) also match the retrieved set exactly, so there is no wholly invented issue at any level. The only unsupported specifics are the 'images plus text' framing of the multimodal over-count (38229 states image/image_url blocks correctly receive a fixed penalty, while audio/video/file blocks are the ones char-counted) and the 'matches the provider's actual billed token count' bar in AC[3], which the source \u2014 an explicitly approximate estimator \u2014 never states. These are added details hanging on a genuinely retrieved issue rather than fabricated issues, and the underlying pain point (inaccurate multimodal token accounting) is real, so they sit at the level-4 anchor of 1-2 unsupported incidental details."
+        },
+        "grounding": {
+          "score": 4,
+          "attempts": 1,
+          "findings": [
+            {
+              "claim": "encounter three interlocking classes of reliability bugs that make streaming, cost tracking, and provider compatibility untrustworthy in production",
+              "prd_location": "problem_statement",
+              "source": "pain_point[3] cluster: Provider/model inference and compatibility gaps ... severity: medium; frequency: 2",
+              "rung": "imprecision"
+            },
+            {
+              "claim": "applications relying on LangChain for streaming, billing, or multi-provider support cannot trust the numbers or the data they get back without extra defensive code, and some integrations fail outright",
+              "prd_location": "problem_statement",
+              "source": "pain_point[1]/[2] severity: high; pain_point[3] 'provider-specific server errors from unconditional null params'",
+              "rung": "imprecision"
+            }
+          ],
+          "rationale": "The PRD's cluster descriptions, issue-ID citations, and defect counts in success_metrics (3/3/2) map exactly onto the three source pain points with no invented scope, and the risks section even flags the thin two-issue evidence base for the compatibility cluster rather than inflating it. Two claims in the problem statement loosen the source: the medium-severity provider-compatibility cluster is folded into a blanket 'untrustworthy in production' framing, and the closing sentence generalizes eight issues into applications broadly being unable to 'trust the numbers or the data they get back.' Both remain compatible with the source findings (which do record high severity for two clusters and provider-side server errors), so they are imprecision rather than escalation, and there are no contradictions \u2014 matching the 4 anchor of 1-2 imprecise facts only."
+        },
+        "completeness": {
+          "score": 5,
+          "attempts": 1,
+          "findings": [
+            {
+              "themes": [
+                {
+                  "theme": "Reasoning/thinking tokens silently dropped in streamed chunks (no reasoning_content parsing)",
+                  "issue_ids": [
+                    36809
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "on_llm_new_token never fires \u2014 no token-level callback propagation in agent execution",
+                  "issue_ids": [
+                    37878
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "SSE parsing fails when events lack an `event:` field, yielding zero generation chunks",
+                  "issue_ids": [
+                    35442
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Token estimation over-counts multimodal data blocks by char-counting base64 payloads",
+                  "issue_ids": [
+                    38229
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Corrupted/inflated token usage metadata from provider responses breaking cost tracking",
+                  "issue_ids": [
+                    37754
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "generation_info written twice on duplicate finish chunks, producing doubled strings",
+                  "issue_ids": [
+                    38226
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "init_chat_model fails to infer provider for model prefixes (o4 family)",
+                  "issue_ids": [
+                    38243
+                  ],
+                  "prominence": "minor"
+                },
+                {
+                  "theme": "Unconditional inclusion of null-valued optional params causes provider Internal Server Error",
+                  "issue_ids": [
+                    36889
+                  ],
+                  "prominence": "minor"
+                }
+              ],
+              "coverage": [
+                {
+                  "theme": "Reasoning/thinking tokens silently dropped in streamed chunks (no reasoning_content parsing)",
+                  "status": "addressed",
+                  "prd_element": "user_stories[1]; acceptance_criteria[1]"
+                },
+                {
+                  "theme": "on_llm_new_token never fires \u2014 no token-level callback propagation in agent execution",
+                  "status": "addressed",
+                  "prd_element": "problem_statement ('there are no token-level callbacks to hook into'); user_stories[1] (cites 37878); acceptance_criteria[1]"
+                },
+                {
+                  "theme": "SSE parsing fails when events lack an `event:` field, yielding zero generation chunks",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[2]; user_stories[1] (cites 35442)"
+                },
+                {
+                  "theme": "Token estimation over-counts multimodal data blocks by char-counting base64 payloads",
+                  "status": "addressed",
+                  "prd_element": "user_stories[2] (cites 38229); acceptance_criteria[3]"
+                },
+                {
+                  "theme": "Corrupted/inflated token usage metadata from provider responses breaking cost tracking",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[5]; user_stories[2] (cites 37754)"
+                },
+                {
+                  "theme": "generation_info written twice on duplicate finish chunks, producing doubled strings",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[4]; user_stories[2] (cites 38226)"
+                },
+                {
+                  "theme": "init_chat_model fails to infer provider for model prefixes (o4 family)",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[6]; user_stories[3] (cites 38243)"
+                },
+                {
+                  "theme": "Unconditional inclusion of null-valued optional params causes provider Internal Server Error",
+                  "status": "addressed",
+                  "prd_element": "acceptance_criteria[7]; user_stories[3] (cites 36889)"
+                }
+              ]
+            }
+          ],
+          "rationale": "Eight distinct problems appear across the eight retrieved issues, each reported by exactly one issue (all minor themes), and every one maps to a concrete PRD element: reasoning-token dropping and token-callback silence to user_stories[1]/AC1, SSE parse failure to AC2, multimodal over-counting to AC3, doubled generation_info to AC4, corrupted usage metadata to AC5, o4 provider-prefix inference to AC6, and null-parameter provider errors to AC7. No enumerated theme is left unrepresented in the problem statement, stories, or acceptance criteria. The only imprecision \u2014 AC3 framing the over-count as 'image plus text' when the issue concerns audio/video/file blocks \u2014 is a grounding/accuracy matter explicitly excluded from this dimension, not a coverage gap. Zero prominent and zero minor themes missed matches the level 5 anchor."
+        },
+        "ac_quality": {
+          "score": 2,
+          "attempts": 1,
+          "findings": [
+            {
+              "type": "non_atomic",
+              "ac_index": 2,
+              "ac_text": "Given a streaming response formatted as SSE with a previously failing edge-case payload shape, when the client parses the SSE stream, then the parser completes without throwing an error and emits all chunks in the payload",
+              "reason": "The Then welds two independent outcomes with 'and': (a) no exception is thrown, and (b) all chunks in the payload are emitted. A parser could complete without error yet silently drop chunks, so a single check cannot settle both; two separate assertions are required. The Given is also loosely specified ('a previously failing edge-case payload shape' names no concrete fixture), compounding the testability problem."
+            },
+            {
+              "type": "vague",
+              "ac_index": 5,
+              "ac_text": "Given a chat completion response with usage metadata, when the usage metadata is parsed into the result object, then the parsed usage figures are not corrupted or inflated relative to the raw provider response",
+              "reason": "The Then slot rests on the unobservable predicate 'not corrupted' \u2014 there is no defined comparison operation or field-level equality assertion that a reviewer could execute to declare pass/fail. 'Inflated' is directionally measurable but undefined as to which figures (prompt/completion/total) and by what tolerance. The assertion cannot be translated into one concrete check."
+            }
+          ],
+          "rationale": "Five of the seven ACs (1, 3, 4, 6, 7) fill Given/When/Then with concrete states, actions, and single verifiable assertions \u2014 e.g. AC4's 'generation_info string appears exactly once' and AC7's 'omitted from the request body rather than sent as null' are directly checkable. However, AC2 is non-atomic (asserts both 'completes without throwing an error' and 'emits all chunks'), and AC5 is vague (its Then hinges on 'not corrupted', an unobservable term with no defined comparison). That is exactly 2 defective ACs, which matches the level-2 anchor; no redundant pairs push it lower, but the two defects preclude a 3 or above."
+        }
+      }
+    }
+  ],
+  "errors": [],
+  "telemetry": [
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "authentication"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 27073,
+      "pmc_output_tokens": 2224,
+      "pmc_latency_ms": 28894,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=27073 out=2224 28894ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3875,
+      "pmc_output_tokens": 1729,
+      "pmc_latency_ms": 23772,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3875 out=1729 23772ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 27151,
+      "pmc_output_tokens": 2016,
+      "pmc_latency_ms": 21338,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=27151 out=2016 21338ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3052,
+      "pmc_output_tokens": 1743,
+      "pmc_latency_ms": 24215,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3052 out=1743 24215ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "authentication"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "retriever and vector store integrations"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 20808,
+      "pmc_output_tokens": 2036,
+      "pmc_latency_ms": 25433,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=20808 out=2036 25433ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 4290,
+      "pmc_output_tokens": 1854,
+      "pmc_latency_ms": 22950,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=4290 out=1854 22950ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 20886,
+      "pmc_output_tokens": 3344,
+      "pmc_latency_ms": 37845,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=20886 out=3344 37845ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3393,
+      "pmc_output_tokens": 1293,
+      "pmc_latency_ms": 17556,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3393 out=1293 17556ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "retriever and vector store integrations"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "token counting and usage metadata"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 21931,
+      "pmc_output_tokens": 2426,
+      "pmc_latency_ms": 29646,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=21931 out=2426 29646ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 4598,
+      "pmc_output_tokens": 3091,
+      "pmc_latency_ms": 38210,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=4598 out=3091 38210ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 22009,
+      "pmc_output_tokens": 2636,
+      "pmc_latency_ms": 30740,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=22009 out=2636 30740ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3664,
+      "pmc_output_tokens": 2009,
+      "pmc_latency_ms": 25767,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3664 out=2009 25767ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "token counting and usage metadata"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "streaming behavior and chunk handling"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 37641,
+      "pmc_output_tokens": 2438,
+      "pmc_latency_ms": 32947,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=37641 out=2438 32947ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 4691,
+      "pmc_output_tokens": 2304,
+      "pmc_latency_ms": 29320,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=4691 out=2304 29320ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 37719,
+      "pmc_output_tokens": 3634,
+      "pmc_latency_ms": 40491,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=37719 out=3634 40491ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3679,
+      "pmc_output_tokens": 1817,
+      "pmc_latency_ms": 23145,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3679 out=1817 23145ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "streaming behavior and chunk handling"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "prompt templates and output parsers"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 32530,
+      "pmc_output_tokens": 3286,
+      "pmc_latency_ms": 41559,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=32530 out=3286 41559ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3857,
+      "pmc_output_tokens": 1801,
+      "pmc_latency_ms": 22679,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3857 out=1801 22679ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 32608,
+      "pmc_output_tokens": 4096,
+      "pmc_latency_ms": 50314,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=32608 out=4096 50314ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 33727,
+      "pmc_output_tokens": 996,
+      "pmc_latency_ms": 11876,
+      "pmc_attempt": 2,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=33727 out=996 11876ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3042,
+      "pmc_output_tokens": 1532,
+      "pmc_latency_ms": 20764,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3042 out=1532 20764ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "prompt templates and output parsers"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "tool calling and function calling"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 32498,
+      "pmc_output_tokens": 2006,
+      "pmc_latency_ms": 26010,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=32498 out=2006 26010ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 5247,
+      "pmc_output_tokens": 2270,
+      "pmc_latency_ms": 26863,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=5247 out=2270 26863ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 32576,
+      "pmc_output_tokens": 3317,
+      "pmc_latency_ms": 36236,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=32576 out=3317 36236ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3987,
+      "pmc_output_tokens": 1925,
+      "pmc_latency_ms": 23006,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3987 out=1925 23006ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "tool calling and function calling"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "performance and latency"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 29222,
+      "pmc_output_tokens": 2346,
+      "pmc_latency_ms": 29242,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=29222 out=2346 29242ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 4554,
+      "pmc_output_tokens": 1426,
+      "pmc_latency_ms": 20047,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=4554 out=1426 20047ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 29300,
+      "pmc_output_tokens": 2360,
+      "pmc_latency_ms": 25776,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=29300 out=2360 25776ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3533,
+      "pmc_output_tokens": 1432,
+      "pmc_latency_ms": 17639,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3533 out=1432 17639ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "performance and latency"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "developer experience"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 31336,
+      "pmc_output_tokens": 2642,
+      "pmc_latency_ms": 34605,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=31336 out=2642 34605ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 4364,
+      "pmc_output_tokens": 1947,
+      "pmc_latency_ms": 23926,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=4364 out=1947 23926ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 31414,
+      "pmc_output_tokens": 3580,
+      "pmc_latency_ms": 39461,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=31414 out=3580 39461ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3385,
+      "pmc_output_tokens": 1676,
+      "pmc_latency_ms": 23751,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3385 out=1676 23751ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "developer experience"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "documentation gaps"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 39317,
+      "pmc_output_tokens": 870,
+      "pmc_latency_ms": 14456,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=39317 out=870 14456ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 2431,
+      "pmc_output_tokens": 463,
+      "pmc_latency_ms": 9104,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=2431 out=463 9104ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 1922,
+      "pmc_output_tokens": 1584,
+      "pmc_latency_ms": 20123,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=1922 out=1584 20123ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "documentation gaps"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "xylophone quarterly banana"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 43307,
+      "pmc_output_tokens": 2187,
+      "pmc_latency_ms": 27306,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "hallucination",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=43307 out=2187 27306ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 3776,
+      "pmc_output_tokens": 1532,
+      "pmc_latency_ms": 18824,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "grounding",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=3776 out=1532 18824ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 43385,
+      "pmc_output_tokens": 2787,
+      "pmc_latency_ms": 29505,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "completeness",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=43385 out=2787 29505ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-opus-5",
+      "pmc_input_tokens": 2987,
+      "pmc_output_tokens": 1783,
+      "pmc_latency_ms": 22717,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "ac_quality",
+      "logger": "pmcopilot.judge",
+      "message": "model call: claude-opus-5 in=2987 out=1783 22717ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "xylophone quarterly banana"
+    }
+  ],
+  "summary": {
+    "hallucination": {
+      "n": 10,
+      "mean": 4.1,
+      "min": 3,
+      "max": 5,
+      "scores": [
+        4,
+        4,
+        4,
+        4,
+        3,
+        5,
+        4,
+        4,
+        5,
+        4
+      ],
+      "target": "all score 5 (mean 5.0, zero below 5)",
+      "meets_target": false,
+      "n_below_target": 8
+    },
+    "grounding": {
+      "n": 10,
+      "mean": 4.1,
+      "min": 3,
+      "max": 5,
+      "scores": [
+        5,
+        4,
+        3,
+        5,
+        4,
+        4,
+        3,
+        4,
+        5,
+        4
+      ],
+      "target": "all score 5 (mean 5.0, zero below 5)",
+      "meets_target": false,
+      "n_below_target": 7
+    },
+    "completeness": {
+      "n": 9,
+      "mean": 4.33,
+      "min": 3,
+      "max": 5,
+      "scores": [
+        4,
+        4,
+        4,
+        5,
+        5,
+        5,
+        3,
+        4,
+        5
+      ],
+      "target": "mean >= 4.0",
+      "meets_target": true,
+      "n_below_target": 1
+    },
+    "ac_quality": {
+      "n": 10,
+      "mean": 2.7,
+      "min": 2,
+      "max": 5,
+      "scores": [
+        3,
+        5,
+        2,
+        2,
+        3,
+        2,
+        3,
+        2,
+        3,
+        2
+      ],
+      "target": "mean >= 4.5",
+      "meets_target": false,
+      "n_below_target": 9
+    }
+  }
+}
