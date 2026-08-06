@@ -9,6 +9,7 @@ semantic (issue numbers in prose) — route through one repair loop with a
 exhaustion is the only thing that reaches graph state.
 """
 import re
+import time
 import anthropic
 from pydantic import ValidationError
 import config
@@ -232,6 +233,7 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
     last_error = "unknown"
 
     for attempt in range(1 + MAX_RETRIES):
+        started = time.perf_counter()
         response = client.messages.create(
             model=config.AGENT_MODEL,
             max_tokens=4000,
@@ -239,6 +241,14 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
             tools=[PRD_TOOL],
             tool_choice={"type": "tool", "name": TOOL_NAME},
             messages=messages,
+        )
+        telemetry.model_call(
+            telemetry.drafter_log,
+            model=response.model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            attempt=attempt + 1,
         )
         tool_use = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_use is None:

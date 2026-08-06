@@ -6,8 +6,10 @@ is validated against the issues actually retrieved this call. Invented IDs are
 stripped; pain points left with no real evidence are dropped. A thin or empty
 finding is a valid result, not an error.
 """
+import time
 import anthropic
 import config
+import telemetry
 from rag.retriever import query
 from schemas.discovery import DiscoveryFinding, PainPoint
 
@@ -57,6 +59,7 @@ def research(topic: str) -> DiscoveryFinding:
     retrieved_ids = {rec["number"] for rec in issues}
 
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    started = time.perf_counter()
     response = client.messages.create(
         model=config.AGENT_MODEL,
         max_tokens=2000,
@@ -64,6 +67,13 @@ def research(topic: str) -> DiscoveryFinding:
         tools=[DISCOVERY_TOOL],
         tool_choice={"type": "tool", "name": TOOL_NAME},
         messages=[{"role": "user", "content": _build_user_prompt(topic, issues)}],
+    )
+    telemetry.model_call(
+        telemetry.discovery_log,
+        model=response.model,
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
+        latency_ms=round((time.perf_counter() - started) * 1000),
     )
 
     tool_use = next((b for b in response.content if b.type == "tool_use"), None)

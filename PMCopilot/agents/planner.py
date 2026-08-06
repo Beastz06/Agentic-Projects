@@ -24,12 +24,14 @@ drafts. Its tool schema uses one NAMED slot per theme (not an anonymous list in
 a wrapper), which resists the stringification quirk.
 """
 import json
+import time
 import graphlib
 import anthropic
 from pydantic import ValidationError
 import config
 from schemas.prd import PRD
 from schemas.roadmap import RoadmapItemDraft, RoadmapItem
+import telemetry
 
 MAX_RETRIES = 2
 QUARTERS = ["Q1", "Q2", "Q3", "Q4"]
@@ -115,6 +117,7 @@ def _score_one(client: anthropic.Anthropic, prd: PRD) -> RoadmapItemDraft:
     last_error = "unknown"
 
     for attempt in range(1 + MAX_RETRIES):
+        started = time.perf_counter()
         response = client.messages.create(
             model=config.AGENT_MODEL,
             max_tokens=1000,
@@ -122,6 +125,16 @@ def _score_one(client: anthropic.Anthropic, prd: PRD) -> RoadmapItemDraft:
             tools=[SCORE_TOOL],
             tool_choice={"type": "tool", "name": SCORE_TOOL_NAME},
             messages=messages,
+        )
+        telemetry.model_call(
+            telemetry.planner_log,
+            model=response.model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            attempt=attempt + 1,
+            site="scoring",
+            subject=prd.theme,
         )
         tool_use = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_use is None:
@@ -337,6 +350,7 @@ def _detect_dependencies(
     last_error = "unknown"
 
     for attempt in range(1 + MAX_RETRIES):
+        started = time.perf_counter()
         response = client.messages.create(
             model=config.AGENT_MODEL,
             max_tokens=1000,
@@ -344,6 +358,15 @@ def _detect_dependencies(
             tools=[dep_tool],
             tool_choice={"type": "tool", "name": DEP_TOOL_NAME},
             messages=messages,
+        )
+        telemetry.model_call(
+            telemetry.planner_log,
+            model=response.model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            attempt=attempt + 1,
+            site="dependency",
         )
         tool_use = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_use is None:

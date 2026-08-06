@@ -30,12 +30,14 @@ provenance) — third instance of the stamp idiom after evidence_issue_ids and
 PRD.theme.
 """
 import json
+import time
 import anthropic
 from pydantic import ValidationError
 import config
 from schemas.prd import PRD
 from schemas.roadmap import RoadmapItem
 from schemas.digest import StakeholderDigest
+import telemetry
 
 MAX_RETRIES = 2
 # eng (longest body ~850 tokens + a compliant relay
@@ -210,6 +212,7 @@ def summarize(
     last_error = "unknown"
 
     for attempt in range(1 + MAX_RETRIES):
+        started = time.perf_counter()
         response = client.messages.create(
             model=config.AGENT_MODEL,
             max_tokens=MAX_TOKENS,
@@ -217,6 +220,15 @@ def summarize(
             tools=[DIGEST_TOOL],
             tool_choice={"type": "tool", "name": TOOL_NAME},
             messages=messages,
+        )
+        telemetry.model_call(
+            telemetry.summarizer_log,
+            model=response.model,
+            input_tokens=response.usage.input_tokens,
+            output_tokens=response.usage.output_tokens,
+            latency_ms=round((time.perf_counter() - started) * 1000),
+            attempt=attempt + 1,
+            subject=audience,
         )
         tool_use = next((b for b in response.content if b.type == "tool_use"), None)
         if tool_use is None:
@@ -300,6 +312,7 @@ def compose_slack_post(digest: StakeholderDigest) -> str:
     to the composer invites jargon leakage into a channel post.
     """
     client = anthropic.Anthropic(api_key=config.ANTHROPIC_API_KEY)
+    started = time.perf_counter()
     response = client.messages.create(
         model=config.AGENT_MODEL,
         max_tokens=SLACK_COMPOSE_MAX_TOKENS,
@@ -312,6 +325,14 @@ def compose_slack_post(digest: StakeholderDigest) -> str:
                 f"CALL TO ACTION: {digest.call_to_action}"
             ),
         }],
+    )
+    telemetry.model_call(
+        telemetry.summarizer_log,
+        model=response.model,
+        input_tokens=response.usage.input_tokens,
+        output_tokens=response.usage.output_tokens,
+        latency_ms=round((time.perf_counter() - started) * 1000),
+        site="slack_compose",
     )
     if response.stop_reason == "max_tokens":
         raise RuntimeError(

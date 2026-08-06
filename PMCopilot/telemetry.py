@@ -19,6 +19,7 @@ import logging
 ROOT = "pmcopilot"
 
 # Component identity is carried by record.name. No field duplicates it.
+discovery_log = logging.getLogger(f"{ROOT}.discovery")
 drafter_log = logging.getLogger(f"{ROOT}.drafter")
 planner_log = logging.getLogger(f"{ROOT}.planner")
 summarizer_log = logging.getLogger(f"{ROOT}.summarizer")
