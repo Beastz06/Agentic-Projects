@@ -168,7 +168,12 @@ first_attempts = [
     e for e in events
     if e.get("pmc_event") == telemetry.EVENT_MODEL_CALL and e.get("pmc_attempt") == 1
 ]
-expected = len(SCENARIOS) - len(failures)
+# Every theme that reaches draft_prd emits an attempt-1 record: the emit sits
+# before the parse, so exhausting the retry budget still leaves one behind.
+# Failures are NOT subtracted. The only theme that emits nothing is one where
+# create() itself raised, and that is the failed-call gap -- which this check
+# should surface, not absorb.
+expected = len(SCENARIOS)
 
 if len(first_attempts) != expected:
     by_logger: dict[str, int] = {}
