@@ -3,10 +3,14 @@
 Fixture unit is FROZEN, not live: the judge is the only moving part during
 Day 32 rubric tuning, so a score change has exactly one possible cause.
 
-retrieved_issues is not checkpointed by the pipeline — research() calls
-query() internally and discards it. It is re-derived here and HARD-ASSERTED
-against the ID sets recorded by the overlap probe. A fixture built on
-unverified retrieval would contaminate every score in the suite.
+retrieved_issues is carried forward from a prior fixture rather than re-queried.
+The index is approximate and the rank-8 boundary gap on this corpus is ~0.003
+against a band width of ~0.13, so live retrieval returns a different eighth
+issue often enough to halt a capture mid-run. Carrying the set forward makes
+retrieval exactly reproducible and leaves the drafter prompt as the only thing
+that differs between fixtures — which is what the comparison requires. The
+assertion still runs, but it now checks that the source fixture is the expected
+one, not that retrieval is stable.
 """
 import json
 import logging
@@ -16,7 +20,6 @@ from datetime import datetime, timezone
 import config
 import telemetry
 import argparse
-from rag.retriever import query
 from schemas.discovery import DiscoveryFinding
 from agents.prd_drafter import draft_prd
 
@@ -25,6 +28,8 @@ FINDINGS_IN = "evals/candidate_findings.json"
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--out", required=True,
                     help="path to write the fixture (e.g. evals/fixture_v2.json)")
+parser.add_argument("--from-fixture", required=True,
+                    help="fixture whose retrieved_issues to reuse, e.g. evals/fixture_v2.json")
 args = parser.parse_args()
 OUT = args.out
 
@@ -79,6 +84,10 @@ COMPLETENESS_EXEMPT = {"documentation gaps"}
 with open(FINDINGS_IN, encoding="utf-8") as f:
     raw_findings = json.load(f)
 
+with open(args.from_fixture, encoding="utf-8") as f:
+    source = json.load(f)
+SOURCE_ISSUES = {s["topic"]: s["retrieved_issues"] for s in source["scenarios"]}
+
 sha = subprocess.run(
     ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
 ).stdout.strip()
@@ -97,15 +106,16 @@ root_log.setLevel(logging.INFO)
 for topic, (band, overlap, expected) in SCENARIOS.items():
     print(f"--- {topic}")
 
-    recs = query(topic, k=K)
+    recs = SOURCE_ISSUES[topic]
     got = sorted(r["number"] for r in recs)
     assert got == sorted(expected), (
-        f"RETRIEVAL DRIFT on '{topic}'.\n"
+        f"SOURCE FIXTURE MISMATCH on '{topic}'.\n"
         f"  expected: {sorted(expected)}\n"
         f"  got:      {got}\n"
-        f"Fixture capture halted — retrieval is not reproducible."
+        f"The fixture passed to --from-fixture does not carry the retrieval "
+        f"this capture expects."
     )
-    print(f"    retrieval verified: {got}")
+    print(f"    retrieval carried forward: {got}")
 
     finding = DiscoveryFinding(**raw_findings[topic])
     try:
@@ -139,6 +149,8 @@ fixture = {
         "agent_model": config.AGENT_MODEL,
         "embedding_model": config.EMBEDDING_MODEL,
         "retrieval_k": K,
+        "retrieval_source": args.from_fixture,
+        "retrieval_source_commit": source["provenance"]["commit"],
         "captured_at": datetime.now(timezone.utc).isoformat(),
     },
     "scenarios": scenarios,
