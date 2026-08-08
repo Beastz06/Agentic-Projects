@@ -1,0 +1,125 @@
+{
+  "topic": "authentication",
+  "thread_id": "gate-demo-20260807T183455Z",
+  "captured_at": "2026-08-07T18:36:37.085386+00:00",
+  "events": [
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "initial"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 24463,
+      "pmc_output_tokens": 598,
+      "pmc_latency_ms": 8718,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.discovery",
+      "message": "model call: claude-sonnet-5 in=24463 out=598 8718ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 4475,
+      "pmc_output_tokens": 2264,
+      "pmc_latency_ms": 21285,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "model call: claude-sonnet-5 in=4475 out=2264 21285ms"
+    },
+    {
+      "pmc_event": "envelope_unwrap",
+      "pmc_wrapper_key": "prd",
+      "logger": "pmcopilot.drafter",
+      "message": "envelope unwrapped: PRD nested under 'prd'"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "initial"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "resume:1:approve"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 2123,
+      "pmc_output_tokens": 308,
+      "pmc_latency_ms": 3769,
+      "pmc_attempt": 1,
+      "pmc_site": "scoring",
+      "pmc_subject": "authentication",
+      "logger": "pmcopilot.planner",
+      "message": "model call: claude-sonnet-5 in=2123 out=308 3769ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 1778,
+      "pmc_output_tokens": 54,
+      "pmc_latency_ms": 2611,
+      "pmc_attempt": 1,
+      "pmc_site": "dependency",
+      "pmc_subject": null,
+      "logger": "pmcopilot.planner",
+      "message": "model call: claude-sonnet-5 in=1778 out=54 2611ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3069,
+      "pmc_output_tokens": 921,
+      "pmc_latency_ms": 11352,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "customer",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3069 out=921 11352ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3025,
+      "pmc_output_tokens": 1356,
+      "pmc_latency_ms": 13764,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "eng",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3025 out=1356 13764ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3048,
+      "pmc_output_tokens": 1401,
+      "pmc_latency_ms": 14948,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "exec",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3048 out=1401 14948ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 759,
+      "pmc_output_tokens": 248,
+      "pmc_latency_ms": 4998,
+      "pmc_attempt": 1,
+      "pmc_site": "slack_compose",
+      "pmc_subject": null,
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=759 out=248 4998ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "resume:1:approve"
+    }
+  ]
+}

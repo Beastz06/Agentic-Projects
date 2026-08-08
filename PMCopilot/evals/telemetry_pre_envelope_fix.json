@@ -1,0 +1,161 @@
+{
+  "topic": "authentication",
+  "thread_id": "gate-demo-20260807T180459Z",
+  "captured_at": "2026-08-07T18:07:10.544213+00:00",
+  "events": [
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "initial"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 24463,
+      "pmc_output_tokens": 582,
+      "pmc_latency_ms": 8426,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.discovery",
+      "message": "model call: claude-sonnet-5 in=24463 out=582 8426ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 4509,
+      "pmc_output_tokens": 2095,
+      "pmc_latency_ms": 19667,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "model call: claude-sonnet-5 in=4509 out=2095 19667ms"
+    },
+    {
+      "pmc_event": "repair_fire",
+      "pmc_attempt": 1,
+      "pmc_defect_origin": "ValidationError",
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "repair fire: attempt 1 failed (ValidationError); retrying. 3 validation errors for PRD\nproblem_statement\n  Field required [type=missing, input_value={'prd': {'theme': '', 'pr...heme': 'authentication'}, input_type=dict]\n    For further information visit https"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 6829,
+      "pmc_output_tokens": 1991,
+      "pmc_latency_ms": 13822,
+      "pmc_attempt": 2,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "model call: claude-sonnet-5 in=6829 out=1991 13822ms"
+    },
+    {
+      "pmc_event": "repair_fire",
+      "pmc_attempt": 2,
+      "pmc_defect_origin": "ValidationError",
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "repair fire: attempt 2 failed (ValidationError); retrying. 3 validation errors for PRD\nproblem_statement\n  Field required [type=missing, input_value={'prd': {'theme': '', 'pr...heme': 'authentication'}, input_type=dict]\n    For further information visit https"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 9149,
+      "pmc_output_tokens": 2093,
+      "pmc_latency_ms": 15222,
+      "pmc_attempt": 3,
+      "pmc_site": null,
+      "pmc_subject": null,
+      "logger": "pmcopilot.drafter",
+      "message": "model call: claude-sonnet-5 in=9149 out=2093 15222ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "initial"
+    },
+    {
+      "pmc_event": "stage_start",
+      "pmc_stage": "resume:1:approve"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 2104,
+      "pmc_output_tokens": 318,
+      "pmc_latency_ms": 5417,
+      "pmc_attempt": 1,
+      "pmc_site": "scoring",
+      "pmc_subject": "authentication",
+      "logger": "pmcopilot.planner",
+      "message": "model call: claude-sonnet-5 in=2104 out=318 5417ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 1768,
+      "pmc_output_tokens": 54,
+      "pmc_latency_ms": 2357,
+      "pmc_attempt": 1,
+      "pmc_site": "dependency",
+      "pmc_subject": null,
+      "logger": "pmcopilot.planner",
+      "message": "model call: claude-sonnet-5 in=1768 out=54 2357ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3065,
+      "pmc_output_tokens": 767,
+      "pmc_latency_ms": 9471,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "customer",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3065 out=767 9471ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3021,
+      "pmc_output_tokens": 1528,
+      "pmc_latency_ms": 13820,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "eng",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3021 out=1528 13820ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 3044,
+      "pmc_output_tokens": 1214,
+      "pmc_latency_ms": 13666,
+      "pmc_attempt": 1,
+      "pmc_site": null,
+      "pmc_subject": "exec",
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=3044 out=1214 13666ms"
+    },
+    {
+      "pmc_event": "model_call",
+      "pmc_model": "claude-sonnet-5",
+      "pmc_input_tokens": 697,
+      "pmc_output_tokens": 215,
+      "pmc_latency_ms": 4560,
+      "pmc_attempt": 1,
+      "pmc_site": "slack_compose",
+      "pmc_subject": null,
+      "logger": "pmcopilot.summarizer",
+      "message": "model call: claude-sonnet-5 in=697 out=215 4560ms"
+    },
+    {
+      "pmc_event": "stage_end",
+      "pmc_stage": "resume:1:approve"
+    }
+  ]
+}
