@@ -21,10 +21,32 @@ TOOL_NAME = "submit_prd"
 MAX_RETRIES = 2
 PROSE_ID_PATTERN = re.compile(r"(?i)(?:#|issues?\s+#?)\d{3,}")
 
+
+def _tool_schema() -> dict:
+    """The PRD schema as the model sees it.
+
+    Two departures from PRD.model_json_schema():
+      - `title` is dropped. Pydantic emits "PRD", and the model was observed
+        constructing {"prd": {...}} — taking the schema's own title as a field
+        name and nesting the payload under it.
+      - `theme` is removed. Code sets it from the finding at validation, so
+        exposing it spends output tokens on a value that is discarded.
+
+    Nested titles under $defs are left alone; the observed nesting was at the
+    top level and a broader strip would be a change without evidence.
+    """
+    schema = PRD.model_json_schema()
+    schema.pop("title", None)
+    schema.get("properties", {}).pop("theme", None)
+    if "required" in schema:
+        schema["required"] = [f for f in schema["required"] if f != "theme"]
+    return schema
+
+
 PRD_TOOL = {
     "name": TOOL_NAME,
     "description": "Submit the completed Product Requirements Document.",
-    "input_schema": PRD.model_json_schema(),
+    "input_schema": _tool_schema(),
 }
 
 SYSTEM_PROMPT = """You are a product manager writing a Product Requirements Document (PRD).
@@ -241,6 +263,20 @@ def _attach_evidence(prd: PRD, finding: DiscoveryFinding) -> PRD:
     return prd
 
 
+def _unwrap_envelope(payload: dict) -> tuple[dict, str | None]:
+    """Descend one level if the model nested the PRD under a single key.
+
+    Returns (payload, wrapper_key); wrapper_key is None when nothing moved.
+    Guarded on problem_statement so a legitimately single-key payload is
+    never descended into.
+    """
+    if len(payload) == 1:
+        (key, value), = payload.items()
+        if isinstance(value, dict) and "problem_statement" in value:
+            return value, key
+    return payload, None
+
+
 def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
     """Draft a PRD from a DiscoveryFinding, with validated grounding.
     feedback: optional human revision instruction from the approval gate; appended to the drafting prompt when present.
@@ -282,7 +318,14 @@ def draft_prd(finding: DiscoveryFinding, feedback: str | None = None) -> PRD:
             # discarded, code sets it from the finding. Inside the loop so every
             # attempt — including repairs — builds a themed PRD; there is no
             # window where an identity-less PRD exists.
-            prd = PRD.model_validate({**tool_use.input, "theme": finding.theme})
+            payload, wrapper_key = _unwrap_envelope(tool_use.input)
+            if wrapper_key is not None:
+                telemetry.drafter_log.warning(
+                    "envelope unwrapped: PRD nested under %r",
+                    wrapper_key,
+                    extra={"pmc_event": "envelope_unwrap", "pmc_wrapper_key": wrapper_key},
+                )
+            prd = PRD.model_validate({**payload, "theme": finding.theme})
         except ValidationError as e:
             error_text = str(e)
             defect_origin = type(e).__name__
