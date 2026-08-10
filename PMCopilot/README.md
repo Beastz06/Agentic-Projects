@@ -11,31 +11,59 @@ LangGraph · Anthropic API · ChromaDB · MCP · Pydantic v2 · Streamlit
 
 ## Results
 
-### Acceptance-criterion quality: 1.40 → 4.33
+### Acceptance-criterion quality: 1.44 → 4.33
 
 Output is scored by an LLM-as-Judge on four dimensions, 1–5. Opus judges Sonnet's
 output, so the judge's blind spots don't correlate with the drafter's.
 
-| dimension | v1 | v2a | v2b | target | |
+| dimension | [v1](./evals/results_v1.json) | [v2a](./evals/results_v2.json) | [v2b](./evals/results_v3.json) | target | |
 |---|---|---|---|---|---|
-| **ac_quality** | 1.40 | 2.67 | **4.33** | ≥ 4.5 | miss |
+| **ac_quality** | 1.44 | 2.67 | **4.33** | ≥ 4.5 | miss |
 | completeness | 4.33 | 4.33 | 4.11 | ≥ 4.0 | meets |
-| hallucination | 4.00 | 4.00 | 4.00 | all 5 | miss |
-| grounding | 4.00 | 4.00 | 3.89 | all 5 | miss |
+| hallucination | 3.89 | 4.00 | 4.00 | all 5 | miss |
+| grounding | 3.33 | 4.00 | 3.89 | all 5 | miss |
 
-<sub>n=9 scenarios, same nine across runs. Measured noise floor ±0.2.</sub>
+<sub>Nine scenarios, the same nine in each column. A prompt change forces a re-draft,
+so each column is one capture of a different prompt generation. Column headers link to
+the run that produced them — filenames count captures while labels count prompt
+generations, so v2b is `results_v3.json`; the [suite index](./evals/) explains the
+divergence. Each file carries per-scenario scores and the judge's findings, so any cell
+above can be traced to the criteria behind it.</sub>
 
-v1 failed badly: every PRD carried three or more defective acceptance criteria.
-Two revisions to the drafter's `SYSTEM_PROMPT` — no schema, model, or retrieval
-change — moved it to 4.33. What moved it was **not clearer instruction**. Each
-fix added one worked bad → good example beside a rule already stated in prose,
-first for atomicity, then for vagueness. Each collapsed the defect it targeted:
-non-atomic 5 → 1, vague 8 → 2, total findings 13 → 3.
+**v1 failed badly.** The judge flagged 40 defective acceptance criteria across nine
+PRDs — criteria bundling several assertions into one, or asserting outcomes no
+reviewer could settle.
 
-`PRD.md` commits to 4.5. **This misses by 0.17 — inside the noise floor.** A
-single run can't distinguish it from a pass. Recorded as a miss; the bar was not
-moved. Nothing untargeted shifted by more than the noise floor, which is the
-evidence the fixes were specific.
+**Two revisions to the drafter's `SYSTEM_PROMPT` took that to 3.** No schema, model,
+or retrieval change. And what moved it was not clearer instruction — the rules were
+already stated in prose and were being ignored. Each revision added one worked
+`bad → good` example beside the rule it belonged to.
+
+| defect type | v1 | after example 1 | after example 2 |
+|---|---|---|---|
+| non-atomic | 20 | 5 | 1 |
+| vague | 14 | 8 | 2 |
+| redundant pair | 6 | 0 | 0 |
+
+**The target is missed.** `PRD.md` commits to 4.5; this reached 4.33, and the bar was
+not moved to meet it. Two dimensions nobody targeted also moved — grounding by +0.56
+and hallucination by +0.11 — so the fixes were less narrow than intended.
+
+### Re-drafting the same nine scenarios scored 3.00
+
+The ±0.2 spread first published here as a noise floor came from judging one frozen set
+of PRDs twice. It measures how consistently the **judge** scores a fixed artifact. It
+says nothing about how consistently the **drafter** produces them.
+
+Re-drafting the same nine at a byte-identical prompt scored
+**[3.00](./evals/results_v4.json)** on ac_quality —
+1.33 below the column above it. That capture also carries the schema fix described
+below, so 1.33 is an upper bound on redraft noise rather than a measurement of it.
+
+What survives: the 2.89 gain from worked examples is more than twice the 1.33 swing,
+so the direction of the result holds. What doesn't: a 0.17 miss against a 4.5 target
+is finer than this apparatus can resolve, and every delta in the table above carries
+redraft noise of unmeasured size.
 
 ### A schema defect was costing 27% of every run's input tokens
 
@@ -72,8 +100,11 @@ not. n=1 on the revise side, recorded as an open question, not a finding.
 | planning | 3,901 | 362 | 2 |
 | summarizing (3 audiences + Slack) | 9,901 | 3,926 | 4 |
 
-<sub>Clean run, n=2, spread ±0.39%. A revision adds 11.0% to input. Planner
-measured at one PRD — the floor, not the operating point.</sub>
+<sub>Clean run, n=2, spread ±0.39%, from
+[run 1](./evals/telemetry_run1.json) and [run 2](./evals/telemetry_run2.json); the
+[before-side](./evals/telemetry_pre_envelope_fix.json) of the schema fix is recorded
+separately. A revision adds 11.0% to input. Planner measured at one PRD — the floor,
+not the operating point.</sub>
 
 Discovery is 57% of a clean run's input in a single call.
 
@@ -125,12 +156,15 @@ Longer write-ups, kept out of this page:
 - **[PRD.md](./PRD.md)** — the product spec this system was built against,
   including the success-metric targets the Results section is scored on.
 - **[Eval suite](./evals/)** — fixtures, judge prompt, and per-run results. Every
-  number above is reproducible from a committed fixture.
+  number above is re-judgeable from a committed fixture.
 
 ---
 
 ## What I'd do next
 
+- **Redraft noise.** One re-capture at an unchanged prompt moved ac_quality by 1.33,
+  and it was confounded with a schema fix. Two captures on each side of that fix would
+  separate sampling from the fix and put a real error bar on every delta above.
 - **Acceptance-criterion ceiling.** Half the corpus now hits `max_length=8`. The
   earlier decision not to raise it was measured on output drafted under repair
   pressure, which appears to suppress criterion counts. Open again.
@@ -138,7 +172,8 @@ Longer write-ups, kept out of this page:
   whether the full retrieved set is load-bearing.
 - **Planner at scale.** Every measurement so far plans a single PRD. Scoring
   differentiation, dependency edges, and quarter spreading are unexercised.
-- **Grounding and hallucination.** Both sit at 4.0 against a zero-tolerance bar
-  and have not moved across three runs. The prompt's worked example demonstrates
+- **Grounding and hallucination.** Neither has reached the zero-tolerance bar, and
+  grounding moved +0.56 across the series without being targeted — an unexplained
+  shift on a dimension no revision addressed. The prompt's worked example demonstrates
   confident invented numerics — a plausible contributor, deliberately not changed
   while acceptance criteria were the variable under test.
