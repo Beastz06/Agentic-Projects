@@ -26,7 +26,7 @@ output, so the judge's blind spots don't correlate with the drafter's.
 <sub>Nine scenarios, the same nine in each column. A prompt change forces a re-draft,
 so each column is one capture of a different prompt generation. Column headers link to
 the run that produced them — filenames count captures while labels count prompt
-generations, so v2b is `results_v3.json`; the [suite index](./evals/) explains the
+generations, so v2b is `results_v3.json`; the [suite index](./evals/README.md) explains the
 divergence. Each file carries per-scenario scores and the judge's findings, so any cell
 above can be traced to the criteria behind it.</sub>
 
