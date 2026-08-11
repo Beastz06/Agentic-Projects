@@ -6,7 +6,7 @@ LangGraph · Anthropic API · ChromaDB · MCP · Pydantic v2 · Streamlit
 
 **[Watch the walkthrough (10 min)](https://www.loom.com/share/8e08cd67d2674987bc3a2e5326bc77c5)** — the system running end to end: a PRD drafted from the corpus, revised at the approval gate, then planned and summarized.
 
-<!-- DEMO GIF — backfill -->
+![Roadmap board — six PRDs planned across three quarters](./docs/demo.gif)
 
 ---
 
