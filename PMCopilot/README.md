@@ -144,6 +144,12 @@ bounded.
 
 ![State machine](./docs/state-machine.png)
 
+Data moves through those agents as a chain of transformations, and issue
+provenance rides along with it: a pain point cites the issues it came from, and
+the acceptance criteria drafted from it cite the same ones.
+
+![Data flow](./docs/data-flow.png)
+
 ---
 
 ## Design notes
