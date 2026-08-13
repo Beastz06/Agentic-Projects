@@ -3,11 +3,13 @@ on missing ids; the MCP transport converts uncaught exceptions into readable err
 import json
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
+from mcp_server.app import DATA_ROOT
 from mcp_server.notion.errors import PageNotFoundError
 from mcp_server.notion.schemas import CreatePageInput, ListPagesInput, Page, UpdatePageInput
 
-STORE_PATH = Path(__file__).parent / "notion_mock.json"
+DATA_DIR = DATA_ROOT / "notion"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+STORE_PATH = DATA_DIR / "notion_mock.json"
 
 
 def init_store() -> None:

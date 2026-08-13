@@ -2,7 +2,7 @@
 the MCP transport converts uncaught exceptions into readable error-results for the calling model."""
 import sqlite3
 from datetime import datetime, timezone
-from pathlib import Path
+from mcp_server.app import DATA_ROOT
 from mcp_server.jira.errors import IssueNotFoundError
 from mcp_server.jira.schemas import (
     AddCommentInput,
@@ -14,7 +14,9 @@ from mcp_server.jira.schemas import (
     UpdateStatusInput,
 )
 
-DB_PATH = Path(__file__).parent / "jira_mock.sqlite"
+DATA_DIR = DATA_ROOT / "jira"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+DB_PATH = DATA_DIR / "jira_mock.sqlite"
 
 
 def init_db() -> None:

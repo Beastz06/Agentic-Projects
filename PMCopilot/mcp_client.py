@@ -6,14 +6,36 @@ in langchain-mcp-adapters, so this module owns the sync bridge for graph nodes.
 """
 import asyncio
 import json
+import os
 import sys
+
 from langchain_mcp_adapters.client import MultiServerMCPClient
+
+
+def _child_env() -> dict | None:
+    """Environment for the server subprocess, or None to inherit the adapter's default.
+
+    The stdio client does not pass the parent environment through, so the one
+    variable the server actually reads has to be forwarded explicitly. Windows
+    needs SYSTEMROOT and PATH alongside it or the interpreter fails to start.
+    """
+    data_dir = os.environ.get("PMCOPILOT_MCP_DATA_DIR")
+    if data_dir is None:
+        return None
+    env = {"PMCOPILOT_MCP_DATA_DIR": data_dir}
+    for key in ("SYSTEMROOT", "PATH"):
+        value = os.environ.get(key)
+        if value is not None:
+            env[key] = value
+    return env
+
 
 SERVER_CONFIG = {
     "pmcopilot": {
         "command": sys.executable,
         "args": ["-m", "mcp_server.server"],
         "transport": "stdio",
+        "env": _child_env(),
     }
 }
 

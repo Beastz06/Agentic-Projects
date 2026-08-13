@@ -3,11 +3,13 @@ append-only. Raises MessageNotFoundError on missing thread parents; the MCP tran
 uncaught exceptions into readable error-results."""
 import json
 from datetime import datetime, timezone
-from pathlib import Path
+from mcp_server.app import DATA_ROOT
 from mcp_server.slack.errors import MessageNotFoundError
 from mcp_server.slack.schemas import Message, PostMessageInput, PostThreadReplyInput
 
-LOG_PATH = Path(__file__).parent / "slack_mock.jsonl"
+DATA_DIR = DATA_ROOT / "slack"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+LOG_PATH = DATA_DIR / "slack_mock.jsonl"
 
 
 def init_log() -> None:
