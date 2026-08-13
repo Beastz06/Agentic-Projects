@@ -150,8 +150,11 @@ the acceptance criteria drafted from it cite the same ones.
 
 ![Data flow](./docs/data-flow.png)
 
----
+The MCP server exposes ten mock filing tools across Jira, Notion, and Slack.
+[Install and configuration](./mcp_server/README.md) covers running it from
+Claude Desktop.
 
+---
 ## Design notes
 
 Longer write-ups, kept out of this page:
