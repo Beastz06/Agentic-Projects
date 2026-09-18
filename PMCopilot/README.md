@@ -167,10 +167,12 @@ Longer write-ups, kept out of this page:
   including the success-metric targets the Results section is scored on.
 - **[Eval suite](./evals/)** — fixtures, judge prompt, and per-run results. Every
   number above is re-judgeable from a committed fixture.
+- **[RETRO.md](./RETRO.md)** — what worked, what didn't, and what I'd do
+  differently, written against the artifacts rather than from memory.
 
 ---
 
-## What I'd do next
+## Known limits and open questions
 
 - **Redraft noise.** One re-capture at an unchanged prompt moved ac_quality by 1.33,
   and it was confounded with a schema fix. Two captures on each side of that fix would
@@ -180,8 +182,6 @@ Longer write-ups, kept out of this page:
   pressure, which appears to suppress criterion counts. Open again.
 - **Discovery cost.** One call carries 57% of a run's input. Nothing has tested
   whether the full retrieved set is load-bearing.
-- **Planner at scale.** Every measurement so far plans a single PRD. Scoring
-  differentiation, dependency edges, and quarter spreading are unexercised.
 - **Grounding and hallucination.** Neither has reached the zero-tolerance bar, and
   grounding moved +0.56 across the series without being targeted — an unexplained
   shift on a dimension no revision addressed. The prompt's worked example demonstrates
